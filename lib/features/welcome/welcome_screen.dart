@@ -1,135 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/theme.dart';
 import '../../core/transitions.dart';
-import '../../widgets/motion.dart';
 import '../auth/login_screen.dart';
+import '../auth/signup_screen.dart';
+import '../splash/cinematic_intro.dart';
 
-/// Layar Selamat Datang JAVARA (Sesuai Desain Asli Page 2 - Android Compact - 5).
-/// Latar naskah kuno hangat (warm parchment), tipografi anggun, dan tombol Mulai.
-class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({super.key});
+/// Layar Selamat Datang JAVARA (Redesigned Editorial & Cinematic Landscape).
+/// Mengusung pemandangan senja berkabut Dataran Tinggi Dieng Jawa Tengah,
+/// bingkai gerbang Candi Bentar adiluhung, dan tipografi editorial minimalis.
+class WelcomeScreen extends StatefulWidget {
+  const WelcomeScreen({
+    super.key,
+    this.playCinematicOnInit = false,
+  });
 
-  void _start(BuildContext context) {
-    Navigator.of(context).pushReplacement(fadeSlideRoute(const LoginScreen()));
+  final bool playCinematicOnInit;
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  final GlobalKey<JavaraCinematicIntroState> _introKey =
+      GlobalKey<JavaraCinematicIntroState>();
+
+  void _onPrimaryAction() {
+    Navigator.of(context).pushReplacement(
+      fadeSlideRoute(const LoginScreen()),
+    );
+  }
+
+  void _onSecondaryAction() {
+    Navigator.of(context).push(
+      fadeSlideRoute(const LoginScreen()),
+    );
+  }
+
+  void _onRegisterAction() {
+    Navigator.of(context).push(
+      fadeSlideRoute(const SignUpScreen()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final h = size.height;
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
+      value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: JColors.cream,
-        systemNavigationBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: const Color(0xFF07040B),
+        systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: JColors.cream,
-        body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 24),
-                    StaggerIn(
-                      index: 0,
-                      child: Text(
-                        'Selamat Datang di',
-                        style: JText.serif(22, color: JColors.ink),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    StaggerIn(
-                      index: 1,
-                      child: Text(
-                        'JAVARA',
-                        style: JText.serif(
-                          44,
-                          weight: FontWeight.w700,
-                          color: JColors.ink,
-                        ).copyWith(letterSpacing: 2),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    StaggerIn(
-                      index: 2,
-                      child: Text(
-                        'Jelajah budaya Jawa , Temukan rasa, karya , dan pengalaman terbaiknya',
-                        style: JText.serif(
-                          16,
-                          color: JColors.ink,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    // Ilustrasi Candi / Lanskap Jawa (Persis Page 2)
-                    Center(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.asset(
-                          'assets/images/candi.png',
-                          height: (h * 0.38).clamp(220.0, 360.0),
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) => Image.asset(
-                            'assets/images/home_hero.png',
-                            height: (h * 0.38).clamp(220.0, 360.0),
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    // Tombol Mulai (Persis Page 2)
-                    StaggerIn(
-                      index: 3,
-                      child: Container(
-                        width: double.infinity,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: const Color(0xFFD4A343),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x20000000),
-                              blurRadius: 8,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: ElevatedButton(
-                          onPressed: () => _start(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            'Mulai',
-                            style: JText.serif(
-                              16,
-                              weight: FontWeight.w700,
-                              color: const Color(0xFF261808),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ),
-              ),
-            ),
-          ),
+        backgroundColor: const Color(0xFF06040A),
+        body: JavaraCinematicIntro(
+          key: _introKey,
+          initialProgress: widget.playCinematicOnInit ? 0.0 : 1.0,
+          autoPlay: widget.playCinematicOnInit,
+          onComplete: () {},
+          onPrimaryAction: _onPrimaryAction,
+          onSecondaryAction: _onSecondaryAction,
+          onRegisterAction: _onRegisterAction,
         ),
       ),
     );
