@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,6 +40,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     with TickerProviderStateMixin {
   late final AnimationController _gateController;
   late final AnimationController _ambientController;
+  Timer? _gateDelayTimer;
 
   @override
   void initState() {
@@ -58,7 +60,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     )..repeat();
 
     if (widget.playGateOpen) {
-      Future.delayed(const Duration(milliseconds: 250), () {
+      _gateDelayTimer = Timer(const Duration(milliseconds: 200), () {
         if (mounted) {
           HapticFeedback.lightImpact();
           _gateController.forward();
@@ -78,6 +80,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   void dispose() {
+    _gateDelayTimer?.cancel();
     _gateController.dispose();
     _ambientController.dispose();
     super.dispose();
@@ -117,9 +120,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     final w = size.width;
     final h = size.height;
 
-    // Dimensi pilar gerbang terukur proporsional layar ponsel
-    final gateWidth = (w * 0.48).clamp(160.0, 240.0);
-    final gateHeight = gateWidth * (1024.0 / 275.0);
+    // Dimensi pilar gerbang terukur proporsional terhadap tinggi dan lebar layar ponsel
+    final gateHeight = (h * 0.72).clamp(380.0, 720.0);
+    final gateWidth = gateHeight * (275.0 / 1024.0);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
@@ -326,7 +329,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         offset: Offset(0, uiSlideY),
                         child: Container(
                           // Scrim gradien lembut tanpa kartu tebal yang menghalangi lanskap
-                          padding: const EdgeInsets.fromLTRB(28, 36, 28, 32),
+                          padding: EdgeInsets.fromLTRB(
+                            28,
+                            h < 700 ? 20 : 36,
+                            28,
+                            math.max(MediaQuery.of(context).padding.bottom + 4, 20.0),
+                          ),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topCenter,
@@ -342,8 +350,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           ),
                           child: SafeArea(
                             top: false,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
+                            child: SingleChildScrollView(
+                              physics: const ClampingScrollPhysics(),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
                               children: [
                                 // Aksara Jawa & Garis Pembatas Halus
                                 Row(
@@ -530,6 +540,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       ),
                     ),
                   ),
+                ),
               ],
             );
           },

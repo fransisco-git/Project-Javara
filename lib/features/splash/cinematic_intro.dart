@@ -25,7 +25,7 @@ class JavaraCinematicIntro extends StatefulWidget {
     required this.onRegisterAction,
     this.initialProgress = 0.0,
     this.autoPlay = true,
-    this.duration = const Duration(milliseconds: 7800),
+    this.duration = const Duration(milliseconds: 6200),
   });
 
   final VoidCallback onComplete;
@@ -43,6 +43,7 @@ class JavaraCinematicIntro extends StatefulWidget {
 class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  bool _isCompleted = false;
 
   // Status teks tahapan pemuatan budaya menuju halaman login
   int _loadingStep = 0;
@@ -65,11 +66,15 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
 
     if (widget.autoPlay && widget.initialProgress < 1.0) {
       _controller.forward().then((_) {
-        if (mounted) {
-          widget.onComplete();
-        }
+        _completeOnce();
       });
     }
+  }
+
+  void _completeOnce() {
+    if (_isCompleted || !mounted) return;
+    _isCompleted = true;
+    widget.onComplete();
   }
 
   @override
@@ -95,11 +100,10 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
   /// Memutar ulang pengalaman sinematik dari awal
   void replay() {
     HapticFeedback.lightImpact();
+    _isCompleted = false;
     setState(() => _loadingStep = 0);
     _controller.forward(from: 0.0).then((_) {
-      if (mounted) {
-        widget.onComplete();
-      }
+      _completeOnce();
     });
   }
 
@@ -107,7 +111,7 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
   void skip() {
     HapticFeedback.selectionClick();
     _controller.stop();
-    widget.onComplete();
+    _completeOnce();
   }
 
   @override
@@ -152,11 +156,11 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
     final charSize = (w * 0.68).clamp(260.0, 360.0);
 
     // Titik kepalan tangan terukur dari data piksel aset gambar
-    final gatotFistXRel = charSize * 0.864;
-    final gatotFistYRel = charSize * 0.371;
+    final gatotFistXRel = charSize * 0.877;
+    final gatotFistYRel = charSize * 0.350;
 
-    final aswatFistXRel = charSize * 0.217;
-    final aswatFistYRel = charSize * 0.613;
+    final aswatFistXRel = charSize * 0.198;
+    final aswatFistYRel = charSize * 0.588;
 
     // Posisi target agar kedua kepalan tangan bertemu PERSIS di satu titik koordinat
     final gatotTargetX = collisionCenter.dx - gatotFistXRel;
@@ -220,14 +224,14 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
         final arcOffsetGatot = math.sin(clashProgress * math.pi) * 36.0;
         final gatotCurX = gatotStartX + (gatotTargetX - gatotStartX) * clashProgress;
         final gatotCurY = gatotStartY + (gatotTargetY - gatotStartY) * clashProgress - arcOffsetGatot;
-        final gatotAngle = 0.18 - (0.09 * clashProgress);
+        final gatotAngle = 0.12 * (1.0 - clashProgress);
 
         final arcOffsetAswat = math.sin(clashProgress * math.pi) * 30.0;
         final aswatCurX = aswatStartX + (aswatTargetX - aswatStartX) * clashProgress;
         final aswatCurY = aswatStartY + (aswatTargetY - aswatStartY) * clashProgress + arcOffsetAswat;
-        final aswatAngle = -0.18 + (0.09 * clashProgress);
+        final aswatAngle = -0.12 * (1.0 - clashProgress);
 
-        final charScale = 0.58 + 0.44 * clashProgress;
+        final charScale = 0.70 + 0.30 * clashProgress;
         final charOpacity = (t < 0.12 || t > 0.43)
             ? 0.0
             : (t > 0.40 ? (1.0 - (t - 0.40) / 0.03).clamp(0.0, 1.0) : 1.0);

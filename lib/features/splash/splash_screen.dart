@@ -25,6 +25,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   bool _isLoggedIn = false;
+  bool _navigated = false;
 
   @override
   void initState() {
@@ -42,7 +43,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _onCinematicComplete() {
-    if (!mounted) return;
+    if (!mounted || _navigated) return;
+    _navigated = true;
     Navigator.of(context).pushReplacement(
       cinematicFadeRoute(
         _isLoggedIn ? const HomeScreen() : const WelcomeScreen(playGateOpen: true),
@@ -51,6 +53,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _onPrimaryAction() {
+    if (!mounted || _navigated) return;
+    _navigated = true;
     Navigator.of(context).pushReplacement(
       fadeSlideRoute(_isLoggedIn ? const HomeScreen() : const LoginScreen()),
     );
