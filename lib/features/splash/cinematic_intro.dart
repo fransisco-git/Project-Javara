@@ -347,13 +347,11 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
         final currentGatotFist = Offset(gatotCurX + gatotFistXRel, gatotCurY + gatotFistYRel);
         final currentAswatFist = Offset(aswatCurX + aswatFistXRel, aswatCurY + aswatFistYRel);
 
-        return GestureDetector(
-          onTap: skip, // Ketuk di mana saja untuk langsung melompat
-          child: Transform.translate(
-            offset: Offset(shakeX, shakeY),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
+        return Transform.translate(
+          offset: Offset(shakeX, shakeY),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
                 // ==========================================
                 // LAPISAN DASAR: Langit Badai Kosmik Gelap
                 // ==========================================
@@ -635,74 +633,13 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
                     ),
                   ),
 
-                // ==========================================
-                // TOMBOL LEWATI (SKIP BUTTON) — Sesuai /antislop-layoutmobile (Target ≥ 48x48px)
-                // ==========================================
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: skip,
-                        child: Container(
-                          constraints: const BoxConstraints(
-                            minWidth: 48,
-                            minHeight: 48,
-                          ),
-                          alignment: Alignment.center,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: const Color(0x660B0715),
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(
-                                color: const Color(0x38DFB76C),
-                                width: 1.0,
-                              ),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color(0x33000000),
-                                  blurRadius: 8,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Lewati',
-                                  style: JText.sans(
-                                    12,
-                                    weight: FontWeight.w600,
-                                    color: const Color(0xFFEADBCA),
-                                  ).copyWith(letterSpacing: 0.5),
-                                ),
-                                const SizedBox(width: 6),
-                                const Icon(
-                                  Icons.fast_forward_rounded,
-                                  size: 14,
-                                  color: Color(0xFFDFB76C),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    }
   }
-}
 
 // ============================================================================
 // CUSTOM VFX PAINTERS: Hulkbuster Vertical Planar Shockwave, Supersonic Wakes,
