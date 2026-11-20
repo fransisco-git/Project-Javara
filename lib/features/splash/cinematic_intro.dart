@@ -5,18 +5,18 @@ import 'package:flutter/services.dart';
 import '../../core/theme.dart';
 import '../../widgets/javara_widgets.dart';
 
-/// Kontroller dan Tampilan Sinematik Pembuka JAVARA — Final Masterpiece Polish.
+/// Kontroller dan Tampilan Sinematik Pembuka JAVARA — Blockbuster CGI / VFX Experience.
 ///
-/// Urutan Narasi 9 Adegan Adiluhung:
-/// 1. Badai Kosmik (Cinematic Storm Atmosphere) — Awan temaram, dentum petir jauh, misteri
-/// 2. Gatotkaca — Melesat dari kiri-bawah dengan momentum ksatria Wayang Jawa
-/// 3. Aswatama — Menukik dari kanan-atas dengan zirah baja-perunggu gelap Mahabharata
-/// 4. Benturan Akbar (Collision Climax) — Visual suspension, benturan tinju presisi, henti sejenak, kilatan putih-emas, gelombang kejut radial, guncangan kamera teredam
-/// 5. Petir Fraktal — Menyambar dari titik benturan memenuhi layar menuju kamera
-/// 6. Penyingkapan Lambang JAVARA — Lambang asli berwibawa, aksara Jawa, aura mandala, bilah pemuatan budaya
-/// 7. Transisi Halimun Dieng — Peleburan badai ke senja Dataran Tinggi Dieng, siluet Gunung Sindoro, kabut dingin bertingkat
-/// 8. Gerbang Candi Bentar — Membuka perlahan ke kiri dan kanan dengan kelembaman batu andesit alami
-/// 9. Antarmuka Selamat Datang Editorial — Tipografi minimalis, lanskap dominan, tombol aksi emas antik
+/// Urutan Narasi 9 Adegan Sinematik Epik:
+/// 1. Badai Kosmik (Storm Atmosphere) — Awan temaram bergolak, kilatan petir jauh, misteri mendalam
+/// 2. Gatotkaca — Melesat dari kiri-bawah dengan lengkungan terbang aerodinamis, ekor plasma emas (*sonic boom wake*), dan partikel energi kencana
+/// 3. Aswatama — Menukik dari kanan-atas dengan lintasan predator ganas, jejak asap petir legam-ungu (*dark lightning & smoke trail*), dan percikan bara logam
+/// 4. Benturan Akbar (CGI Climax Collision) — Garis kecepatan (*speed lines*), penangguhan peluru waktu (*bullet-time suspension*), loncatan busur listrik antar-tinju, benturan tepat di pusat layar, kilatan horizontal (*anamorphic lens flare*), gelombang kejut ganda, dan guncangan kamera teredam (*damped camera shake*)
+/// 5. Sambaran Petir Fraktal — Percabangan petir putih-emas meledak ke arah lensa kamera memenuhi layar
+/// 6. Penyingkapan Lambang JAVARA — Menyatukan energi petir ke pusat, menyingkap lambang kebesaran asli JAVARA dengan aura mandala emas & bilah pemuatan budaya
+/// 7. Transisi Halimun Dataran Tinggi Dieng — Peleburan badai ke lanskap senja pegunungan Dieng, siluet Gunung Sindoro, dan kilatan petir halus di awan senja
+/// 8. Pembukaan Gerbang Candi Bentar — Dari tertutup rapat di tengah, kedua pilar batu andesit perlahan membuka ke kiri & kanan dengan kelembaman batu masif dan perspektif 3D
+/// 9. Penyingkapan Antarmuka Selamat Datang Editorial — Tipografi minimalis, lanskap dominan, tombol aksi emas antik, dan tombol putar ulang
 class JavaraCinematicIntro extends StatefulWidget {
   const JavaraCinematicIntro({
     super.key,
@@ -26,7 +26,7 @@ class JavaraCinematicIntro extends StatefulWidget {
     required this.onRegisterAction,
     this.initialProgress = 0.0,
     this.autoPlay = true,
-    this.duration = const Duration(milliseconds: 8600),
+    this.duration = const Duration(milliseconds: 9200),
   });
 
   final VoidCallback onComplete;
@@ -45,7 +45,7 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
-  // Status loading step untuk Scene 6 (Lambang JAVARA)
+  // Status teks pemuatan budaya untuk Scene 6 (Lambang JAVARA)
   int _loadingStep = 0;
   static const List<String> _loadingTexts = [
     'Menyelaraskan Khasanah Budaya Jawa...',
@@ -77,9 +77,10 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Pra-muat seluruh aset gambar ke memori untuk menjamin zero-stutter 60fps
+    // Pra-muat seluruh aset gambar ke GPU memori untuk performa mulus 60fps
     precacheImage(const AssetImage('assets/images/gatotkaca_clash.png'), context);
     precacheImage(const AssetImage('assets/images/aswatama_clash.png'), context);
+    precacheImage(const AssetImage('assets/images/dieng_sunset_reflection.jpg'), context);
     precacheImage(const AssetImage('assets/images/dieng_sunset.jpg'), context);
     precacheImage(const AssetImage('assets/images/temple_gate_left.png'), context);
     precacheImage(const AssetImage('assets/images/temple_gate_right.png'), context);
@@ -87,9 +88,9 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
 
   void _handleAnimationProgress() {
     final v = _controller.value;
-    // Pembaruan teks tahapan pemuatan saat Scene 6 aktif (t: 0.52 s.d 0.68)
-    if (v >= 0.52 && v <= 0.68) {
-      final sub = ((v - 0.52) / 0.16 * _loadingTexts.length).floor();
+    // Pembaruan teks tahapan pemuatan saat Scene 6 aktif (t: 0.50 s.d 0.66)
+    if (v >= 0.50 && v <= 0.66) {
+      final sub = ((v - 0.50) / 0.16 * _loadingTexts.length).floor();
       final idx = sub.clamp(0, _loadingTexts.length - 1);
       if (idx != _loadingStep && mounted) {
         setState(() => _loadingStep = idx);
@@ -113,7 +114,7 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
     HapticFeedback.selectionClick();
     _controller.animateTo(
       1.0,
-      duration: const Duration(milliseconds: 550),
+      duration: const Duration(milliseconds: 500),
       curve: Curves.easeOutCubic,
     ).then((_) {
       if (mounted) {
@@ -129,25 +130,25 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
     super.dispose();
   }
 
-  /// Kurva pendekatan sinematik dengan visual suspension sebelum benturan
+  /// Kurva pendekatan sinematik filmis: Laju Supersonik -> Penangguhan Peluru Waktu -> Hentakan Puncak
   double _cinematicApproach(double progress) {
     if (progress <= 0.0) return 0.0;
     if (progress >= 1.0) return 1.0;
 
-    // Tahap 1: Percepatan ksatria melesat (0.0 s.d 0.72) -> 86% jarak tempuh
-    if (progress < 0.72) {
-      final p = progress / 0.72;
-      return 0.86 * Curves.easeInQuad.transform(p);
+    // Tahap 1: Laju supersonik melesat cepat (0.0 s.d 0.70) -> 88% jarak
+    if (progress < 0.70) {
+      final p = progress / 0.70;
+      return 0.88 * Curves.easeInQuad.transform(p);
     }
-    // Tahap 2: Visual Suspension (0.72 s.d 0.90) -> melambat di udara (86% s.d 92%)
+    // Tahap 2: Bullet-time Suspension (0.70 s.d 0.90) -> melambat dramatis di udara (88% s.d 93%)
     else if (progress < 0.90) {
-      final p = (progress - 0.72) / 0.18;
-      return 0.86 + 0.06 * Curves.easeOutSine.transform(p);
+      final p = (progress - 0.70) / 0.20;
+      return 0.88 + 0.05 * Curves.easeOutSine.transform(p);
     }
-    // Tahap 3: Hentakan dahsyat benturan (0.90 s.d 1.00) -> 92% s.d 100% tepat sasaran
+    // Tahap 3: Hentakan tumbukan dahsyat (0.90 s.d 1.00) -> melesat cepat ke 100%
     else {
       final p = (progress - 0.90) / 0.10;
-      return 0.92 + 0.08 * Curves.easeInCubic.transform(p);
+      return 0.93 + 0.07 * Curves.easeInCubic.transform(p);
     }
   }
 
@@ -157,22 +158,20 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
     final w = size.width;
     final h = size.height;
 
-    // Titik benturan tinju presisi di tengah vertikal dan horizontal
+    // Titik benturan kepalan tinju di pusat layar
     final collisionCenter = Offset(w * 0.50, h * 0.38);
 
-    // Dimensi gambar ksatria responsif
-    final charSize = (w * 0.60).clamp(240.0, 320.0);
+    // Dimensi gambar ksatria proporsional
+    final charSize = (w * 0.65).clamp(250.0, 340.0);
 
-    // Titik jangkar tinju relatif terhadap ukuran gambar (hasil kalkulasi piksel)
-    // Gatotkaca: tinju di kanan-atas (x: 86.4%, y: 37.1%)
+    // Titik kepalan tangan terukur dari data piksel aset gambar
     final gatotFistXRel = charSize * 0.864;
     final gatotFistYRel = charSize * 0.371;
 
-    // Aswatama: tinju di kiri-bawah (x: 21.7%, y: 61.3%)
     final aswatFistXRel = charSize * 0.217;
     final aswatFistYRel = charSize * 0.613;
 
-    // Posisi target kotak ksatria agar tinju bertemu PERSIS di collisionCenter
+    // Posisi target agar kepalan tangan bertemu PERSIS di satu titik
     final gatotTargetX = collisionCenter.dx - gatotFistXRel;
     final gatotTargetY = collisionCenter.dy - gatotFistYRel;
 
@@ -180,11 +179,11 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
     final aswatTargetY = collisionCenter.dy - aswatFistYRel;
 
     // Posisi awal di luar layar
-    final gatotStartX = -charSize * 1.35;
-    final gatotStartY = h * 0.75;
+    final gatotStartX = -charSize * 1.40;
+    final gatotStartY = h * 0.80;
 
-    final aswatStartX = w + charSize * 0.35;
-    final aswatStartY = -charSize * 0.85;
+    final aswatStartX = w + charSize * 0.40;
+    final aswatStartY = -charSize * 0.90;
 
     return AnimatedBuilder(
       animation: _controller,
@@ -192,114 +191,125 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
         final t = _controller.value;
 
         // ==============================================================
-        // 1. GUNCANGAN KAMERA TEREDAM (Controlled Camera Shake)
+        // 1. GUNCANGAN KAMERA FILM (Damped Multi-axis Camera Shake)
         // ==============================================================
         double shakeX = 0.0;
         double shakeY = 0.0;
-        if (t >= 0.37 && t <= 0.46) {
-          final impactT = (t - 0.37) / 0.09;
-          final decay = math.exp(-impactT * 4.2);
-          shakeX = math.sin(impactT * math.pi * 10) * 8.5 * decay;
-          shakeY = math.cos(impactT * math.pi * 8) * 5.0 * decay;
+        if (t >= 0.36 && t <= 0.46) {
+          final impactT = (t - 0.36) / 0.10;
+          final decay = math.exp(-impactT * 4.5);
+          shakeX = math.sin(impactT * math.pi * 12) * 11.0 * decay;
+          shakeY = math.cos(impactT * math.pi * 10) * 7.0 * decay;
         }
 
         // ==============================================================
-        // 2. KILATAN PUTIH-EMAS (Overexposure Flash)
+        // 2. KILATAN PUTIH-EMAS & ANAMORPHIC LENS FLARE (t: 0.36 - 0.44)
         // ==============================================================
         double flashOpacity = 0.0;
-        if (t >= 0.37 && t <= 0.44) {
-          if (t < 0.382) {
-            flashOpacity = ((t - 0.37) / 0.012).clamp(0.0, 1.0);
+        double flareIntensity = 0.0;
+        if (t >= 0.36 && t <= 0.44) {
+          if (t < 0.375) {
+            final p = (t - 0.36) / 0.015;
+            flashOpacity = p.clamp(0.0, 1.0);
+            flareIntensity = p.clamp(0.0, 1.0);
           } else {
-            flashOpacity = (1.0 - (t - 0.382) / 0.058).clamp(0.0, 1.0);
+            final p = 1.0 - (t - 0.375) / 0.065;
+            flashOpacity = p.clamp(0.0, 1.0);
+            flareIntensity = (p * 1.2).clamp(0.0, 1.0);
           }
         }
 
         // ==============================================================
-        // 3. DINAMIKA PENDEKATAN KSATRIA (Scene 2, 3 & 4)
+        // 3. DINAMIKA TERBANG & SUDUT KEMIRINGAN AERODINAMIS
         // ==============================================================
         double clashProgress = 0.0;
-        if (t >= 0.15 && t <= 0.37) {
-          clashProgress = _cinematicApproach((t - 0.15) / 0.22);
-        } else if (t > 0.37 && t <= 0.42) {
+        if (t >= 0.12 && t <= 0.36) {
+          clashProgress = _cinematicApproach((t - 0.12) / 0.24);
+        } else if (t > 0.36 && t <= 0.42) {
           clashProgress = 1.0; // Freeze frame saat benturan puncak
         }
 
+        // Lengkungan terbang aerodinamis (Parabolic swooping arc)
+        final arcOffsetGatot = math.sin(clashProgress * math.pi) * 35.0;
         final gatotCurX = gatotStartX + (gatotTargetX - gatotStartX) * clashProgress;
-        final gatotCurY = gatotStartY + (gatotTargetY - gatotStartY) * clashProgress;
-        final gatotScale = 0.65 + 0.35 * clashProgress;
-        final gatotOpacity = (t < 0.15 || t > 0.44)
+        final gatotCurY = gatotStartY + (gatotTargetY - gatotStartY) * clashProgress - arcOffsetGatot;
+        final gatotAngle = 0.16 - (0.08 * clashProgress); // Kemiringan menyusut saat mendekati benturan
+
+        final arcOffsetAswat = math.sin(clashProgress * math.pi) * 28.0;
+        final aswatCurX = aswatStartX + (aswatTargetX - aswatStartX) * clashProgress;
+        final aswatCurY = aswatStartY + (aswatTargetY - aswatStartY) * clashProgress + arcOffsetAswat;
+        final aswatAngle = -0.16 + (0.08 * clashProgress);
+
+        final charScale = 0.60 + 0.40 * clashProgress;
+        final charOpacity = (t < 0.12 || t > 0.44)
             ? 0.0
             : (t > 0.41 ? (1.0 - (t - 0.41) / 0.03).clamp(0.0, 1.0) : 1.0);
 
-        final aswatCurX = aswatStartX + (aswatTargetX - aswatStartX) * clashProgress;
-        final aswatCurY = aswatStartY + (aswatTargetY - aswatStartY) * clashProgress;
-        final aswatScale = 0.65 + 0.35 * clashProgress;
-        final aswatOpacity = (t < 0.15 || t > 0.44)
-            ? 0.0
-            : (t > 0.41 ? (1.0 - (t - 0.41) / 0.03).clamp(0.0, 1.0) : 1.0);
+        // Pre-impact micro-arcs (loncatan busur listrik sesaat sebelum tinju bersentuhan)
+        final isPreImpactSuspension = (t >= 0.30 && t <= 0.36);
+        final preImpactT = isPreImpactSuspension ? ((t - 0.30) / 0.06) : 0.0;
 
         // ==============================================================
-        // 4. GELOMBANG KEJUT & PETIR FRAKTAL (Scene 4 & 5)
+        // 4. GELOMBANG KEJUT GANDA & PETIR FRAKTAL (Scene 4 & 5)
         // ==============================================================
         double shockwaveProgress = 0.0;
-        if (t >= 0.37 && t <= 0.50) {
-          shockwaveProgress = Curves.easeOutCubic.transform((t - 0.37) / 0.13);
+        if (t >= 0.36 && t <= 0.50) {
+          shockwaveProgress = Curves.easeOutCubic.transform((t - 0.36) / 0.14);
         }
 
         double lightningProgress = 0.0;
-        if (t >= 0.37 && t <= 0.54) {
-          lightningProgress = ((t - 0.37) / 0.17).clamp(0.0, 1.0);
+        if (t >= 0.36 && t <= 0.54) {
+          lightningProgress = ((t - 0.36) / 0.18).clamp(0.0, 1.0);
         }
 
         // ==============================================================
-        // 5. PENYINGKAPAN LAMBANG JAVARA (Scene 6) (t: 0.48 s.d 0.70)
+        // 5. PENYINGKAPAN LAMBANG JAVARA (Scene 6) (t: 0.48 s.d 0.68)
         // ==============================================================
         double logoOpacity = 0.0;
         double logoScale = 0.92;
-        if (t >= 0.48 && t <= 0.70) {
-          if (t < 0.54) {
-            final sub = (t - 0.48) / 0.06;
+        if (t >= 0.48 && t <= 0.68) {
+          if (t < 0.53) {
+            final sub = (t - 0.48) / 0.05;
             logoOpacity = Curves.easeOut.transform(sub);
             logoScale = 0.90 + 0.10 * sub;
-          } else if (t <= 0.65) {
+          } else if (t <= 0.64) {
             logoOpacity = 1.0;
             logoScale = 1.0;
           } else {
-            final sub = (t - 0.65) / 0.05;
+            final sub = (t - 0.64) / 0.04;
             logoOpacity = (1.0 - sub).clamp(0.0, 1.0);
             logoScale = 1.0 + 0.04 * sub;
           }
         }
 
         // ==============================================================
-        // 6. PELEBURAN KE LANSKAP SENJA DIENG (Scene 7) (t: 0.64 s.d 1.0)
+        // 6. PELEBURAN KE LANSKAP SENJA DIENG (Scene 7) (t: 0.62 s.d 1.0)
         // ==============================================================
         double diengOpacity = 0.0;
-        if (t >= 0.64) {
-          diengOpacity = Curves.easeInOutCubic.transform(((t - 0.64) / 0.14).clamp(0.0, 1.0));
+        if (t >= 0.62) {
+          diengOpacity = Curves.easeInOutCubic.transform(((t - 0.62) / 0.14).clamp(0.0, 1.0));
         }
 
         // ==============================================================
-        // 7. PEMBUKAAN GERBANG CANDI BENTAR (Scene 8) (t: 0.74 s.d 0.92)
+        // 7. PEMBUKAAN GERBANG CANDI BENTAR (Scene 8) (t: 0.72 s.d 0.90)
         // ==============================================================
         double gateOpenProgress = 0.0;
-        if (t >= 0.74) {
-          final raw = ((t - 0.74) / 0.18).clamp(0.0, 1.0);
+        if (t >= 0.72) {
+          final raw = ((t - 0.72) / 0.18).clamp(0.0, 1.0);
           gateOpenProgress = Curves.easeInOutCubic.transform(raw);
         }
-        // Jarak geser pilar gerbang candi ke kiri dan kanan
-        final gateShift = (w * 0.38) * gateOpenProgress;
+        // Jarak geser sayap candi bentar ke kiri dan kanan dari keadaan tertutup rapat
+        final gateShift = (w * 0.42) * gateOpenProgress;
 
         // ==============================================================
         // 8. PENYINGKAPAN ANTARMUKA SELAMAT DATANG (Scene 9) (t: 0.86 s.d 1.0)
         // ==============================================================
         double uiOpacity = 0.0;
-        double uiSlide = 20.0;
+        double uiSlide = 22.0;
         if (t >= 0.86) {
           final raw = ((t - 0.86) / 0.14).clamp(0.0, 1.0);
           uiOpacity = Curves.easeOutCubic.transform(raw);
-          uiSlide = 20.0 * (1.0 - uiOpacity);
+          uiSlide = 22.0 * (1.0 - uiOpacity);
         }
 
         return Transform.translate(
@@ -308,7 +318,7 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
             fit: StackFit.expand,
             children: [
               // ==========================================
-              // LAPISAN DASAR: Langit Badai Gelap (Scene 1-6)
+              // LAPISAN DASAR: Langit Badai Kosmik Gelap (Scene 1-6)
               // ==========================================
               RepaintBoundary(
                 child: Container(
@@ -317,18 +327,18 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Color(0xFF06040A),
-                        Color(0xFF0F0B1A),
-                        Color(0xFF140F22),
-                        Color(0xFF08050C),
+                        Color(0xFF040207),
+                        Color(0xFF0C0716),
+                        Color(0xFF120B20),
+                        Color(0xFF060309),
                       ],
                     ),
                   ),
                 ),
               ),
 
-              // Awan Badai Kosmik Dinamis & Desakan Gelombang Kejut
-              if (t < 0.74)
+              // Awan Badai Dinamis & Dorongan Gelombang Kejut
+              if (t < 0.72)
                 Positioned.fill(
                   child: CustomPaint(
                     painter: _StormCloudsPainter(
@@ -339,7 +349,7 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
                 ),
 
               // ==========================================
-              // LAPISAN LANSKAP SENJA DIENG (Scene 7-9)
+              // LAPISAN LANSKAP SENJA CANDI DIENG (Scene 7-9)
               // ==========================================
               if (diengOpacity > 0.0)
                 Positioned.fill(
@@ -348,28 +358,42 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        // Foto Lanskap Dieng & Siluet Gunung Sindoro
+                        // Foto Lanskap Gunung Sindoro & Senja Dieng dengan Pantulan Air Sempurna
                         RepaintBoundary(
                           child: Image.asset(
-                            'assets/images/dieng_sunset.jpg',
+                            'assets/images/dieng_sunset_reflection.jpg',
                             fit: BoxFit.cover,
                             alignment: Alignment.center,
+                            errorBuilder: (context, error, stackTrace) => Image.asset(
+                              'assets/images/dieng_sunset.jpg',
+                              fit: BoxFit.cover,
+                              alignment: Alignment.center,
+                            ),
                           ),
                         ),
 
-                        // Gradasi Senja Alami Dieng (Muted Amber, Dusty Rose, Violet-Gray)
+                        // Gradasi Senja Alami Dieng (Muted Amber, Dusty Rose, Slate Mist)
                         Container(
                           decoration: const BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
-                                Color(0x77161022), // Langit violet-gray dingin
+                                Color(0x66140D20), // Langit malam violet dingin
                                 Colors.transparent,
-                                Color(0x33B8736B), // Pendaran dusty rose senja
-                                Color(0xD90C0912), // Dasar gelap andesit untuk keterbacaan teks
+                                Color(0x28B8736B), // Pendaran amber senja
+                                Color(0xE60A0710), // Dasar andesit gelap untuk keterbacaan UI
                               ],
-                              stops: [0.0, 0.35, 0.65, 1.0],
+                              stops: [0.0, 0.30, 0.65, 1.0],
+                            ),
+                          ),
+                        ),
+
+                        // Petir Lembut Halus di Balik Awan Senja Pegunungan (Sesuai Permintaan)
+                        Positioned.fill(
+                          child: CustomPaint(
+                            painter: _DistantCloudLightningPainter(
+                              time: t * 5.0,
                             ),
                           ),
                         ),
@@ -388,20 +412,35 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
                 ),
 
               // ==========================================
+              // LAPISAN VFX: Ekor Plasma Supersonik & Garis Kecepatan
+              // ==========================================
+              if (charOpacity > 0.0)
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: _SupersonicFlightVFXPainter(
+                      gatotFist: Offset(gatotCurX + gatotFistXRel, gatotCurY + gatotFistYRel),
+                      aswatFist: Offset(aswatCurX + aswatFistXRel, aswatCurY + aswatFistYRel),
+                      clashProgress: clashProgress,
+                    ),
+                  ),
+                ),
+
+              // ==========================================
               // LAPISAN KSATRIA: Gatotkaca & Aswatama (Scene 2-4)
               // ==========================================
-              if (gatotOpacity > 0.0)
+              if (charOpacity > 0.0) ...[
+                // Gatotkaca Melesat dari Kiri-Bawah
                 Positioned(
                   left: gatotCurX,
                   top: gatotCurY,
                   width: charSize,
                   height: charSize,
                   child: Opacity(
-                    opacity: gatotOpacity,
+                    opacity: charOpacity,
                     child: Transform.scale(
-                      scale: gatotScale,
+                      scale: charScale,
                       child: Transform.rotate(
-                        angle: 0.14, // Kemiringan melesat gagah ke atas
+                        angle: gatotAngle,
                         child: Image.asset(
                           'assets/images/gatotkaca_clash.png',
                           fit: BoxFit.contain,
@@ -411,23 +450,36 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
                   ),
                 ),
 
-              if (aswatOpacity > 0.0)
+                // Aswatama Menukik dari Kanan-Atas
                 Positioned(
                   left: aswatCurX,
                   top: aswatCurY,
                   width: charSize,
                   height: charSize,
                   child: Opacity(
-                    opacity: aswatOpacity,
+                    opacity: charOpacity,
                     child: Transform.scale(
-                      scale: aswatScale,
+                      scale: charScale,
                       child: Transform.rotate(
-                        angle: -0.14, // Kemiringan menukik tajam ke bawah
+                        angle: aswatAngle,
                         child: Image.asset(
                           'assets/images/aswatama_clash.png',
                           fit: BoxFit.contain,
                         ),
                       ),
+                    ),
+                  ),
+                ),
+              ],
+
+              // Loncatan Busur Listrik Antar-Tinju (Pre-impact Bullet-Time Suspension)
+              if (isPreImpactSuspension)
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: _PreImpactMicroArcPainter(
+                      gatotFist: Offset(gatotCurX + gatotFistXRel, gatotCurY + gatotFistYRel),
+                      aswatFist: Offset(aswatCurX + aswatFistXRel, aswatCurY + aswatFistYRel),
+                      intensity: preImpactT,
                     ),
                   ),
                 ),
@@ -446,11 +498,22 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
                   ),
                 ),
 
-              // Kilatan Cahaya Putih-Emas (Restrained White-Gold Flash)
+              // Anamorphic Lens Flare (Kilatan Cahaya Horizontal Film Bioskop)
+              if (flareIntensity > 0.0)
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: _AnamorphicFlarePainter(
+                      center: collisionCenter,
+                      intensity: flareIntensity,
+                    ),
+                  ),
+                ),
+
+              // Kilatan Cahaya Putih-Emas (Overexposure Flash)
               if (flashOpacity > 0.0)
                 Positioned.fill(
                   child: Container(
-                    color: Color.fromRGBO(255, 252, 238, flashOpacity),
+                    color: Color.fromRGBO(255, 252, 238, flashOpacity * 0.90),
                   ),
                 ),
 
@@ -564,19 +627,20 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
 
               // ==========================================
               // LAPISAN GERBANG CANDI BENTAR (Scene 8)
+              // (Membuka dari Tertutup Rapat di Tengah ke Kiri & Kanan)
               // ==========================================
               if (diengOpacity > 0.0) ...[
-                // Sayap Kiri Candi Bentar (Membuka ke Kiri)
+                // Sayap Kiri Candi Bentar (Membuka ke Arah Kiri)
                 Positioned(
                   left: -gateShift,
-                  top: h * 0.16,
+                  top: h * 0.12,
                   bottom: -15,
                   width: w * 0.52,
                   child: Transform(
                     alignment: Alignment.centerRight,
                     transform: Matrix4.identity()
                       ..setEntry(3, 2, 0.001)
-                      ..rotateY(-0.12 * gateOpenProgress),
+                      ..rotateY(-0.14 * gateOpenProgress),
                     child: Image.asset(
                       'assets/images/temple_gate_left.png',
                       fit: BoxFit.contain,
@@ -585,17 +649,17 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
                   ),
                 ),
 
-                // Sayap Kanan Candi Bentar (Membuka ke Kanan)
+                // Sayap Kanan Candi Bentar (Membuka ke Arah Kanan)
                 Positioned(
                   right: -gateShift,
-                  top: h * 0.16,
+                  top: h * 0.12,
                   bottom: -15,
                   width: w * 0.52,
                   child: Transform(
                     alignment: Alignment.centerLeft,
                     transform: Matrix4.identity()
                       ..setEntry(3, 2, 0.001)
-                      ..rotateY(0.12 * gateOpenProgress),
+                      ..rotateY(0.14 * gateOpenProgress),
                     child: Image.asset(
                       'assets/images/temple_gate_right.png',
                       fit: BoxFit.contain,
@@ -609,15 +673,15 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  height: 28,
+                  height: 32,
                   child: Container(
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
                         colors: [
-                          Color(0xFF09070D),
-                          Color(0x99100C16),
+                          Color(0xFF09060D),
+                          Color(0x990E0914),
                           Colors.transparent,
                         ],
                       ),
@@ -888,8 +952,205 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
 }
 
 // ============================================================================
-// CUSTOM PAINTERS: Awan Badai, Benturan, Petir Fraktal, Halimun Dieng
+// CUSTOM VFX PAINTERS: Plasma Trails, Bullet-time Micro-arcs, Lens Flare,
+// Distant Lightning, Shockwaves, and Parallax Mist
 // ============================================================================
+
+/// Melukis jejak plasma supersonik & garis kecepatan filmis di belakang ksatria
+class _SupersonicFlightVFXPainter extends CustomPainter {
+  _SupersonicFlightVFXPainter({
+    required this.gatotFist,
+    required this.aswatFist,
+    required this.clashProgress,
+  });
+
+  final Offset gatotFist;
+  final Offset aswatFist;
+  final double clashProgress;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (clashProgress <= 0.05 || clashProgress >= 0.98) return;
+
+    final alpha = (clashProgress < 0.6)
+        ? (clashProgress / 0.6)
+        : (1.0 - (clashProgress - 0.6) / 0.4);
+
+    // 1. Ekor Plasma Emas Gatotkaca (Supersonic Golden Jet Wash)
+    final gatotTrailPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 6.0
+      ..shader = LinearGradient(
+        colors: [
+          Colors.transparent,
+          const Color(0xFFC79B3A).withValues(alpha: alpha * 0.4),
+          const Color(0xFFFFE599).withValues(alpha: alpha * 0.8),
+        ],
+        stops: const [0.0, 0.6, 1.0],
+      ).createShader(
+        Rect.fromPoints(
+          Offset(gatotFist.dx - 180, gatotFist.dy + 180),
+          gatotFist,
+        ),
+      );
+
+    final gatotPath = Path();
+    gatotPath.moveTo(gatotFist.dx - 220, gatotFist.dy + 220);
+    gatotPath.quadraticBezierTo(
+      gatotFist.dx - 90,
+      gatotFist.dy + 70,
+      gatotFist.dx,
+      gatotFist.dy,
+    );
+    canvas.drawPath(gatotPath, gatotTrailPaint);
+
+    // 2. Ekor Asap & Petir Gelap Aswatama (Dark Smoky Plasma Wake)
+    final aswatTrailPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 6.0
+      ..shader = LinearGradient(
+        colors: [
+          Colors.transparent,
+          const Color(0xFF4A1E38).withValues(alpha: alpha * 0.4),
+          const Color(0xFF9E4B7A).withValues(alpha: alpha * 0.75),
+        ],
+        stops: const [0.0, 0.6, 1.0],
+      ).createShader(
+        Rect.fromPoints(
+          Offset(aswatFist.dx + 180, aswatFist.dy - 180),
+          aswatFist,
+        ),
+      );
+
+    final aswatPath = Path();
+    aswatPath.moveTo(aswatFist.dx + 220, aswatFist.dy - 220);
+    aswatPath.quadraticBezierTo(
+      aswatFist.dx + 90,
+      aswatFist.dy - 70,
+      aswatFist.dx,
+      aswatFist.dy,
+    );
+    canvas.drawPath(aswatPath, aswatTrailPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SupersonicFlightVFXPainter old) =>
+      old.gatotFist != gatotFist ||
+      old.aswatFist != aswatFist ||
+      old.clashProgress != clashProgress;
+}
+
+/// Melukis loncatan busur listrik mikro sesaat sebelum benturan tinju (Bullet-time Suspension)
+class _PreImpactMicroArcPainter extends CustomPainter {
+  _PreImpactMicroArcPainter({
+    required this.gatotFist,
+    required this.aswatFist,
+    required this.intensity,
+  });
+
+  final Offset gatotFist;
+  final Offset aswatFist;
+  final double intensity;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (intensity <= 0.0) return;
+
+    final mid = Offset(
+      (gatotFist.dx + aswatFist.dx) / 2,
+      (gatotFist.dy + aswatFist.dy) / 2,
+    );
+
+    // Pendaran bola plasma terkompresi di antara kedua tinju
+    final glowPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFFFFFFFF).withValues(alpha: intensity * 0.9),
+          const Color(0xFFFFDF9E).withValues(alpha: intensity * 0.6),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.4, 1.0],
+      ).createShader(Rect.fromCircle(center: mid, radius: 45 * intensity));
+    canvas.drawCircle(mid, 45 * intensity, glowPaint);
+
+    // 4 busur listrik mikro zig-zag bertegangan tinggi
+    final arcPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8
+      ..strokeCap = StrokeCap.round
+      ..color = Color.fromRGBO(255, 245, 210, intensity);
+
+    for (int i = 0; i < 4; i++) {
+      final path = Path();
+      path.moveTo(gatotFist.dx, gatotFist.dy);
+      final jitter = (i.isEven ? 8.0 : -8.0) * intensity;
+      path.quadraticBezierTo(mid.dx + jitter, mid.dy - jitter, aswatFist.dx, aswatFist.dy);
+      canvas.drawPath(path, arcPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _PreImpactMicroArcPainter old) =>
+      old.gatotFist != gatotFist ||
+      old.aswatFist != aswatFist ||
+      old.intensity != intensity;
+}
+
+/// Melukis Anamorphic Lens Flare (Garis Kilatan Cahaya Horizontal Sinematik Film)
+class _AnamorphicFlarePainter extends CustomPainter {
+  _AnamorphicFlarePainter({
+    required this.center,
+    required this.intensity,
+  });
+
+  final Offset center;
+  final double intensity;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (intensity <= 0.0) return;
+
+    final cy = center.dy;
+    final w = size.width;
+
+    // Garis sorot horizontal panjang membentang selebar layar
+    final flarePaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          Colors.transparent,
+          const Color(0xFF9ED5FF).withValues(alpha: intensity * 0.35),
+          const Color(0xFFFFFFFF).withValues(alpha: intensity * 0.95),
+          const Color(0xFFFFDF9E).withValues(alpha: intensity * 0.35),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.25, 0.50, 0.75, 1.0],
+      ).createShader(Rect.fromLTWH(0, cy - 3, w, 6));
+
+    canvas.drawRect(Rect.fromLTWH(0, cy - 1.5, w, 3.0), flarePaint);
+
+    // Inti pendaran vertikal lembut
+    final coreGlowPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFFFFFFFF).withValues(alpha: intensity),
+          const Color(0xFFFFDF9E).withValues(alpha: intensity * 0.5),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.3, 1.0],
+      ).createShader(Rect.fromCircle(center: center, radius: 100 * intensity));
+
+    canvas.drawOval(
+      Rect.fromCenter(center: center, width: 220 * intensity, height: 28 * intensity),
+      coreGlowPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _AnamorphicFlarePainter old) =>
+      old.center != center || old.intensity != intensity;
+}
 
 /// Melukis lapisan awan badai misterius dan dorongan awan saat benturan
 class _StormCloudsPainter extends CustomPainter {
@@ -912,7 +1173,6 @@ class _StormCloudsPainter extends CustomPainter {
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 45)
       ..style = PaintingStyle.fill;
 
-    // Dorongan awan menjauh saat gelombang kejut
     final push = shockwave * 75.0;
 
     // Gumpalan awan atas
@@ -1023,8 +1283,8 @@ class _CollisionClashPainter extends CustomPainter {
         ..strokeCap = StrokeCap.round
         ..color = const Color(0xFFFFFFFF).withValues(alpha: alpha * 0.95);
 
-      const int branchCount = 10;
-      final maxReach = size.width * 0.92 * lightningProgress;
+      const int branchCount = 12;
+      final maxReach = size.width * 0.95 * lightningProgress;
 
       for (int i = 0; i < branchCount; i++) {
         final baseAngle = (i * 2 * math.pi / branchCount) + 0.12;
@@ -1068,6 +1328,42 @@ class _CollisionClashPainter extends CustomPainter {
   bool shouldRepaint(covariant _CollisionClashPainter old) =>
       old.shockwaveProgress != shockwaveProgress ||
       old.lightningProgress != lightningProgress;
+}
+
+/// Melukis kilatan petir lembut alami di balik awan senja Dieng
+class _DistantCloudLightningPainter extends CustomPainter {
+  _DistantCloudLightningPainter({required this.time});
+  final double time;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Kilatan terjadi berkala secara lembut
+    final cycle = (time * 0.6) % (math.pi * 2);
+    final intensity = (math.sin(cycle) > 0.85)
+        ? ((math.sin(cycle) - 0.85) / 0.15) * 0.28
+        : 0.0;
+
+    if (intensity <= 0.0) return;
+
+    final w = size.width;
+    final h = size.height;
+
+    final flashPaint = Paint()
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 60)
+      ..color = const Color(0xFFFFEFB8).withValues(alpha: intensity);
+
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(w * 0.52, h * 0.35),
+        width: w * 0.75,
+        height: 120,
+      ),
+      flashPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _DistantCloudLightningPainter old) => old.time != time;
 }
 
 /// Melukis kabut dingin pegunungan Dieng multi-lapis (Parallax Mist System)
