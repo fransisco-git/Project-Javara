@@ -8,7 +8,6 @@ import '../../core/transitions.dart';
 import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
 import '../home/home_screen.dart';
-import '../splash/splash_screen.dart';
 
 /// Layar Selamat Datang JAVARA (Refined Editorial & Candi Bentar Sunset Experience).
 ///
@@ -104,13 +103,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     HapticFeedback.lightImpact();
     Navigator.of(context).push(
       fadeSlideRoute(const SignUpScreen()),
-    );
-  }
-
-  void _onReplayBattleAction() {
-    HapticFeedback.mediumImpact();
-    Navigator.of(context).pushReplacement(
-      cinematicFadeRoute(const SplashScreen()),
     );
   }
 
@@ -252,64 +244,22 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 ),
 
                 // ==========================================
-                // 3. BILAH ATAS: Tombol Putar Ulang Sinematik
+                // 3. BILAH ATAS: Indikator Aksara Jawa Halus
                 // ==========================================
-                Positioned(
+                const Positioned(
                   top: 0,
-                  left: 0,
                   right: 0,
                   child: SafeArea(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Tombol Putar Ulang Pertarungan Sinematik (Understated Pill)
-                          GestureDetector(
-                            onTap: _onReplayBattleAction,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                              decoration: BoxDecoration(
-                                color: const Color(0x55000000),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: const Color(0x33DFB76C),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.replay_rounded,
-                                    size: 14,
-                                    color: Color(0xFFDFB76C),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Putar Ulang Sinematik',
-                                    style: JText.sans(
-                                      11.5,
-                                      weight: FontWeight.w600,
-                                      color: const Color(0xFFDFB76C),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          // Indikator Aksara Jawa Halus
-                          const Text(
-                            'ꦗ ꦮ ꦫ',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Color(0x88DFB76C),
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 4,
-                            ),
-                          ),
-                        ],
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      child: Text(
+                        'ꦗ ꦮ ꦫ',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Color(0x88DFB76C),
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 4,
+                        ),
                       ),
                     ),
                   ),
