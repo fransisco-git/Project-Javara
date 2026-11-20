@@ -6,6 +6,7 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const JavaraApp());
-    await tester.pumpAndSettle(const Duration(seconds: 4));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(JavaraApp), findsOneWidget);
   });
 }

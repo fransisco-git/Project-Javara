@@ -1675,7 +1675,10 @@ class _JavaraStudioScreenState extends State<JavaraStudioScreen>
                 decoration: BoxDecoration(
                   color: const Color(0xB31C1612),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: const Color(0x44B08D57), width: 0.8),
+                  border: Border.all(
+                    color: const Color(0x44B08D57),
+                    width: 0.8,
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
