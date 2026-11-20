@@ -6,14 +6,16 @@ import '../../services/auth_service.dart';
 import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
 import '../home/home_screen.dart';
+import '../welcome/welcome_screen.dart';
 import 'cinematic_intro.dart';
 
 /// Layar Pembuka (Splash Screen) Sinematik JAVARA.
 ///
-/// Selalu memutar pengalaman sinematik pembuka Gatotkaca vs Aswatama
-/// yang saling beradu tinju saat terbang, menciptakan kilatan petir & awan,
-/// membuka lambang asli JAVARA, hingga terbukanya gerbang Candi Bentar
-/// dengan latar senja berkabut Dataran Tinggi Dieng Jawa Tengah.
+/// Memutar pertarungan sinematik pembuka Gatotkaca vs Aswatama
+/// yang saling beradu tinju saat terbang dengan VFX film blockbuster,
+/// ledakan petir fraktal, membuka lambang asli JAVARA,
+/// lalu bertransisi mulus ke halaman Welcome dengan animasi terbukanya
+/// gerbang Candi Bentar di Dataran Tinggi Dieng.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -37,6 +39,15 @@ class _SplashScreenState extends State<SplashScreen> {
         setState(() => _isLoggedIn = loggedIn);
       }
     } catch (_) {}
+  }
+
+  void _onCinematicComplete() {
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      cinematicFadeRoute(
+        _isLoggedIn ? const HomeScreen() : const WelcomeScreen(playGateOpen: true),
+      ),
+    );
   }
 
   void _onPrimaryAction() {
@@ -70,7 +81,7 @@ class _SplashScreenState extends State<SplashScreen> {
         body: JavaraCinematicIntro(
           initialProgress: 0.0,
           autoPlay: true,
-          onComplete: () {},
+          onComplete: _onCinematicComplete,
           onPrimaryAction: _onPrimaryAction,
           onSecondaryAction: _onSecondaryAction,
           onRegisterAction: _onRegisterAction,
