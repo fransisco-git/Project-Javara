@@ -5,17 +5,20 @@ import 'package:flutter/services.dart';
 import '../../core/theme.dart';
 import '../../widgets/javara_widgets.dart';
 
-/// Kontroller dan Tampilan Sinematik Pembuka JAVARA — Movie-Grade VFX & CGI.
+/// Kontroller dan Tampilan Sinematik Pembuka JAVARA — Movie-Grade Cultural VFX & CGI.
 ///
-/// Urutan Narasi Sinematik (Terinspirasi Adegan Benturan Hulkbuster vs Hulk):
-/// 1. Badai Kosmik (Storm Atmosphere) [t: 0.00 - 0.08] — Awan bergolak, kilatan petir dalam awan (*sheet lightning*).
-/// 2. Pendekatan Horisontal (Horizontal Standoff Approach) [t: 0.08 - 0.20] — Gatotkaca dari kiri, Aswatama dari kanan melesat pada bidang tempur horisontal yang sejajar sempurna.
-/// 3. Tarikan Pukulan & Pengumpulan Daya (Anticipation Wind-Up) [t: 0.20 - 0.28] — Kedua ksatria menarik kepalan tinju dan torso ke belakang, busur listrik tegangan tinggi berderak di antara kedua tinju.
-/// 4. Lontaran Pukulan Lurus Berkecepatan Penuh (Explosive Straight Punch Thrust) [t: 0.28 - 0.335] — Melesat eksplosif ke arah tengah dengan kerucut uap Mach dan ekor plasma supersonik.
-/// 5. Benturan Buku-Jari ke Buku-Jari & Freeze Frame (Knuckle-to-Knuckle Hit-Stop) [t: 0.335 - 0.365] — Kedua kepalan tangan bertemu tepat buku-jari ke buku-jari di titik tengah layar (0px offset). Aksi membeku sesaat (Hit-stop).
-/// 6. Ledakan Efek VFX Bioskop (Impact Burst & Planar Shockwave) [t: 0.335 - 0.44] — Kilatan horizontal lensa film bioskop (*35mm anamorphic lens flare*), lembaran gelombang kejut vertikal lonjong, 36+ partikel percikan kinetik, dan guncangan kamera teredam (*damped camera shake*).
-/// 7. Hentakan Balik Kinetik (Kinetic Recoil) [t: 0.365 - 0.43] — Kedua ksatria terpental balik akibat daya benturan yang mahadasyat, sembari 16 cabang petir fraktal meledak memenuhi layar.
-/// 8. Penyingkapan Lambang JAVARA & Pemuatan Budaya [t: 0.48 - 1.00] — Aura Surya Mandala memusat membuka lambang asli JAVARA dengan Aksara Jawa `ꦗ ꦮ ꦫ` dan bilah pemuatan budaya menuju Candi Bentar Welcome Screen.
+/// Disusun dengan disiplin Anti-Slop (/antislop, /antislop-layoutmobile, /ui-styling, /ui-ux-pro-max):
+/// - Menghilangkan kesan gambar kaku "cardboard cutout/puppet" dengan deformasi kinetik
+///   (Squash & Stretch organik sepanjang sumbu dorong pukulan).
+/// - Transformasi skala berporos sub-piksel di buku-jari (knuckle invariant), sehingga
+///   kedua kepalan tangan tetap terkunci persis di titik tengah layar (0.0px gap).
+/// - Pencahayaan terintegrasi atmosferik (Rim-light kencana untuk Gatotkaca, bayangan
+///   ametis-gelap untuk Aswatama, dan bayangan dinamis ke lapisan awan).
+/// - Menghilangkan penumpukan "AI-slop glow" acak; menggantinya dengan gelombang kejut
+///   kondensasi Mach vertikal lonjong (Planar Shockwave), partikel kinetik berhukum
+///   gravitasi-gesekan udara, dan petir fraktal filmis 35mm.
+/// - Layout mobile responsif dengan target sentuh tombol Lewati memenuhi standar aksesibilitas
+///   minimal 48x48px dan rasio kontras warna tinggi (WCAG AAA).
 class JavaraCinematicIntro extends StatefulWidget {
   const JavaraCinematicIntro({
     super.key,
@@ -45,7 +48,7 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
   late final AnimationController _controller;
   bool _isCompleted = false;
 
-  // Status teks tahapan pemuatan budaya menuju halaman berikutnya
+  // Status teks tahapan pemuatan budaya menuju Candi Bentar Welcome Screen
   int _loadingStep = 0;
   static const List<String> _loadingTexts = [
     'Menyelaraskan Khasanah Budaya Jawa...',
@@ -80,14 +83,14 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Pra-muat seluruh aset gambar ke memori GPU untuk performa tanpa stutter
+    // Pra-muat seluruh aset gambar ke memori GPU untuk performa tanpa lag
     precacheImage(const AssetImage('assets/images/gatotkaca_clash.png'), context);
     precacheImage(const AssetImage('assets/images/aswatama_clash.png'), context);
   }
 
   void _handleAnimationProgress() {
     final v = _controller.value;
-    // Pembaruan teks tahapan pemuatan saat Scene Logo aktif (t: 0.52 s.d 0.90)
+    // Pembaruan tahapan pemuatan saat Logo aktif (t: 0.52 s.d 0.90)
     if (v >= 0.52 && v <= 0.90) {
       final sub = ((v - 0.52) / 0.38 * _loadingTexts.length).floor();
       final idx = sub.clamp(0, _loadingTexts.length - 1);
@@ -107,7 +110,7 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
     });
   }
 
-  /// Melewati sinematik langsung menuju penyelesaian (ke Login / Welcome)
+  /// Melewati sinematik langsung menuju penyelesaian
   void skip() {
     HapticFeedback.selectionClick();
     _controller.stop();
@@ -121,79 +124,85 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
     super.dispose();
   }
 
-  /// Kinematika Benturan 5 Tahap Terinspirasi Adegan Hulkbuster vs Hulk:
-  /// Output: [dispFraction, leanAngle, isPreArcActive, preArcIntensity]
-  /// - dispFraction: Jarak relatif dari titik benturan kepalan (0.0 = knuckle ketemu persis)
-  /// - leanAngle: Sudut kemiringan torso karakter (rad)
-  List<double> _evaluateHulkbusterCombatKinematics(double t) {
+  /// Kinematika Benturan 5 Tahap + Deformasi Organik (Anti-Slop Physics):
+  /// Output: [dispFraction, leanAngle, scaleX, scaleY, isPreArcActive, preArcIntensity]
+  List<double> _evaluateKinematicsAndDeform(double t) {
     if (t < 0.08) {
-      return [-1.5, 0.0, 0.0, 0.0];
+      return [-1.5, 0.0, 1.0, 1.0, 0.0, 0.0];
     }
     if (t > 0.45) {
-      return [-0.22, -0.06, 0.0, 0.0];
+      return [-0.20, -0.06, 1.0, 1.0, 0.0, 0.0];
     }
 
-    // Normalisasi jendela pertarungan (t: 0.08 s.d 0.43)
     final p = ((t - 0.08) / 0.35).clamp(0.0, 1.0);
 
     // ==============================================================
     // TAHAP 1: Pendekatan Horisontal Cepat (p: 0.00 -> 0.35 | t: 0.08 -> 0.20)
-    // Gatotkaca dari kiri, Aswatama dari kanan meluncur ke jarak standoff
     // ==============================================================
     if (p < 0.35) {
       final sub = p / 0.35;
       final easeIn = 1.0 - math.pow(1.0 - sub, 3).toDouble();
-      final disp = -1.25 + 0.87 * easeIn; // Dari -1.25 ke -0.38
+      final disp = -1.25 + 0.87 * easeIn;
       final lean = 0.04 * (1.0 - sub);
-      return [disp, lean, 0.0, 0.0];
+      final sx = 1.0 + 0.04 * sub;
+      final sy = 1.0 - 0.02 * sub;
+      return [disp, lean, sx, sy, 0.0, 0.0];
     }
 
     // ==============================================================
     // TAHAP 2: Tarikan Pukulan & Anticipation Wind-Up (p: 0.35 -> 0.58 | t: 0.20 -> 0.28)
-    // Kedua ksatria menarik kepalan tinju dan torso ke belakang (coiling power)
+    // Otot meregang ke belakang: kompresi horisontal & pembengkakan vertikal (muscle coiling)
     // ==============================================================
     else if (p < 0.58) {
       final sub = (p - 0.35) / 0.23;
       final pull = 0.5 - 0.5 * math.cos(sub * math.pi);
-      final disp = -0.38 - 0.16 * pull; // Menarik ke belakang dari -0.38 ke -0.54
-      final lean = -0.10 * pull; // Torso condong ke belakang menahan regangan tenaga
-      final arcIntensity = pull; // Busur listrik tegangan tinggi mulai memercik
-      return [disp, lean, 1.0, arcIntensity];
+      final disp = -0.38 - 0.16 * pull;
+      final lean = -0.10 * pull;
+      final sx = 1.04 - 0.10 * pull; // Menciut horisontal ke 0.94
+      final sy = 0.98 + 0.08 * pull; // Menggembung vertikal ke 1.06
+      return [disp, lean, sx, sy, 1.0, pull];
     }
 
     // ==============================================================
-    // TAHAP 3: Lontaran Pukulan Eksplosif Menuju Pusat (p: 0.58 -> 0.74 | t: 0.28 -> 0.335)
-    // Percepatan masif melesatkan tinju ke titik tengah (Cubic In)
+    // TAHAP 3: Lontaran Pukulan Eksplosif (p: 0.58 -> 0.74 | t: 0.28 -> 0.335)
+    // Kecepatan supersonik: peregangan aerodinamis (velocity stretch)
     // ==============================================================
     else if (p < 0.74) {
       final sub = (p - 0.58) / 0.16;
       final thrust = math.pow(sub, 3.4).toDouble();
-      final disp = -0.54 + 0.54 * thrust; // Melesat cepat dari -0.54 ke 0.000 persis!
-      final lean = -0.10 + 0.16 * thrust; // Bergeser dari condong belakang ke dorongan kuat (+0.06)
+      final disp = -0.54 + 0.54 * thrust;
+      final lean = -0.10 + 0.16 * thrust;
+      final sx = 0.94 + 0.18 * thrust; // Meregang hingga 1.12x sepanjang garis serang
+      final sy = 1.06 - 0.12 * thrust; // Meramping ke 0.94x
       final arcIntensity = (1.0 - sub * 0.5);
-      return [disp, lean, 1.0, arcIntensity];
+      return [disp, lean, sx, sy, 1.0, arcIntensity];
     }
 
     // ==============================================================
-    // TAHAP 4: Buku-Jari Bertemu Buku-Jari & Freeze Frame (p: 0.74 -> 0.84 | t: 0.335 -> 0.365)
-    // Hit-stop: kepalan tangan terkunci knuckle-to-knuckle di 0.000 (0px gap)
+    // TAHAP 4: Buku-Jari Bertemu & Freeze Frame (p: 0.74 -> 0.84 | t: 0.335 -> 0.365)
+    // Hit-stop: kepalan tangan terkunci buku-jari ke buku-jari.
+    // Tumbukan keras: kompresi impak mendadak (sudden impact squash).
     // ==============================================================
     else if (p < 0.84) {
-      const disp = 0.000; // TEPAT DI TITIK IMPAK BUKU JARI
-      const lean = 0.06; // Mempertahankan dorongan benturan penuh
-      return [disp, lean, 0.0, 0.0];
+      const disp = 0.000;
+      const lean = 0.06;
+      const sx = 0.92; // Memampat ke 0.92x akibat tumbukan lawan
+      const sy = 1.08; // Melebar vertikal ke 1.08x
+      return [disp, lean, sx, sy, 0.0, 0.0];
     }
 
     // ==============================================================
     // TAHAP 5: Hentakan Balik Kinetik / Recoil (p: 0.84 -> 1.00 | t: 0.365 -> 0.43)
-    // Daya benturan memantulkan kedua ksatria ke belakang
+    // Daya benturan memantulkan ksatria mundur secara elastis ke skala normal
     // ==============================================================
     else {
       final sub = (p - 0.84) / 0.16;
       final recoil = 1.0 - math.pow(1.0 - sub, 2).toDouble();
-      final disp = -0.20 * recoil; // Terpental mundur ke -0.20 (~60-70px)
-      final lean = 0.06 - 0.14 * recoil; // Torso terpental ke belakang (-0.08)
-      return [disp, lean, 0.0, 0.0];
+      final disp = -0.20 * recoil;
+      final lean = 0.06 - 0.14 * recoil;
+      final sx = 0.92 + 0.08 * recoil; // Kembali ke 1.00x
+      final sy = 1.08 - 0.08 * recoil; // Kembali ke 1.00x
+      return [disp, lean, sx, sy, 0.0, 0.0];
     }
   }
 
@@ -206,8 +215,8 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
     // Titik pusat benturan kepalan tinju di layar (golden ratio horisontal)
     final collisionCenter = Offset(w * 0.50, h * 0.38);
 
-    // Dimensi gambar ksatria responsif
-    final charSize = (w * 0.72).clamp(280.0, 380.0);
+    // Dimensi gambar ksatria responsif terhadap berbagai ukuran layar smartphone
+    final charSize = (w * 0.72).clamp(270.0, 370.0);
 
     // Titik buku-jari tinju terukur sub-piksel dari data piksel aset gambar asli:
     // Gatotkaca (1024x1024): knuckle depan x=1004 (0.9805), y=468 (0.4570)
@@ -228,17 +237,25 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
     // Jarak lintasan serang horisontal
     final strikeDistance = charSize * 0.92;
 
+    // Titik poros Alignment untuk Transform.scale agar buku-jari tetap terkunci tanpa bergeser
+    // Gatotkaca Alignment: x = 0.9805 * 2 - 1 = +0.961, y = 0.4570 * 2 - 1 = -0.086
+    const gatotKnuckleAlignment = Alignment(0.961, -0.086);
+    // Aswatama Alignment: x = 0.0889 * 2 - 1 = -0.822, y = 0.5630 * 2 - 1 = +0.126
+    const aswatKnuckleAlignment = Alignment(-0.822, 0.126);
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
         final t = _controller.value;
 
-        // Kinematika Hulkbuster vs Hulk
-        final kin = _evaluateHulkbusterCombatKinematics(t);
+        // Evaluasi kinematika & deformasi anti-slop
+        final kin = _evaluateKinematicsAndDeform(t);
         final dispFraction = kin[0];
         final leanAngle = kin[1];
-        final isPreArcActive = kin[2] > 0.5;
-        final preArcIntensity = kin[3];
+        final scaleX = kin[2];
+        final scaleY = kin[3];
+        final isPreArcActive = kin[4] > 0.5;
+        final preArcIntensity = kin[5];
 
         // Posisi Horisontal Sejajar Murni (Ketinggian Y terkunci di bidang tempur yang sama)
         final gatotCurX = gatotImpactX + dispFraction * strikeDistance;
@@ -247,11 +264,11 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
         final aswatCurX = aswatImpactX - dispFraction * strikeDistance;
         final aswatCurY = aswatImpactY;
 
-        // Sudut rotasi torso (Gatotkaca condong sesuai arah hadap kanan, Aswatama hadap kiri)
+        // Sudut rotasi torso
         final gatotAngle = leanAngle;
         final aswatAngle = -leanAngle;
 
-        // Opasitas karakter (muncul t: 0.08, lebur halus ke petir t: 0.41 s.d 0.45)
+        // Opasitas karakter (muncul t: 0.08, lebur mulus ke petir t: 0.41 s.d 0.45)
         double charOpacity = 0.0;
         if (t >= 0.08 && t <= 0.45) {
           if (t < 0.12) {
@@ -265,7 +282,6 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
 
         // ==============================================================
         // 1. GUNCANGAN KAMERA FILM (Damped Multi-axis Camera Shake)
-        // Terpicu tepat pada saat benturan kepalan (t: 0.335 s.d 0.44)
         // ==============================================================
         double shakeX = 0.0;
         double shakeY = 0.0;
@@ -328,7 +344,6 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
           loadingProgress = ((t - 0.52) / 0.43).clamp(0.05, 1.0);
         }
 
-        // Koordinat ujung kepalan tinju aktual saat ini di canvas
         final currentGatotFist = Offset(gatotCurX + gatotFistXRel, gatotCurY + gatotFistYRel);
         final currentAswatFist = Offset(aswatCurX + aswatFistXRel, aswatCurY + aswatFistYRel);
 
@@ -384,7 +399,7 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
                   ),
 
                 // ==========================================
-                // LAPISAN KSATRIA: Gatotkaca & Aswatama (Hulkbuster vs Hulk Mechanics)
+                // LAPISAN KSATRIA: Gatotkaca & Aswatama (Anti-Slop Deform & Rim Lighting)
                 // ==========================================
                 if (charOpacity > 0.0) ...[
                   // Gatotkaca (Kiri -> Bergerak Horisontal ke Kanan)
@@ -398,9 +413,25 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
                       child: Transform.rotate(
                         angle: gatotAngle,
                         alignment: Alignment.center,
-                        child: Image.asset(
-                          'assets/images/gatotkaca_clash.png',
-                          fit: BoxFit.contain,
+                        child: Transform(
+                          transform: Matrix4.diagonal3Values(scaleX, scaleY, 1.0),
+                          alignment: gatotKnuckleAlignment,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFFC79B3A).withValues(alpha: 0.25 * charOpacity),
+                                  blurRadius: 28,
+                                  spreadRadius: 2,
+                                  offset: const Offset(-8, 6),
+                                ),
+                              ],
+                            ),
+                            child: Image.asset(
+                              'assets/images/gatotkaca_clash.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -417,9 +448,25 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
                       child: Transform.rotate(
                         angle: aswatAngle,
                         alignment: Alignment.center,
-                        child: Image.asset(
-                          'assets/images/aswatama_clash.png',
-                          fit: BoxFit.contain,
+                        child: Transform(
+                          transform: Matrix4.diagonal3Values(scaleX, scaleY, 1.0),
+                          alignment: aswatKnuckleAlignment,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF7A2E5B).withValues(alpha: 0.25 * charOpacity),
+                                  blurRadius: 28,
+                                  spreadRadius: 2,
+                                  offset: const Offset(8, 6),
+                                ),
+                              ],
+                            ),
+                            child: Image.asset(
+                              'assets/images/aswatama_clash.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -589,44 +636,59 @@ class JavaraCinematicIntroState extends State<JavaraCinematicIntro>
                   ),
 
                 // ==========================================
-                // TOMBOL LEWATI (SKIP BUTTON)
+                // TOMBOL LEWATI (SKIP BUTTON) — Sesuai /antislop-layoutmobile (Target ≥ 48x48px)
                 // ==========================================
                 Positioned(
                   top: 0,
                   right: 0,
                   child: SafeArea(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         onTap: skip,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: const Color(0x44000000),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: const Color(0x28FFFFFF),
-                              width: 0.8,
-                            ),
+                          constraints: const BoxConstraints(
+                            minWidth: 48,
+                            minHeight: 48,
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Lewati',
-                                style: JText.sans(
-                                  12,
-                                  weight: FontWeight.w500,
-                                  color: const Color(0xCCFFFFFF),
+                          alignment: Alignment.center,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0x660B0715),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color: const Color(0x38DFB76C),
+                                width: 1.0,
+                              ),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x33000000),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
                                 ),
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(
-                                Icons.fast_forward_rounded,
-                                size: 14,
-                                color: Color(0xCCFFFFFF),
-                              ),
-                            ],
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Lewati',
+                                  style: JText.sans(
+                                    12,
+                                    weight: FontWeight.w600,
+                                    color: const Color(0xFFEADBCA),
+                                  ).copyWith(letterSpacing: 0.5),
+                                ),
+                                const SizedBox(width: 6),
+                                const Icon(
+                                  Icons.fast_forward_rounded,
+                                  size: 14,
+                                  color: Color(0xFFDFB76C),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -947,7 +1009,6 @@ class _HulkbusterClashVFXPainter extends CustomPainter {
     }
 
     // 2. Lembaran Gelombang Kejut Lonjong Vertikal (Hulkbuster Vertical Planar Shockwave)
-    // Seperti di Avengers: Age of Ultron, gelombang kejut tinju tegak lurus sumbu pukulan (vertikal)
     if (shockwaveProgress > 0.0) {
       final baseRadius = size.width * 1.15 * shockwaveProgress;
       final ringAlpha = (1.0 - shockwaveProgress).clamp(0.0, 1.0);
