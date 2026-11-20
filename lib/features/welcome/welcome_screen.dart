@@ -9,15 +9,20 @@ import '../auth/signup_screen.dart';
 import '../home/home_screen.dart';
 import '../splash/splash_screen.dart';
 
-/// Layar Selamat Datang JAVARA (Candi Bentar Gate & Dieng Sunset Experience).
+/// Layar Selamat Datang JAVARA (Refined Editorial & Candi Bentar Sunset Experience).
 ///
-/// Mengimplementasikan gerbang Candi Bentar khas Jawa Tengah (sesuai foto referensi pengguna):
-/// - Kondisi awal: Gerbang tertutup rapat di tengah menutupi siluet gunung.
-/// - Animasi pembukaan: Kedua pilar gerbang terbelah dan membuka perlahan ke kiri dan kanan
-///   dengan kelembaman batu andesit alami dan rotasi perspektif 3D.
-/// - Latar belakang: Pemandangan megah gunung berkabut senja keemasan dengan pantulan
-///   air jernih (*mirror reflection*) dan lapisan kabut Dataran Tinggi Dieng yang merayap.
-/// - Antarmuka pengguna: Tombol Masuk, Daftar, Jelajahi, dan tombol Putar Ulang Pertarungan Sinematik.
+/// Disempurnakan sesuai panduan Prompt 2:
+/// - Latar pemandangan gunung & senja Dataran Tinggi Dieng mendominasi visual secara alami.
+/// - Gerbang Candi Bentar andesit Jawa Tengah tertutup di awal, lalu membuka perlahan
+///   ke kiri dan kanan dengan kelembaman batu alami dan rotasi perspektif 3D.
+/// - Suasana dingin berkabut dengan gradien senja bersahaja: muted amber, dusty pink,
+///   blue-gray, dan violet-gray (menghindari oranye jenuh atau fantasi kartun).
+/// - Tipografi editorial luhur tanpa kartu tebal yang menghalangi pemandangan:
+///   * Headline: "Mengenal warisan. Memahami makna."
+///   * Description: "Jelajahi busana adat Jawa Tengah, filosofi, sejarah, dan nilai budaya yang diwariskan lintas generasi."
+///   * Primary Button: "Mulai Eksplorasi Budaya →"
+///   * Secondary Action: "Masuk ke Akun Anda"
+///   * Register Text: "Belum memiliki akun? Daftar di sini"
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({
     super.key,
@@ -39,24 +44,23 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   void initState() {
     super.initState();
 
-    // Kontroler animasi pembukaan gerbang candi (durasi 2600ms dengan akselerasi halus)
+    // Animasi pembukaan gerbang candi: 2600ms dengan akselerasi & deselerasi alami
     _gateController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2600),
       value: widget.playGateOpen ? 0.0 : 1.0,
     );
 
-    // Kontroler animasi ambien berkelanjutan (kabut merayap & denyut pendar senja)
+    // Animasi ambien berkelanjutan (kabut merayap lembut & denyut pendar senja)
     _ambientController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 8000),
+      duration: const Duration(milliseconds: 8500),
     )..repeat();
 
     if (widget.playGateOpen) {
-      // Jeda sejenak sebelum gerbang mulai membuka untuk memberi kesan megah
-      Future.delayed(const Duration(milliseconds: 300), () {
+      Future.delayed(const Duration(milliseconds: 250), () {
         if (mounted) {
-          HapticFeedback.mediumImpact();
+          HapticFeedback.lightImpact();
           _gateController.forward();
         }
       });
@@ -66,7 +70,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Pra-muat aset gambar ke GPU memori
+    // Pra-muat aset gambar ke memori GPU untuk rendering instan tanpa jeda
     precacheImage(const AssetImage('assets/images/user_candi_landscape.jpg'), context);
     precacheImage(const AssetImage('assets/images/user_gate_left_cut.png'), context);
     precacheImage(const AssetImage('assets/images/user_gate_right_cut.png'), context);
@@ -77,6 +81,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     _gateController.dispose();
     _ambientController.dispose();
     super.dispose();
+  }
+
+  void _onPrimaryExplore() {
+    HapticFeedback.selectionClick();
+    Navigator.of(context).pushReplacement(
+      fadeSlideRoute(const HomeScreen()),
+    );
   }
 
   void _onLoginAction() {
@@ -93,13 +104,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
-  void _onExploreAction() {
-    HapticFeedback.selectionClick();
-    Navigator.of(context).pushReplacement(
-      fadeSlideRoute(const HomeScreen()),
-    );
-  }
-
   void _onReplayBattleAction() {
     HapticFeedback.mediumImpact();
     Navigator.of(context).pushReplacement(
@@ -113,7 +117,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     final w = size.width;
     final h = size.height;
 
-    // Lebar pilar gerbang terukur proporsional layar ponsel
+    // Dimensi pilar gerbang terukur proporsional layar ponsel
     final gateWidth = (w * 0.48).clamp(160.0, 240.0);
     final gateHeight = gateWidth * (1024.0 / 275.0);
 
@@ -131,30 +135,30 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             final gateT = _gateController.value;
             final ambientT = _ambientController.value;
 
-            // Progres terbukanya gerbang (kurva easeInOutCubic untuk kelembaman batu andesit)
+            // Kurva pembukaan gerbang: kelembaman batu andesit alami (easeInOutCubic)
             final openProgress = Curves.easeInOutCubic.transform(gateT);
 
-            // Jarak geser gerbang dari tengah layar ke sisi kiri dan kanan
-            final maxShift = w * 0.46;
+            // Jarak geser gerbang dari titik temu tengah ke arah luar
+            final maxShift = w * 0.45;
             final gateShift = maxShift * openProgress;
 
-            // Sudut rotasi perspektif 3D gerbang saat terbuka
-            final gateRotateY = 0.12 * openProgress;
+            // Rotasi perspektif 3D halus saat gerbang membuka
+            final gateRotateY = 0.11 * openProgress;
 
-            // Opasitas dan pergeseran UI selamat datang
+            // Transisi kemunculan UI editorial (mulai aktif saat gerbang terbuka 45%)
             double uiOpacity = 0.0;
-            double uiSlideY = 24.0;
-            if (gateT >= 0.50) {
-              final sub = ((gateT - 0.50) / 0.50).clamp(0.0, 1.0);
-              uiOpacity = Curves.easeOutQuad.transform(sub);
-              uiSlideY = (1.0 - uiOpacity) * 24.0;
+            double uiSlideY = 20.0;
+            if (gateT >= 0.45) {
+              final sub = ((gateT - 0.45) / 0.55).clamp(0.0, 1.0);
+              uiOpacity = Curves.easeOutCubic.transform(sub);
+              uiSlideY = (1.0 - uiOpacity) * 20.0;
             }
 
             return Stack(
               fit: StackFit.expand,
               children: [
                 // ==========================================
-                // 1. LAPISAN LATAR: Pemandangan Gunung & Pantulan Air
+                // 1. LAPISAN PEMANDANGAN: Panorama Gunung & Pantulan Air
                 // ==========================================
                 Positioned.fill(
                   child: Image.asset(
@@ -164,7 +168,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   ),
                 ),
 
-                // Gradien Atmosfer Senja Dieng
+                // Gradien Atmosfer Senja Dataran Tinggi Dieng (Muted Tones)
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
@@ -172,18 +176,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          const Color(0xFF0B1426).withValues(alpha: 0.35),
+                          const Color(0xFF161C2C).withValues(alpha: 0.28), // Slate blue
                           Colors.transparent,
-                          const Color(0xFF1B0E14).withValues(alpha: 0.45),
-                          const Color(0xFF08040C).withValues(alpha: 0.88),
+                          const Color(0xFF261824).withValues(alpha: 0.38), // Muted violet-gray
+                          const Color(0xFF09060E).withValues(alpha: 0.88), // Ground shadow
                         ],
-                        stops: const [0.0, 0.35, 0.70, 1.0],
+                        stops: const [0.0, 0.32, 0.68, 1.0],
                       ),
                     ),
                   ),
                 ),
 
-                // Pendar Cahaya Surya Senja di Balik Gunung
+                // Pendaran Surya Senja Hangat di Balik Puncak Gunung
                 Positioned.fill(
                   child: CustomPaint(
                     painter: _DiengSunsetGlowPainter(
@@ -193,7 +197,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   ),
                 ),
 
-                // Kabut Pegunungan Dieng Merayap (Parallax Mist Layers)
+                // Kabut Pegunungan Dieng Merayap Lembut (Parallax Mist)
                 Positioned.fill(
                   child: CustomPaint(
                     painter: _DiengParallaxMistPainter(
@@ -204,7 +208,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 ),
 
                 // ==========================================
-                // 2. LAPISAN GERBANG CANDI BENTAR (Terbuka ke Kiri & Kanan)
+                // 2. GERBANG CANDI BENTAR (Membuka ke Kiri & Kanan)
                 // ==========================================
                 // Pilar Sayap Kiri Candi Bentar (Membuka ke Kiri)
                 Positioned(
@@ -245,7 +249,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 ),
 
                 // ==========================================
-                // 3. TOMBOL PUTAR ULANG PERTARUNGAN (Top Bar)
+                // 3. BILAH ATAS: Tombol Putar Ulang Sinematik
                 // ==========================================
                 Positioned(
                   top: 0,
@@ -257,17 +261,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Tombol Putar Ulang Pertarungan Sinematik
+                          // Tombol Putar Ulang Pertarungan Sinematik (Understated Pill)
                           GestureDetector(
                             onTap: _onReplayBattleAction,
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                               decoration: BoxDecoration(
-                                color: const Color(0x66000000),
+                                color: const Color(0x55000000),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: const Color(0x33DFB76C),
-                                  width: 0.9,
+                                  width: 0.8,
                                 ),
                               ),
                               child: Row(
@@ -275,12 +279,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 children: [
                                   const Icon(
                                     Icons.replay_rounded,
-                                    size: 15,
+                                    size: 14,
                                     color: Color(0xFFDFB76C),
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    'Putar Ulang Pertarungan',
+                                    'Putar Ulang Sinematik',
                                     style: JText.sans(
                                       11.5,
                                       weight: FontWeight.w600,
@@ -292,27 +296,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             ),
                           ),
 
-                          // Tombol Lewati / Jelajahi Tamu
-                          GestureDetector(
-                            onTap: _onExploreAction,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                              decoration: BoxDecoration(
-                                color: const Color(0x44000000),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: const Color(0x22FFFFFF),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: Text(
-                                'Jelajahi',
-                                style: JText.sans(
-                                  11.5,
-                                  weight: FontWeight.w500,
-                                  color: const Color(0xCCFFFFFF),
-                                ),
-                              ),
+                          // Indikator Aksara Jawa Halus
+                          const Text(
+                            'ꦗ ꦮ ꦫ',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Color(0x88DFB76C),
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 4,
                             ),
                           ),
                         ],
@@ -322,7 +313,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 ),
 
                 // ==========================================
-                // 4. KONTEN SELAMAT DATANG EDITORIAL (Bottom Sheet UI)
+                // 4. KONTEN SELAMAT DATANG EDITORIAL (Restrained & Dominant Landscape)
                 // ==========================================
                 if (uiOpacity > 0.0)
                   Positioned(
@@ -334,17 +325,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       child: Transform.translate(
                         offset: Offset(0, uiSlideY),
                         child: Container(
-                          padding: const EdgeInsets.fromLTRB(28, 24, 28, 36),
+                          // Scrim gradien lembut tanpa kartu tebal yang menghalangi lanskap
+                          padding: const EdgeInsets.fromLTRB(28, 36, 28, 32),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
                                 Colors.transparent,
-                                const Color(0xFF09050F).withValues(alpha: 0.85),
-                                const Color(0xFF06030A),
+                                const Color(0xFF07040C).withValues(alpha: 0.45),
+                                const Color(0xFF050308).withValues(alpha: 0.90),
+                                const Color(0xFF040206).withValues(alpha: 0.98),
                               ],
-                              stops: const [0.0, 0.35, 1.0],
+                              stops: const [0.0, 0.28, 0.65, 1.0],
                             ),
                           ),
                           child: SafeArea(
@@ -352,67 +345,99 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                // Lambang Aksara Jawa dengan Pendaran Surya Emas
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0x22DFB76C),
-                                    borderRadius: BorderRadius.circular(24),
-                                    border: Border.all(
-                                      color: const Color(0x44DFB76C),
-                                      width: 0.8,
+                                // Aksara Jawa & Garis Pembatas Halus
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 22,
+                                      height: 0.8,
+                                      color: const Color(0x55DFB76C),
                                     ),
-                                  ),
-                                  child: const Text(
-                                    'ꦗ ꦮ ꦫ',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Color(0xFFDFB76C),
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 6,
+                                    const SizedBox(width: 10),
+                                    const Text(
+                                      'ꦗ ꦮ ꦫ',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFFDFB76C),
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 6,
+                                      ),
                                     ),
-                                  ),
+                                    const SizedBox(width: 10),
+                                    Container(
+                                      width: 22,
+                                      height: 0.8,
+                                      color: const Color(0x55DFB76C),
+                                    ),
+                                  ],
                                 ),
 
                                 const SizedBox(height: 14),
 
-                                // Judul Utama Editorial
+                                // Headline: "Mengenal warisan. Memahami makna."
                                 Text(
-                                  'Sugeng Rawuh ing JAVARA',
+                                  'Mengenal warisan.\nMemahami makna.',
                                   style: JText.serif(
-                                    25,
+                                    27,
                                     weight: FontWeight.w700,
                                     color: const Color(0xFFF7EFE4),
+                                  ).copyWith(
+                                    height: 1.22,
+                                    letterSpacing: -0.3,
+                                    shadows: const [
+                                      Shadow(
+                                        color: Color(0xAA000000),
+                                        blurRadius: 14,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
 
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 10),
 
-                                // Subjudul Filosofis
-                                Text(
-                                  'Gerbang Khasanah Adat, Busana, & Budaya Luhur Jawa',
-                                  style: JText.sans(
-                                    13,
-                                    color: const Color(0xFFB8A996),
-                                    weight: FontWeight.w400,
+                                // Description: "Jelajahi busana adat Jawa Tengah..."
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Text(
+                                    'Jelajahi busana adat Jawa Tengah, filosofi, sejarah, dan nilai budaya yang diwariskan lintas generasi.',
+                                    style: JText.sans(
+                                      13.5,
+                                      color: const Color(0xFFC8BDB2),
+                                      weight: FontWeight.w400,
+                                    ).copyWith(
+                                      height: 1.55,
+                                      shadows: const [
+                                        Shadow(
+                                          color: Color(0x99000000),
+                                          blurRadius: 10,
+                                          offset: Offset(0, 1),
+                                        ),
+                                      ],
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  textAlign: TextAlign.center,
                                 ),
 
-                                const SizedBox(height: 28),
+                                const SizedBox(height: 26),
 
-                                // Tombol Masuk Akun (Primary Gold)
+                                // Primary CTA: "Mulai Eksplorasi Budaya →" (Understated Antique Gold Accent)
                                 SizedBox(
                                   width: double.infinity,
                                   height: 52,
                                   child: ElevatedButton(
-                                    onPressed: _onLoginAction,
+                                    onPressed: _onPrimaryExplore,
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFDFB76C),
-                                      foregroundColor: const Color(0xFF1E1408),
-                                      elevation: 6,
-                                      shadowColor: const Color(0x66DFB76C),
+                                      backgroundColor: const Color(0xFF1E1712),
+                                      foregroundColor: const Color(0xFFF7EFE4),
+                                      elevation: 4,
+                                      shadowColor: const Color(0x44000000),
+                                      side: const BorderSide(
+                                        color: Color(0x88DFB76C),
+                                        width: 1.1,
+                                      ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(14),
                                       ),
@@ -421,18 +446,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          'Masuk Akun',
+                                          'Mulai Eksplorasi Budaya',
                                           style: JText.sans(
                                             15.5,
-                                            weight: FontWeight.w700,
-                                            color: const Color(0xFF1E1408),
-                                          ),
+                                            weight: FontWeight.w600,
+                                            color: const Color(0xFFF7EFE4),
+                                          ).copyWith(letterSpacing: 0.4),
                                         ),
                                         const SizedBox(width: 8),
                                         const Icon(
                                           Icons.arrow_forward_rounded,
-                                          size: 18,
-                                          color: Color(0xFF1E1408),
+                                          size: 17,
+                                          color: Color(0xFFDFB76C),
                                         ),
                                       ],
                                     ),
@@ -441,28 +466,59 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
                                 const SizedBox(height: 12),
 
-                                // Tombol Daftar Akun Baru (Outlined Subtle)
+                                // Secondary Action: "Masuk ke Akun Anda"
                                 SizedBox(
                                   width: double.infinity,
-                                  height: 48,
-                                  child: OutlinedButton(
-                                    onPressed: _onSignUpAction,
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: const Color(0xFFDFB76C),
-                                      side: const BorderSide(
-                                        color: Color(0x55DFB76C),
-                                        width: 1.1,
-                                      ),
+                                  height: 44,
+                                  child: TextButton(
+                                    onPressed: _onLoginAction,
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: const Color(0xFFC8BDB2),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(14),
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
                                     child: Text(
-                                      'Daftar Akun Baru',
+                                      'Masuk ke Akun Anda',
                                       style: JText.sans(
-                                        14.5,
-                                        weight: FontWeight.w600,
-                                        color: const Color(0xFFDFB76C),
+                                        14,
+                                        weight: FontWeight.w500,
+                                        color: const Color(0xFFD6CBC0),
+                                      ).copyWith(letterSpacing: 0.3),
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 6),
+
+                                // Register Text: "Belum memiliki akun? Daftar di sini"
+                                GestureDetector(
+                                  onTap: _onSignUpAction,
+                                  behavior: HitTestBehavior.opaque,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 4),
+                                    child: RichText(
+                                      textAlign: TextAlign.center,
+                                      text: TextSpan(
+                                        text: 'Belum memiliki akun? ',
+                                        style: JText.sans(
+                                          12.5,
+                                          color: const Color(0x99B8A996),
+                                          weight: FontWeight.w400,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text: 'Daftar di sini',
+                                            style: JText.sans(
+                                              12.5,
+                                              color: const Color(0xFFDFB76C),
+                                              weight: FontWeight.w600,
+                                            ).copyWith(
+                                              decoration: TextDecoration.underline,
+                                              decorationColor: const Color(0x66DFB76C),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
@@ -484,10 +540,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 }
 
 // ============================================================================
-// CUSTOM PAINTERS: Parallax Mountain Mist & Sunset Golden Glow
+// CUSTOM PAINTERS: Parallax Highland Mist & Restrained Sunset Glow
 // ============================================================================
 
-/// Melukis lapisan kabut Dataran Tinggi Dieng yang merayap di atas pantulan air
+/// Melukis lapisan kabut Dataran Tinggi Dieng yang merayap di atas air
 class _DiengParallaxMistPainter extends CustomPainter {
   _DiengParallaxMistPainter({
     required this.time,
@@ -499,33 +555,35 @@ class _DiengParallaxMistPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (openProgress <= 0.05) return;
+
     final w = size.width;
     final h = size.height;
 
     final mistPaint = Paint()
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 36)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 38)
       ..style = PaintingStyle.fill;
 
-    // Lapisan 1: Halimun melayang di sekitar dasar candi (y: h * 0.60)
-    final offset1 = math.sin(time * 2 * math.pi) * 32.0;
-    mistPaint.color = Color.fromRGBO(240, 225, 205, 0.16 * openProgress);
+    // Lapisan 1: Halimun melayang di sekitar dasar gerbang candi (y: h * 0.58)
+    final offset1 = math.sin(time * 2 * math.pi) * 30.0;
+    mistPaint.color = Color.fromRGBO(190, 180, 195, 0.15 * openProgress);
     canvas.drawOval(
       Rect.fromCenter(
-        center: Offset(w * 0.45 + offset1, h * 0.58),
-        width: w * 1.1,
-        height: 65,
+        center: Offset(w * 0.46 + offset1, h * 0.58),
+        width: w * 1.15,
+        height: 60,
       ),
       mistPaint,
     );
 
     // Lapisan 2: Kabut dingin tipis di atas permukaan pantulan air (y: h * 0.72)
-    final offset2 = math.cos(time * 2 * math.pi * 0.8) * 28.0;
-    mistPaint.color = Color.fromRGBO(210, 220, 235, 0.12 * openProgress);
+    final offset2 = math.cos(time * 2 * math.pi * 0.75) * 26.0;
+    mistPaint.color = Color.fromRGBO(155, 170, 190, 0.11 * openProgress);
     canvas.drawOval(
       Rect.fromCenter(
-        center: Offset(w * 0.55 + offset2, h * 0.72),
+        center: Offset(w * 0.54 + offset2, h * 0.72),
         width: w * 1.25,
-        height: 75,
+        height: 70,
       ),
       mistPaint,
     );
@@ -536,7 +594,7 @@ class _DiengParallaxMistPainter extends CustomPainter {
       old.time != time || old.openProgress != openProgress;
 }
 
-/// Melukis pendar keemasan lembut surya senja di balik gunung
+/// Melukis pendar keemasan bersahaja surya senja di balik gunung (muted amber & dusty rose)
 class _DiengSunsetGlowPainter extends CustomPainter {
   _DiengSunsetGlowPainter({
     required this.ambientTime,
@@ -554,17 +612,17 @@ class _DiengSunsetGlowPainter extends CustomPainter {
     final h = size.height;
 
     final sunCenter = Offset(w * 0.50, h * 0.38);
-    final pulse = 1.0 + 0.08 * math.sin(ambientTime * 2 * math.pi);
-    final glowRadius = (w * 0.65) * pulse;
+    final pulse = 1.0 + 0.06 * math.sin(ambientTime * 2 * math.pi);
+    final glowRadius = (w * 0.62) * pulse;
 
     final glowPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          Color.fromRGBO(255, 240, 200, 0.32 * openProgress),
-          Color.fromRGBO(223, 183, 108, 0.18 * openProgress),
+          Color.fromRGBO(235, 205, 160, 0.28 * openProgress), // Warm muted amber core
+          Color.fromRGBO(160, 120, 140, 0.14 * openProgress), // Dusty rose transition
           Colors.transparent,
         ],
-        stops: const [0.0, 0.45, 1.0],
+        stops: const [0.0, 0.48, 1.0],
       ).createShader(Rect.fromCircle(center: sunCenter, radius: glowRadius));
 
     canvas.drawCircle(sunCenter, glowRadius, glowPaint);
