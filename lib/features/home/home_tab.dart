@@ -275,7 +275,7 @@ class _HomeTabState extends State<HomeTab> {
                                         32,
                                         height: 1.15,
                                         weight: FontWeight.w800,
-                                        color: const Color(0xFF382315),
+                                        color: const Color(0xFFFFFBF4),
                                       ),
                                     ),
 
@@ -286,7 +286,7 @@ class _HomeTabState extends State<HomeTab> {
                                       'Eksplorasi keanggunan, filosofi, dan ragam pakaian adat warisan leluhur Jawa Tengah.',
                                       style: JText.serif(
                                         13.5,
-                                        color: const Color(0xFF5C4738),
+                                        color: const Color(0xFFD6C8B8),
                                         height: 1.4,
                                       ),
                                     ),
@@ -511,16 +511,16 @@ class _JavaraGlassPanel extends StatelessWidget {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: const Color(0xF2FFFDF9),
+            color: const Color(0xE8140E1B),
             borderRadius: BorderRadius.circular(radius),
             border: Border.all(
-              color: borderColor ?? const Color(0x28B08D57),
+              color: borderColor ?? const Color(0x38DFB76C),
               width: 1.0,
             ),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x10382315),
-                blurRadius: 8,
+                color: Color(0x33000000),
+                blurRadius: 6,
                 offset: Offset(0, 2),
               ),
             ],
@@ -591,27 +591,127 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final w = size.width;
+
+    final scrollRatio = (_smoothScroll / 650.0).clamp(0.0, 1.2);
+
+    // KINEMATIKA GERAK TANGAN MUDRA BUDDHA (SCROLL-DRIVEN CORNER TO CENTER CLAPPING GESTURE)
+    // 0.0 = tangan di pojok kiri & kanan membingkai candi secara lega (tidak menutupi tengah)
+    // 1.0 = kedua telapak tangan meluncur ke tengah & menyatu erat seperti menepuk tangan (Anjali Mudra / Sembah suci)
+    final mudraProgress = (_smoothScroll / 300.0).clamp(0.0, 1.0);
+    // Kurva dinamis: diawali gerak lembut dari pojok lalu berakselerasi merapat mantap
+    final mudraCurve = Curves.easeInOutCubic.transform(mudraProgress);
+
+    // Dimensi dan proporsi tangan fotorealistik
+    final handHeight = (w * 0.74).clamp(270.0, 380.0);
+    final leftHandWidth = handHeight * (682.0 / 735.0);
+    final rightHandWidth = handHeight * (694.0 / 735.0);
+    final centerX = w / 2;
+
+    // Posisi awal di pojokan (Corner Placement):
+    // Tangan kiri di pojok kiri bawah, tangan kanan di pojok kanan bawah
+    // Area tengah layar terbuka 100% lega memperlihatkan Candi Borobudur & Surya Mandala
+    final leftOpenX = -leftHandWidth * 0.60;
+    final rightOpenX = w - (rightHandWidth * 0.40);
+
+    // Posisi akhir saat menyatu di tengah (Closed Clapping Meeting Point):
+    // Bertemu tepat di garis tengah centerX dengan sentuhan erat 2px
+    final leftClosedX = centerX - leftHandWidth + 2.0;
+    final rightClosedX = centerX - 2.0;
+
+    final leftTargetX = ui.lerpDouble(leftOpenX, leftClosedX, mudraCurve)! +
+        (_smoothPointerX * 8.0);
+    final rightTargetX = ui.lerpDouble(rightOpenX, rightClosedX, mudraCurve)! +
+        (_smoothPointerX * 8.0);
+
+    // Parallax posisi vertikal tangan:
+    // Saat di pojok (180.0) bersiap di bawah, lalu naik anggun ke dada (118.0) saat menepuk/menyatu
+    final handsY = ui.lerpDouble(180.0, 118.0, mudraCurve)! -
+        (_smoothScroll * 0.16) +
+        (_smoothPointerY * 12.0);
+
+    // Rotasi 3D spasial telapak tangan:
+    // Dari miring anggun di pojok luar (menghadap ke dalam) menuju tegak sejajar saat menyatu
+    final leftHandYaw =
+        ui.lerpDouble(-0.52, 0.015, mudraCurve)! + (_smoothPointerX * 0.05);
+    final leftHandPitch = (_smoothPointerY * -0.05) + (scrollRatio * 0.04);
+    final leftHandRoll =
+        ui.lerpDouble(-0.20, 0.0, mudraCurve)! + (_smoothPointerX * 0.02);
+
+    final rightHandYaw =
+        ui.lerpDouble(0.52, -0.015, mudraCurve)! + (_smoothPointerX * 0.05);
+    final rightHandPitch = (_smoothPointerY * -0.05) + (scrollRatio * 0.04);
+    final rightHandRoll =
+        ui.lerpDouble(0.20, 0.0, mudraCurve)! + (_smoothPointerX * 0.02);
+
+    final leftHandMatrix = Matrix4.identity()
+      ..setEntry(3, 2, 0.0016)
+      ..rotateX(leftHandPitch)
+      ..rotateY(leftHandYaw)
+      ..rotateZ(leftHandRoll);
+
+    final rightHandMatrix = Matrix4.identity()
+      ..setEntry(3, 2, 0.0016)
+      ..rotateX(rightHandPitch)
+      ..rotateY(rightHandYaw)
+      ..rotateZ(rightHandRoll);
+
+    final handsOpacity =
+        (1.0 - ((_smoothScroll - 500.0) / 450.0)).clamp(0.40, 1.0);
+
+    // DOLLY ZOOM SINEMATIK CANDI:
+    final ambientBreath = math.sin(_elapsedTime * 1.3) * 0.012;
+    final zoom = 1.0 + (scrollRatio * 0.45) + ambientBreath;
+
+    // Sudut 3D Spasial Candi (Pitch, Yaw, Roll):
+    final pitch =
+        (scrollRatio * 0.12) +
+        (_smoothPointerY * -0.05) +
+        (math.sin(_elapsedTime * 1.1) * 0.010);
+    final yaw =
+        (_smoothPointerX * 0.08) + (math.sin(_smoothScroll * 0.0035) * 0.025);
+    final roll =
+        (_smoothPointerX * 0.015) + (math.sin(_elapsedTime * 0.8) * 0.006);
+
+    // Translasi Vertikal & Horizontal Parallax Candi:
+    final translateY =
+        -_smoothScroll * 0.28 + (math.sin(_elapsedTime * 1.5) * 5.0);
+    final translateX =
+        (_smoothPointerX * 16.0) + (math.sin(_smoothScroll * 0.004) * 10.0);
+
+    final templeMatrix = Matrix4.identity()
+      ..setEntry(3, 2, 0.0016)
+      // ignore: deprecated_member_use
+      ..translate(translateX, translateY, 0.0)
+      // ignore: deprecated_member_use
+      ..scale(zoom, zoom, 1.0)
+      ..rotateX(pitch)
+      ..rotateY(yaw)
+      ..rotateZ(roll);
+
     return Stack(
       fit: StackFit.expand,
       children: [
-        // --- 1. LATAR HANGAT MORI SOGA ADILUHUNG (WARM IVORY HERITAGE) ---
+        // --- 1. LANGIT OBSIDIAN DUSK MISTIS (THREEUI KAGE STYLE) ---
         Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFFFAF5EC),
-                Color(0xFFF4ECE0),
-                Color(0xFFEBDBC7),
-                Color(0xFFFAF5EC),
+                Color(0xFF040206), // Puncak langit malam obsidian
+                Color(0xFF0D0814),
+                Color(0xFF1B0E1E), // Atmospheric dusk
+                Color(0xFF2E1715), // Warm volcanic sunset horizon
+                Color(0xFF07040B), // Deep ground
               ],
-              stops: [0.0, 0.35, 0.70, 1.0],
+              stops: [0.0, 0.25, 0.55, 0.82, 1.0],
             ),
           ),
         ),
 
-        // --- 2. WATERMARK TIPOGRAFI ARSITEKTURAL RAKSASA ("J A V A R A") ---
+        // --- 2. WATERMARK TIPOGRAFI ARSITEKTURAL RAKSASA (KAGE STYLE: "J A V A R A") ---
         Positioned.fill(
           child: _JavaraArchitecturalWatermark(
             scrollOffset: _smoothScroll,
@@ -619,7 +719,7 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           ),
         ),
 
-        // --- 3. SURYA MANDALA AKASA (GOLD RAYS & WARM AMBIENT CORONA) ---
+        // --- 3. SURYA MANDALA AKASA (GOD RAYS & RADIANT GOLD CORONA) ---
         Positioned.fill(
           child: CustomPaint(
             painter: _JavaraSuryaMandalaPainter(
@@ -630,7 +730,107 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           ),
         ),
 
-        // --- 4. KABUT VOLUMETRIK & PARTIKEL KUNANG-KUNANG EMAS WASTRA ---
+        // --- 4. MODEL 3D CANDI BOROBUDUR SINEMATIK (OCTANE RENDER QUALITY) ---
+        Positioned(
+          top: -20,
+          left: -w * 0.12,
+          right: -w * 0.12,
+          bottom: -70,
+          child: Transform(
+            transform: templeMatrix,
+            alignment: Alignment.center,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  'assets/images/candi_3d_cinema.jpg',
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
+                  excludeFromSemantics: true,
+                ),
+                Image.asset(
+                  'assets/images/candi_3d_cutout.png',
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
+                  excludeFromSemantics: true,
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // --- 5. AURA ENERGI SUCI ANJALI MUDRA (BLOOM & SACRED RIPPLES DI TITIK TEMU PALM) ---
+        Positioned.fill(
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: _AnjaliMudraEnergyPainter(
+                contactPoint: Offset(
+                  centerX + (_smoothPointerX * 8.0),
+                  handsY + (handHeight * 0.44),
+                ),
+                mudraCurve: mudraCurve,
+                elapsedTime: _elapsedTime,
+              ),
+            ),
+          ),
+        ),
+
+        // --- 6. TANGAN KIRI BUDDHA 3D (MENUTUP KE TENGAH SEIRING SCROLL) ---
+        Positioned(
+          top: handsY,
+          left: leftTargetX,
+          width: leftHandWidth,
+          height: handHeight,
+          child: IgnorePointer(
+            child: Opacity(
+              opacity: handsOpacity,
+              child: Transform(
+                transform: leftHandMatrix,
+                alignment: Alignment.centerRight,
+                child: Image.asset(
+                  'assets/images/buddha_hand_left.png',
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
+                  excludeFromSemantics: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        // --- 7. TANGAN KANAN BUDDHA 3D (MENUTUP KE TENGAH SEIRING SCROLL) ---
+        Positioned(
+          top: handsY,
+          left: rightTargetX,
+          width: rightHandWidth,
+          height: handHeight,
+          child: IgnorePointer(
+            child: Opacity(
+              opacity: handsOpacity,
+              child: Transform(
+                transform: rightHandMatrix,
+                alignment: Alignment.centerLeft,
+                child: Image.asset(
+                  'assets/images/buddha_hand_right.png',
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
+                  excludeFromSemantics: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        // --- 8. PIN KURATORIAL 3D MENGAMBANG (THREEUI KAGE FLOATING BADGES) ---
+        Positioned.fill(
+          child: _Javara3DFloatingBadges(
+            scrollOffset: _smoothScroll,
+            pointerX: _smoothPointerX,
+            pointerY: _smoothPointerY,
+          ),
+        ),
+
+        // --- 9. KABUT VOLUMETRIK & 32 PARTIKEL KUNANG-KUNANG EMAS ---
         Positioned.fill(
           child: IgnorePointer(
             child: CustomPaint(
@@ -643,7 +843,7 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           ),
         ),
 
-        // --- 5. VIGNETTE PEREDUP BAWAH LEMBUT ---
+        // --- 10. VIGNETTE PEREDUP BAWAH (MEMASTIKAN KONTEN TERBACA JELAS) ---
         Positioned.fill(
           child: IgnorePointer(
             child: DecoratedBox(
@@ -652,11 +852,12 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
+                    const Color(0x22000000),
                     Colors.transparent,
-                    const Color(0x064A2D19),
-                    const Color(0x184A2D19),
+                    const Color(0x6607040B),
+                    const Color(0xF507040B),
                   ],
-                  stops: const [0.0, 0.65, 1.0],
+                  stops: const [0.0, 0.20, 0.60, 1.0],
                 ),
               ),
             ),
@@ -936,6 +1137,196 @@ class _JavaraAtmospherePainter extends CustomPainter {
   bool shouldRepaint(covariant _JavaraAtmospherePainter oldDelegate) => true;
 }
 
+/// Melukis Pendaran Aura Emas Suci & Gelombang Anjali Mudra saat telapak tangan bertemu
+class _AnjaliMudraEnergyPainter extends CustomPainter {
+  _AnjaliMudraEnergyPainter({
+    required this.contactPoint,
+    required this.mudraCurve,
+    required this.elapsedTime,
+  });
+
+  final Offset contactPoint;
+  final double mudraCurve;
+  final double elapsedTime;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (mudraCurve < 0.60) return;
+
+    // Intensitas bertahap dari 0.0 sampai 1.0 seiring telapak tangan merapat menepuk
+    final intensity = ((mudraCurve - 0.60) / 0.40).clamp(0.0, 1.0);
+
+    // 1. Pendaran Inti Emas Luhur (Golden Prana Halo Core)
+    final pulse = math.sin(elapsedTime * 3.5) * 6.0;
+    final coreRadius = (42.0 + pulse) * intensity;
+    final corePaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFFFFFBE8).withValues(alpha: 0.95 * intensity),
+          const Color(0xFFFFDF9E).withValues(alpha: 0.75 * intensity),
+          const Color(0xFFFFB84D).withValues(alpha: 0.40 * intensity),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.35, 0.70, 1.0],
+      ).createShader(Rect.fromCircle(center: contactPoint, radius: coreRadius * 2.0));
+
+    canvas.drawCircle(contactPoint, coreRadius * 2.0, corePaint);
+
+    // 2. Lingkaran Gelombang Suci Berkembang (Concentric Sacred Ripples)
+    final ripplePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    for (int i = 0; i < 3; i++) {
+      final phase = (elapsedTime * 1.2 + (i * 0.33)) % 1.0;
+      final r = (20.0 + phase * 85.0) * intensity;
+      final alpha = ((1.0 - phase) * 0.45 * intensity).clamp(0.0, 1.0);
+      ripplePaint.color = const Color(0xFFFFD700).withValues(alpha: alpha);
+      canvas.drawCircle(contactPoint, r, ripplePaint);
+    }
+
+    // 3. Kilau Bintang Berlian 8 Arah (Prabha Starburst) saat tangan hampir/sudah menutup sempurna
+    if (intensity > 0.60) {
+      final starIntensity = ((intensity - 0.60) / 0.40);
+      final starPaint = Paint()
+        ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.90 * starIntensity)
+        ..style = PaintingStyle.fill;
+
+      final longRay = (36.0 + math.sin(elapsedTime * 6.0) * 7.0) * starIntensity;
+      final shortRay = longRay * 0.34;
+
+      final path = Path()
+        ..moveTo(contactPoint.dx, contactPoint.dy - longRay)
+        ..quadraticBezierTo(contactPoint.dx, contactPoint.dy, contactPoint.dx + shortRay, contactPoint.dy - shortRay)
+        ..quadraticBezierTo(contactPoint.dx, contactPoint.dy, contactPoint.dx + longRay, contactPoint.dy)
+        ..quadraticBezierTo(contactPoint.dx, contactPoint.dy, contactPoint.dx + shortRay, contactPoint.dy + shortRay)
+        ..quadraticBezierTo(contactPoint.dx, contactPoint.dy, contactPoint.dx, contactPoint.dy + longRay)
+        ..quadraticBezierTo(contactPoint.dx, contactPoint.dy, contactPoint.dx - shortRay, contactPoint.dy + shortRay)
+        ..quadraticBezierTo(contactPoint.dx, contactPoint.dy, contactPoint.dx - longRay, contactPoint.dy)
+        ..quadraticBezierTo(contactPoint.dx, contactPoint.dy, contactPoint.dx - shortRay, contactPoint.dy - shortRay)
+        ..close();
+
+      canvas.drawPath(path, starPaint);
+
+      // Pusat kilau intan putih murni
+      final diamondCore = Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: 0.95 * starIntensity);
+      canvas.drawCircle(contactPoint, 3.5 * starIntensity, diamondCore);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _AnjaliMudraEnergyPainter oldDelegate) => true;
+}
+
+/// Pin Kuratorial 3D Mengambang di Sekitar Candi (ThreeUI Kage Floating Badges)
+class _Javara3DFloatingBadges extends StatelessWidget {
+  const _Javara3DFloatingBadges({
+    required this.scrollOffset,
+    required this.pointerX,
+    required this.pointerY,
+  });
+
+  final double scrollOffset;
+  final double pointerX;
+  final double pointerY;
+
+  @override
+  Widget build(BuildContext context) {
+    if (scrollOffset > 380) return const SizedBox.shrink();
+    final fade = (1.0 - (scrollOffset / 320.0)).clamp(0.0, 1.0);
+
+    return Opacity(
+      opacity: fade,
+      child: Stack(
+        children: [
+          Positioned(
+            top: 240 - (scrollOffset * 0.22) + (pointerY * 8),
+            left: 20 + (pointerX * 10),
+            child: const _BadgePill(
+              code: 'VIII',
+              title: 'DINASTI SYAILENDRA',
+              subtitle: 'Abad ke-8 Masehi',
+            ),
+          ),
+          Positioned(
+            top: 290 - (scrollOffset * 0.18) - (pointerY * 6),
+            right: 20 - (pointerX * 10),
+            child: const _BadgePill(
+              code: '2.672',
+              title: 'PANEL RELIEF',
+              subtitle: 'Maharupa Andesit',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BadgePill extends StatelessWidget {
+  const _BadgePill({
+    required this.code,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String code;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xB8120B1A),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0x55DFB76C), width: 0.8),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 8,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+            decoration: BoxDecoration(
+              color: JColors.gold.withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Text(
+              code,
+              style: JText.serif(8.5, weight: FontWeight.w800, color: const Color(0xFFFFDF9E)),
+            ),
+          ),
+          const SizedBox(width: 7),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: JText.serif(8.5, weight: FontWeight.w700, color: Colors.white),
+              ),
+              Text(
+                subtitle,
+                style: JText.serif(7.5, color: const Color(0xFFC4B4A2)),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
 /// SEARCH BAR JAVARA OBSIDIAN GLASS
 class _SearchBar extends StatelessWidget {
   const _SearchBar({required this.controller, required this.onChanged});
@@ -952,14 +1343,14 @@ class _SearchBar extends StatelessWidget {
         controller: controller,
         onChanged: onChanged,
         textInputAction: TextInputAction.search,
-        style: JText.serif(14, color: const Color(0xFF382315)),
-        cursorColor: const Color(0xFFB08D57),
+        style: JText.serif(14, color: Colors.white),
+        cursorColor: const Color(0xFFFFD700),
         decoration: InputDecoration(
           hintText: 'Cari busana, kebaya, beskap, batik, jarik...',
-          hintStyle: JText.serif(14, color: const Color(0xFF7D6C5D)),
+          hintStyle: JText.serif(14, color: const Color(0xFFA69584)),
           prefixIcon: const Icon(
             Icons.search_rounded,
-            color: Color(0xFFB08D57),
+            color: Color(0xFFDFB76C),
             size: 22,
           ),
           suffixIcon: ValueListenableBuilder<TextEditingValue>(
