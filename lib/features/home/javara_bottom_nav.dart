@@ -42,11 +42,11 @@ class JavaraBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Palet warna mewah khas JAVARA — Warm Ivory & Rich Sogan Brown
-    const activeTextColor = Color(0xFF382315);
-    const inactiveTextColor = Color(0xFF7D6C5D);
-    const activeIconColor = Color(0xFF382315);
-    const inactiveIconColor = Color(0xFF8C7B6D);
+    // Palet warna mewah khas JAVARA (selalu aktif di semua tab sesuai preferensi estetika tab Kuis)
+    const activeTextColor = Color(0xFFFFDF9E);
+    const inactiveTextColor = Color(0xFFA39485);
+    const activeIconColor = Color(0xFFFFDF9E);
+    const inactiveIconColor = Color(0xFF8F8073);
 
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
@@ -56,16 +56,16 @@ class JavaraBottomNav extends StatelessWidget {
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
           decoration: const BoxDecoration(
-            color: Color(0xF8FAF6EE),
+            color: Color(0xEB14100D),
             border: Border(
               top: BorderSide(
-                color: Color(0x33B08D57),
+                color: Color(0x3DDFB76C),
                 width: 1.0,
               ),
             ),
             boxShadow: [
               BoxShadow(
-                color: Color(0x14382315),
+                color: Color(0x60000000),
                 blurRadius: 18,
                 offset: Offset(0, -3),
               ),
@@ -153,7 +153,7 @@ class JavaraBottomNav extends StatelessWidget {
                     ? const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [Color(0x35B08D57), Color(0x18B08D57)],
+                        colors: [Color(0x45DFB76C), Color(0x20DFB76C)],
                       )
                     : null,
                 color: isSelected
@@ -161,14 +161,14 @@ class JavaraBottomNav extends StatelessWidget {
                     : Colors.transparent, // Bersih & elegan saat tidak dipilih seperti Image 1
                 border: isSelected
                     ? Border.all(
-                        color: const Color(0x55B08D57),
+                        color: const Color(0x75DFB76C),
                         width: 0.9,
                       )
                     : null,
                 boxShadow: isSelected
                     ? const [
                         BoxShadow(
-                          color: Color(0x1EB08D57),
+                          color: Color(0x35DFB76C),
                           blurRadius: 6,
                           offset: Offset(0, 1),
                         ),
@@ -220,18 +220,18 @@ class JavaraBottomNav extends StatelessWidget {
   }) {
     final item = items[itemIndex];
 
-    // Warna kapsul pill adaptif — Deep Sogan Brown pill dengan aksen emas kencana
+    // Warna kapsul pill adaptif sesuai tema & status aktif (Dark Gold Kuis style)
     final pillBg = isSelected
-        ? const Color(0xFF382315)
-        : const Color(0x1F382315);
+        ? const Color(0x55DFB76C)
+        : const Color(0x25DFB76C);
 
     final pillBorder = isSelected
-        ? const Color(0xFFB08D57)
-        : const Color(0x33B08D57);
+        ? const Color(0x99DFB76C)
+        : const Color(0x45DFB76C);
 
     final pillTextColor = isSelected
         ? const Color(0xFFFFDF9E)
-        : const Color(0xFF5A4434);
+        : const Color(0xFFD4C4B4);
 
     return Semantics(
       button: true,
@@ -259,13 +259,13 @@ class JavaraBottomNav extends StatelessWidget {
                 boxShadow: [
                   if (isSelected)
                     const BoxShadow(
-                      color: Color(0x35382315),
+                      color: Color(0x40DFB76C),
                       blurRadius: 7,
                       offset: Offset(0, 2),
                     )
                   else
                     const BoxShadow(
-                      color: Color(0x0C382315),
+                      color: Color(0x20000000),
                       blurRadius: 4,
                       offset: Offset(0, 1),
                     ),
