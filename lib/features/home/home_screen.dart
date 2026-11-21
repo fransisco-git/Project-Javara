@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme.dart';
-import '../explore/explore_tab.dart';
+import '../fashion/screens/clothing_catalog_screen.dart';
 import '../fashion/screens/sinau_busana_screen.dart';
 import '../fashion/screens/wardrobe_tab.dart';
 import 'home_tab.dart';
 import 'javara_bottom_nav.dart';
 import 'profile_tab.dart';
 
-/// Kerangka utama setelah login: 5 tab + bar navigasi.
-/// Tab: Beranda · Jelajah · Wardrobe (kapsul pusat) · Kuis · Profil
+/// Kerangka utama setelah login: 5 tab fokus busana Jawa Tengah + bar navigasi.
+/// Tab: Beranda · Katalog · Studio (kapsul pusat) · Pustaka · Profil
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -28,20 +28,20 @@ class _HomeScreenState extends State<HomeScreen> {
       inactiveIcon: Icons.home_outlined,
     ),
     NavItemData(
-      label: 'Jelajah',
-      activeIcon: Icons.explore_rounded,
-      inactiveIcon: Icons.explore_outlined,
+      label: 'Katalog',
+      activeIcon: Icons.storefront_rounded,
+      inactiveIcon: Icons.storefront_outlined,
     ),
     NavItemData(
-      label: 'Wardrobe',
+      label: 'Studio',
       activeIcon: Icons.checkroom_rounded,
       inactiveIcon: Icons.checkroom_outlined,
       isPill: true,
     ),
     NavItemData(
-      label: 'Kuis',
-      activeIcon: Icons.school_rounded,
-      inactiveIcon: Icons.school_outlined,
+      label: 'Pustaka',
+      activeIcon: Icons.menu_book_rounded,
+      inactiveIcon: Icons.menu_book_outlined,
     ),
     NavItemData(
       label: 'Profil',
@@ -65,8 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark.copyWith(
           statusBarColor: Colors.transparent,
-          systemNavigationBarColor: const Color(0xFF14100D),
-          systemNavigationBarIconBrightness: Brightness.light,
+          systemNavigationBarColor: const Color(0xFFFAF6EE),
+          systemNavigationBarIconBrightness: Brightness.dark,
         ),
         child: Scaffold(
           extendBody: true,
@@ -74,10 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
             index: _index,
             children: [
               HomeTab(onOpenTab: (i) => setState(() => _index = i)),
-              JBackground(
-                variant: HeritageBackgroundVariant.explore,
-                child: ExploreTab(onOpenTab: (i) => setState(() => _index = i)),
-              ),
+              const ClothingCatalogScreen(isTab: true),
               const JBackground(
                 variant: HeritageBackgroundVariant.wardrobe,
                 child: WardrobeTab(),

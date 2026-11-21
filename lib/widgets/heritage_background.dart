@@ -66,34 +66,16 @@ class JavaraHeritageBackground extends StatelessWidget {
   }
 
   Gradient _getVignetteGradient(HeritageBackgroundVariant v) {
-    switch (v) {
-      case HeritageBackgroundVariant.wardrobe:
-      case HeritageBackgroundVariant.kuis:
-      case HeritageBackgroundVariant.darkVelvet:
-        return const RadialGradient(
-          center: Alignment(0.0, -0.3),
-          radius: 1.3,
-          colors: [
-            Colors.transparent,
-            Color(0x22000000),
-            Color(0x66080504),
-          ],
-          stops: [0.4, 0.75, 1.0],
-        );
-      case HeritageBackgroundVariant.explore:
-      case HeritageBackgroundVariant.profile:
-      case HeritageBackgroundVariant.warmParchment:
-        return const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.transparent,
-            Color(0x054A2D19),
-            Color(0x184A2D19),
-          ],
-          stops: [0.6, 0.85, 1.0],
-        );
-    }
+    return const LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Colors.transparent,
+        Color(0x064A2D19),
+        Color(0x144A2D19),
+      ],
+      stops: [0.6, 0.85, 1.0],
+    );
   }
 }
 
@@ -172,18 +154,18 @@ class _BaseGradientLayer extends StatelessWidget {
         );
 
       case HeritageBackgroundVariant.wardrobe:
-        // Gradasi studio wardrobe: Pencahayaan panggung museum busana adat privat.
-        // Sorot lampu hangat di atas rel gantungan meluruh ke lantai obsidian gelap.
+        // Gradasi studio wardrobe: Pencahayaan panggung museum busana adat yang hangat dan terang.
+        // Nuansa krem sutra mori, soga muda keraton, dengan pendaran keemasan adiluhung.
         return Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF281C15), // Cokelat kayu jati tua berpendar
-                Color(0xFF1E1510), // Bayangan soga malam
-                Color(0xFF150F0C), // Beludru gelap
-                Color(0xFF0F0B09), // Obsidian pekat dasar
+                Color(0xFFFAF6EE), // Mori gading
+                Color(0xFFF3ECE0), // Soga muda adiluhung
+                Color(0xFFEBDBC7), // Serat kain alami
+                Color(0xFFE2CFAF), // Pasir keemasan
               ],
               stops: [0.0, 0.30, 0.70, 1.0],
             ),
@@ -194,8 +176,8 @@ class _BaseGradientLayer extends StatelessWidget {
                 center: Alignment(0.0, -0.65),
                 radius: 1.3,
                 colors: [
-                  Color(0x35E4C590), // Sorot lampu emas hangat ke gantungan busana
-                  Color(0x188C5E33), // Pendaran kayu jati
+                  Color(0x35DFB76C), // Sorot lampu emas hangat ke gantungan busana
+                  Color(0x18C29D5E), // Pendaran soga keemasan
                   Colors.transparent,
                 ],
                 stops: [0.0, 0.45, 1.0],
@@ -205,17 +187,17 @@ class _BaseGradientLayer extends StatelessWidget {
         );
 
       case HeritageBackgroundVariant.kuis:
-        // Gradasi kuis & sinau: Suasana hening dan khidmat sanggar keraton.
+        // Gradasi kuis & sinau: Suasana hening dan khidmat sanggar keraton yang terang & jernih.
         return Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF241913), // Hangatnya bilik pustaka keraton
-                Color(0xFF1C130E),
-                Color(0xFF140D0A),
-                Color(0xFF0D0907),
+                Color(0xFFF9F4EB), // Pustaka gading
+                Color(0xFFF1E6D4), // Naskah lontar hangat
+                Color(0xFFE8D7C0), // Serat kayu jati terang
+                Color(0xFFDFCCB1), // Soga krem klasik
               ],
               stops: [0.0, 0.35, 0.75, 1.0],
             ),
@@ -227,7 +209,7 @@ class _BaseGradientLayer extends StatelessWidget {
                 radius: 1.2,
                 colors: [
                   Color(0x28DFB76C), // Semburat cahaya lentera emas
-                  Color(0x0C7A4F2A),
+                  Color(0x0CC59B58),
                   Colors.transparent,
                 ],
                 stops: [0.0, 0.5, 1.0],
@@ -258,9 +240,9 @@ class _BaseGradientLayer extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF221711),
-                Color(0xFF18100C),
-                Color(0xFF100A07),
+                Color(0xFFF7F2E9),
+                Color(0xFFEDE2D1),
+                Color(0xFFE4D3BD),
               ],
             ),
           ),
@@ -279,14 +261,8 @@ class _JavaneseKawungWatermarkPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final isDark = variant == HeritageBackgroundVariant.wardrobe ||
-        variant == HeritageBackgroundVariant.kuis ||
-        variant == HeritageBackgroundVariant.darkVelvet;
-
-    // Warna garis motif yang disesuaikan dengan latar
-    final strokeColor = isDark
-        ? const Color(0xFFDFB76C).withValues(alpha: 0.038) // Emas halus di latar gelap
-        : const Color(0xFF6E4825).withValues(alpha: 0.032); // Cokelat soga halus di latar terang
+    // Seluruh varian konsisten pada tema terang/krem warisan budaya Jawa Tengah
+    final strokeColor = const Color(0xFF6E4825).withValues(alpha: 0.032); // Cokelat soga halus di latar terang
 
     final paint = Paint()
       ..color = strokeColor

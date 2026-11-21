@@ -133,12 +133,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             // Kurva pembukaan gerbang: kelembaman batu andesit alami (easeInOutCubic)
             final openProgress = Curves.easeInOutCubic.transform(gateT);
 
-            // Jarak geser gerbang dari titik temu tengah ke arah luar
-            final maxShift = w * 0.45;
+            // Jarak geser gerbang dari titik temu tengah ke arah luar (halus dan proporsional)
+            final maxShift = w * 0.42;
             final gateShift = maxShift * openProgress;
 
-            // Rotasi perspektif 3D halus saat gerbang membuka
-            final gateRotateY = 0.11 * openProgress;
+            // Opasitas gerbang: meluruh lembut saat membuka agar tidak mengalami clipping di tepi layar
+            final gateOpacity = (1.0 - (openProgress * 1.18)).clamp(0.0, 1.0);
 
             // Transisi kemunculan UI editorial (mulai aktif saat gerbang terbuka 45%)
             double uiOpacity = 0.0;
@@ -203,45 +203,41 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 ),
 
                 // ==========================================
-                // 2. GERBANG CANDI BENTAR (Membuka ke Kiri & Kanan)
+                // 2. GERBANG CANDI BENTAR (Membuka ke Kiri & Kanan Tanpa Stretching & Clipping)
                 // ==========================================
-                // Pilar Sayap Kiri Candi Bentar (Membuka ke Kiri)
-                Positioned(
-                  left: (w * 0.50 - gateWidth) - gateShift,
-                  top: h * 0.08,
-                  width: gateWidth,
-                  height: gateHeight,
-                  child: Transform(
-                    alignment: Alignment.centerRight,
-                    transform: Matrix4.identity()
-                      ..setEntry(3, 2, 0.001)
-                      ..rotateY(-gateRotateY),
-                    child: Image.asset(
-                      'assets/images/user_gate_left_cut.png',
-                      fit: BoxFit.contain,
-                      alignment: Alignment.centerRight,
+                if (gateOpacity > 0.0) ...[
+                  // Pilar Sayap Kiri Candi Bentar (Membuka ke Kiri dengan Transisi Halus)
+                  Positioned(
+                    left: (w * 0.50 - gateWidth) - gateShift,
+                    top: h * 0.08,
+                    width: gateWidth,
+                    height: gateHeight,
+                    child: Opacity(
+                      opacity: gateOpacity,
+                      child: Image.asset(
+                        'assets/images/user_gate_left_cut.png',
+                        fit: BoxFit.contain,
+                        alignment: Alignment.centerRight,
+                      ),
                     ),
                   ),
-                ),
 
-                // Pilar Sayap Kanan Candi Bentar (Membuka ke Kanan)
-                Positioned(
-                  left: (w * 0.50) + gateShift,
-                  top: h * 0.08,
-                  width: gateWidth,
-                  height: gateHeight,
-                  child: Transform(
-                    alignment: Alignment.centerLeft,
-                    transform: Matrix4.identity()
-                      ..setEntry(3, 2, 0.001)
-                      ..rotateY(gateRotateY),
-                    child: Image.asset(
-                      'assets/images/user_gate_right_cut.png',
-                      fit: BoxFit.contain,
-                      alignment: Alignment.centerLeft,
+                  // Pilar Sayap Kanan Candi Bentar (Membuka ke Kanan dengan Transisi Halus)
+                  Positioned(
+                    left: (w * 0.50) + gateShift,
+                    top: h * 0.08,
+                    width: gateWidth,
+                    height: gateHeight,
+                    child: Opacity(
+                      opacity: gateOpacity,
+                      child: Image.asset(
+                        'assets/images/user_gate_right_cut.png',
+                        fit: BoxFit.contain,
+                        alignment: Alignment.centerLeft,
+                      ),
                     ),
                   ),
-                ),
+                ],
 
                 // ==========================================
                 // 3. BILAH ATAS: Indikator Aksara Jawa Halus

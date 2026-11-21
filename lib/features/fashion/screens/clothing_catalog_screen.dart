@@ -16,11 +16,13 @@ import 'javanese_wardrobe_screen.dart';
 class ClothingCatalogScreen extends StatefulWidget {
   const ClothingCatalogScreen({
     super.key,
+    this.isTab = false,
     this.initialCategory,
     this.initialGender,
     this.initialRegion,
   });
 
+  final bool isTab;
   final ClothingCategory? initialCategory;
   final GenderTarget? initialGender;
   final TraditionRegion? initialRegion;
@@ -228,17 +230,23 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           CircleAvatar(
-            backgroundColor: const Color(0x33DFB76C),
+            backgroundColor: const Color(0x20B08D57),
             radius: 18,
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              icon: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                size: 16,
-                color: Color(0xFFFFDF9E),
-              ),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
+            child: widget.isTab
+                ? const Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 16,
+                    color: Color(0xFF382315),
+                  )
+                : IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 16,
+                      color: Color(0xFF382315),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
           ),
           Column(
             children: [
@@ -247,7 +255,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                 style: JText.editorial(
                   18,
                   weight: FontWeight.w700,
-                  color: const Color(0xFFFFDF9E),
+                  color: const Color(0xFF382315),
                   letterSpacing: 1.5,
                 ),
               ),
@@ -255,7 +263,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                 'ꦏꦠꦭꦺꦴꦒ꧀ꦧꦸꦱꦤꦗꦮꦶ',
                 style: TextStyle(
                   fontSize: 10,
-                  color: Color(0xFFC7B7A6),
+                  color: Color(0xFF7D6C5D),
                   letterSpacing: 0.8,
                 ),
               ),
@@ -263,14 +271,14 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
           ),
           // Tombol Buka Lemari Virtual Wardrobe 3D
           CircleAvatar(
-            backgroundColor: const Color(0x33DFB76C),
+            backgroundColor: const Color(0x20B08D57),
             radius: 18,
             child: IconButton(
               padding: EdgeInsets.zero,
               icon: const Icon(
                 Icons.checkroom_rounded,
                 size: 18,
-                color: Color(0xFFFFDF9E),
+                color: Color(0xFF382315),
               ),
               onPressed: () {
                 Navigator.of(context).push(
@@ -297,10 +305,10 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                 child: Container(
                   height: 44,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF221A15),
+                    color: const Color(0xFFFFFDF9),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0x44DFB76C),
+                      color: const Color(0x33B08D57),
                       width: 0.8,
                     ),
                   ),
@@ -309,25 +317,25 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                     onChanged: (val) => setState(() => _searchQuery = val.trim()),
                     style: const TextStyle(
                       fontSize: 13,
-                      color: Color(0xFFFAF6F0),
+                      color: Color(0xFF382315),
                     ),
                     decoration: InputDecoration(
                       hintText: 'Cari busana, makna, serat, wilayah...',
                       hintStyle: const TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF8F8073),
+                        color: Color(0xFF8C7B6D),
                       ),
                       prefixIcon: const Icon(
                         Icons.search_rounded,
                         size: 18,
-                        color: Color(0xFFDFB76C),
+                        color: Color(0xFFB08D57),
                       ),
                       suffixIcon: _searchQuery.isNotEmpty
                           ? IconButton(
                               icon: const Icon(
                                 Icons.close_rounded,
                                 size: 16,
-                                color: Color(0xFFDFB76C),
+                                color: Color(0xFFB08D57),
                               ),
                               onPressed: () {
                                 _searchController.clear();
@@ -352,11 +360,11 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                     width: 44,
                     decoration: BoxDecoration(
                       color: _activeFilterCount > 0
-                          ? const Color(0xFFDFB76C)
-                          : const Color(0xFF221A15),
+                          ? const Color(0xFFB08D57)
+                          : const Color(0xFFFFFDF9),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: const Color(0x66DFB76C),
+                        color: const Color(0x33B08D57),
                         width: 0.8,
                       ),
                     ),
@@ -365,8 +373,8 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                         Icons.tune_rounded,
                         size: 20,
                         color: _activeFilterCount > 0
-                            ? const Color(0xFF14100D)
-                            : const Color(0xFFFFDF9E),
+                            ? const Color(0xFFFFFDF9)
+                            : const Color(0xFF382315),
                       ),
                       onPressed: _showFilterBottomSheet,
                     ),
@@ -400,10 +408,10 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                 height: 44,
                 width: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF221A15),
+                  color: const Color(0xFFFFFDF9),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0x44DFB76C),
+                    color: const Color(0x33B08D57),
                     width: 0.8,
                   ),
                 ),
@@ -413,7 +421,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                         ? Icons.view_agenda_outlined
                         : Icons.grid_view_rounded,
                     size: 20,
-                    color: const Color(0xFFFFDF9E),
+                    color: const Color(0xFF382315),
                   ),
                   onPressed: () {
                     HapticFeedback.selectionClick();
@@ -525,13 +533,13 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFFDFB76C)
-              : const Color(0x33281E18),
+              ? const Color(0xFF382315)
+              : const Color(0xFFFFFDF9),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFFFFDF9E)
-                : const Color(0x44DFB76C),
+                ? const Color(0xFFB08D57)
+                : const Color(0x33B08D57),
             width: isSelected ? 1.2 : 0.8,
           ),
         ),
@@ -543,8 +551,8 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                 icon,
                 size: 14,
                 color: isSelected
-                    ? const Color(0xFF14100D)
-                    : const Color(0xFFFFDF9E),
+                    ? const Color(0xFFFFDF9E)
+                    : const Color(0xFF382315),
               ),
               const SizedBox(width: 6),
             ],
@@ -554,8 +562,8 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 color: isSelected
-                    ? const Color(0xFF14100D)
-                    : const Color(0xFFFAF6F0),
+                    ? const Color(0xFFFFDF9E)
+                    : const Color(0xFF382315),
               ),
             ),
           ],
@@ -597,15 +605,15 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1612),
+          color: const Color(0xFFFFFDF9),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: const Color(0x33DFB76C),
+            color: const Color(0x28B08D57),
             width: 0.8,
           ),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x40000000),
+              color: Color(0x10382315),
               blurRadius: 8,
               offset: Offset(0, 3),
             ),
@@ -727,7 +735,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                           style: JText.serif(
                             12.5,
                             weight: FontWeight.w800,
-                            color: const Color(0xFFFAF6F0),
+                            color: const Color(0xFF382315),
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -737,7 +745,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                           item.socialContext.label,
                           style: const TextStyle(
                             fontSize: 9.5,
-                            color: Color(0xFF9E8D7F),
+                            color: Color(0xFF7D6C5D),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -752,13 +760,13 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                           style: const TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFFDFB76C),
+                            color: Color(0xFFB08D57),
                           ),
                         ),
                         const Icon(
                           Icons.arrow_forward_rounded,
                           size: 14,
-                          color: Color(0xFFDFB76C),
+                          color: Color(0xFFB08D57),
                         ),
                       ],
                     ),
@@ -792,12 +800,19 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF1C1612),
+              color: const Color(0xFFFFFDF9),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0x33DFB76C),
+                color: const Color(0x28B08D57),
                 width: 0.8,
               ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x10382315),
+                  blurRadius: 8,
+                  offset: Offset(0, 3),
+                ),
+              ],
             ),
             child: Row(
               children: [
@@ -869,7 +884,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                         style: JText.serif(
                           13.5,
                           weight: FontWeight.w800,
-                          color: const Color(0xFFFAF6F0),
+                          color: const Color(0xFF382315),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -878,7 +893,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                         item.javaneseScript,
                         style: const TextStyle(
                           fontSize: 9.5,
-                          color: Color(0xFFDFB76C),
+                          color: Color(0xFFB08D57),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -886,7 +901,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                         '${item.region.title} · ${item.socialContext.label}',
                         style: const TextStyle(
                           fontSize: 10,
-                          color: Color(0xFF9E8D7F),
+                          color: Color(0xFF7D6C5D),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

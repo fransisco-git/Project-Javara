@@ -79,7 +79,7 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
             : IconButton(
                 icon: const Icon(
                   Icons.arrow_back_ios_new_rounded,
-                  color: Color(0xFFE4C590),
+                  color: Color(0xFF382315),
                   size: 18,
                 ),
                 onPressed: () => Navigator.of(context).pop(),
@@ -91,14 +91,14 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFFFAF6F0),
+                color: Color(0xFF382315),
               ),
             ),
             Text(
               'ꦱꦶꦤꦲꦸꦧꦸꦱꦤꦗꦮ',
               style: TextStyle(
                 fontSize: 10,
-                color: const Color(0xFFE4C590).withValues(alpha: 0.8),
+                color: const Color(0xFFB08D57),
               ),
             ),
           ],
@@ -106,10 +106,10 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFFE4C590),
+          indicatorColor: const Color(0xFFB08D57),
           indicatorWeight: 2.5,
-          labelColor: const Color(0xFFE4C590),
-          unselectedLabelColor: const Color(0xFFA89989),
+          labelColor: const Color(0xFF382315),
+          unselectedLabelColor: const Color(0xFF7D6C5D),
           labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
           tabs: const [
             Tab(text: 'Khasanah Pengetahuan'),
@@ -208,9 +208,16 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1712),
+        color: const Color(0xFFFFFDF9),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0x33E4C590), width: 1.0),
+        border: Border.all(color: const Color(0x33B08D57), width: 1.0),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x10382315),
+            blurRadius: 8,
+            offset: Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,16 +228,16 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                 decoration: BoxDecoration(
-                  color: const Color(0x22E4C590),
+                  color: const Color(0x20B08D57),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0x44E4C590), width: 0.8),
+                  border: Border.all(color: const Color(0x44B08D57), width: 0.8),
                 ),
                 child: Text(
                   tag,
                   style: const TextStyle(
                     fontSize: 8.5,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFFE4C590),
+                    color: Color(0xFF382315),
                     letterSpacing: 0.6,
                   ),
                 ),
@@ -240,7 +247,7 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFFE4C590),
+                  color: Color(0xFFB08D57),
                 ),
               ),
             ],
@@ -251,21 +258,21 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
             style: JText.serif(
               16,
               weight: FontWeight.w700,
-              color: const Color(0xFFFAF6F0),
+              color: const Color(0xFF382315),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             summary,
-            style: const TextStyle(fontSize: 12, color: Color(0xFFC4B6A6), height: 1.45),
+            style: const TextStyle(fontSize: 12, color: Color(0xFF4A3828), height: 1.45),
           ),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF16120E),
+              color: const Color(0xFFF5EADA),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0x22E4C590), width: 0.8),
+              border: Border.all(color: const Color(0x22B08D57), width: 0.8),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,11 +282,11 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('✦ ', style: TextStyle(color: Color(0xFFE4C590), fontSize: 10)),
+                      const Text('✦ ', style: TextStyle(color: Color(0xFFB08D57), fontSize: 10)),
                       Expanded(
                         child: Text(
                           p,
-                          style: const TextStyle(fontSize: 11, color: Color(0xFFFAF6F0)),
+                          style: const TextStyle(fontSize: 11, color: Color(0xFF382315)),
                         ),
                       ),
                     ],
@@ -313,18 +320,18 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
             children: [
               Text(
                 'Pertanyaan ${_currentQuizIndex + 1} dari ${quizzes.length}',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFFE4C590)),
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF382315)),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF261C14),
+                  color: const Color(0xFF382315),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE4C590), width: 0.8),
+                  border: Border.all(color: const Color(0xFFB08D57), width: 0.8),
                 ),
                 child: Text(
                   'Skor: $_score Poin',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFFFAF6F0)),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFFFFDF9E)),
                 ),
               ),
             ],
@@ -334,8 +341,8 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: (_currentQuizIndex + 1) / quizzes.length,
-              backgroundColor: const Color(0xFF221A14),
-              valueColor: const AlwaysStoppedAnimation(Color(0xFFE4C590)),
+              backgroundColor: const Color(0xFFE8DED0),
+              valueColor: const AlwaysStoppedAnimation(Color(0xFFB08D57)),
               minHeight: 6,
             ),
           ),
@@ -346,9 +353,16 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
             width: double.infinity,
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E1712),
+              color: const Color(0xFFFFFDF9),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0x44E4C590)),
+              border: Border.all(color: const Color(0x33B08D57)),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x10382315),
+                  blurRadius: 8,
+                  offset: Offset(0, 3),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,18 +372,18 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
                   children: [
                     Text(
                       currentQuiz.category.toUpperCase(),
-                      style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Color(0xFFC79B3A)),
+                      style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Color(0xFFB08D57)),
                     ),
                     Text(
                       currentQuiz.javaneseScript,
-                      style: const TextStyle(fontSize: 11, color: Color(0xFFE4C590)),
+                      style: const TextStyle(fontSize: 11, color: Color(0xFFB08D57)),
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
                 Text(
                   currentQuiz.question,
-                  style: JText.serif(15.5, weight: FontWeight.w700, color: const Color(0xFFFAF6F0)),
+                  style: JText.serif(15.5, weight: FontWeight.w700, color: const Color(0xFF382315)),
                 ),
               ],
             ),
@@ -379,20 +393,23 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
           // Opsi Pilihan Jawaban
           ...List.generate(currentQuiz.options.length, (i) {
             final optionText = currentQuiz.options[i];
-            Color btnColor = const Color(0xFF221A14);
-            Color borderColor = const Color(0x33E4C590);
-            Color textColor = const Color(0xFFFAF6F0);
+            Color btnColor = const Color(0xFFFFFDF9);
+            Color borderColor = const Color(0x33B08D57);
+            Color textColor = const Color(0xFF382315);
 
             if (_isAnswerSubmitted) {
               if (i == currentQuiz.correctOptionIndex) {
-                btnColor = const Color(0xFF1B3D2B);
-                borderColor = const Color(0xFF4BB543);
+                btnColor = const Color(0x223F6B3A);
+                borderColor = const Color(0xFF3F6B3A);
+                textColor = const Color(0xFF22551E);
               } else if (i == _selectedAnswerIndex) {
-                btnColor = const Color(0xFF4A1A17);
-                borderColor = const Color(0xFFB85959);
+                btnColor = const Color(0x22B3261E);
+                borderColor = const Color(0xFFB3261E);
+                textColor = const Color(0xFF8A1E17);
               }
             } else if (i == _selectedAnswerIndex) {
-              borderColor = const Color(0xFFE4C590);
+              borderColor = const Color(0xFFB08D57);
+              btnColor = const Color(0x1FB08D57);
             }
 
             return Padding(
@@ -443,9 +460,9 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF18130F),
+                color: const Color(0xFFFFFDF9),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0x66E4C590), width: 1.0),
+                border: Border.all(color: const Color(0x44B08D57), width: 1.0),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -457,8 +474,8 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
                             ? Icons.check_circle_rounded
                             : Icons.info_rounded,
                         color: _selectedAnswerIndex == currentQuiz.correctOptionIndex
-                            ? const Color(0xFF4BB543)
-                            : const Color(0xFFE4C590),
+                            ? const Color(0xFF3F6B3A)
+                            : const Color(0xFFB08D57),
                         size: 18,
                       ),
                       const SizedBox(width: 8),
@@ -466,10 +483,12 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
                         _selectedAnswerIndex == currentQuiz.correctOptionIndex
                             ? 'Benar Sekali!'
                             : 'Pembahasan Historis:',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFFFAF6F0),
+                          color: _selectedAnswerIndex == currentQuiz.correctOptionIndex
+                              ? const Color(0xFF22551E)
+                              : const Color(0xFF382315),
                         ),
                       ),
                     ],
@@ -477,7 +496,7 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
                   const SizedBox(height: 8),
                   Text(
                     currentQuiz.historicalExplanation,
-                    style: const TextStyle(fontSize: 11.5, color: Color(0xFFC4B6A6), height: 1.45),
+                    style: const TextStyle(fontSize: 11.5, color: Color(0xFF4A3828), height: 1.45),
                   ),
                 ],
               ),
@@ -489,8 +508,8 @@ class _SinauBusanaScreenState extends State<SinauBusanaScreen>
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE4C590),
-                  foregroundColor: const Color(0xFF14100D),
+                  backgroundColor: const Color(0xFF382315),
+                  foregroundColor: const Color(0xFFFFDF9E),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
