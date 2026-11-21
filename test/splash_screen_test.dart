@@ -1,34 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:jawara_app/features/splash/cinematic_intro.dart';
 import 'package:jawara_app/features/splash/splash_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('Javara Splash Screen Tests', () {
-    testWidgets('Renders elegant splash brand logo, Aksara Jawa, and loading steps', (tester) async {
+  group('Javara Cinematic Intro & Splash Screen Tests', () {
+    testWidgets('Renders JavaraCinematicIntro with Gatotkaca and Aswatama assets and completes callback', (tester) async {
+      bool completed = false;
       tester.view.physicalSize = const Size(390 * 2, 844 * 2);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
-        const MaterialApp(
-          home: SplashScreen(),
+        MaterialApp(
+          home: JavaraCinematicIntro(
+            autoPlay: false,
+            onComplete: () => completed = true,
+            onPrimaryAction: () {},
+            onSecondaryAction: () {},
+            onRegisterAction: () {},
+          ),
         ),
       );
 
-      // Verify Aksara Jawa logo text is displayed (both in logo and subtitle)
-      expect(find.text('ꦗ ꦮ ꦫ'), findsWidgets);
+      // Verify the cinematic widget mounts
+      expect(find.byType(JavaraCinematicIntro), findsOneWidget);
 
-      // Verify subtitle text
-      expect(find.text('WARISAN BUSANA JAWA TENGAH'), findsOneWidget);
-
-      // Verify skip button exists
-      expect(find.text('Lewati'), findsOneWidget);
-
-      // Pump a short duration to verify loading step
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(find.textContaining('Busana Adat Jawa'), findsOneWidget);
+      // Trigger completion manually via key/method or verify state
+      final state = tester.state<JavaraCinematicIntroState>(find.byType(JavaraCinematicIntro));
+      state.skip();
+      await tester.pump();
+      expect(completed, isTrue);
     });
 
     testWidgets('Zero RenderFlex overflow across various mobile screen widths', (tester) async {
@@ -43,8 +47,14 @@ void main() {
           tester.view.devicePixelRatio = 2.0;
 
           await tester.pumpWidget(
-            const MaterialApp(
-              home: SplashScreen(),
+            MaterialApp(
+              home: JavaraCinematicIntro(
+                autoPlay: false,
+                onComplete: () {},
+                onPrimaryAction: () {},
+                onSecondaryAction: () {},
+                onRegisterAction: () {},
+              ),
             ),
           );
           await tester.pump(const Duration(milliseconds: 100));
@@ -56,6 +66,21 @@ void main() {
         FlutterError.onError = prevOnError;
         tester.view.resetPhysicalSize();
       }
+    });
+
+    testWidgets('SplashScreen widget mounts cleanly', (tester) async {
+      tester.view.physicalSize = const Size(390 * 2, 844 * 2);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SplashScreen(),
+        ),
+      );
+
+      expect(find.byType(SplashScreen), findsOneWidget);
+      expect(find.byType(JavaraCinematicIntro), findsOneWidget);
     });
   });
 }
