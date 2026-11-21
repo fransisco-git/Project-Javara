@@ -3,14 +3,14 @@ import 'package:flutter/services.dart';
 
 import '../../core/theme.dart';
 import '../explore/explore_tab.dart';
-import '../fashion/screens/sinau_busana_screen.dart';
+import '../fashion/screens/clothing_catalog_screen.dart';
 import '../fashion/screens/wardrobe_tab.dart';
 import 'home_tab.dart';
 import 'javara_bottom_nav.dart';
 import 'profile_tab.dart';
 
-/// Kerangka utama setelah login: 5 tab + bar navigasi.
-/// Tab: Beranda · Jelajah · Wardrobe (kapsul pusat) · Kuis · Profil
+/// Kerangka utama setelah login: 5 tab fokus busana Jawa Tengah + bar navigasi.
+/// Tab: Beranda · Jelajah · Wardrobe (kapsul pusat) · Katalog · Profil
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -39,9 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
       isPill: true,
     ),
     NavItemData(
-      label: 'Kuis',
-      activeIcon: Icons.school_rounded,
-      inactiveIcon: Icons.school_outlined,
+      label: 'Katalog',
+      activeIcon: Icons.storefront_rounded,
+      inactiveIcon: Icons.storefront_outlined,
     ),
     NavItemData(
       label: 'Profil',
@@ -82,10 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 variant: HeritageBackgroundVariant.wardrobe,
                 child: WardrobeTab(),
               ),
-              const JBackground(
-                variant: HeritageBackgroundVariant.kuis,
-                child: SinauBusanaScreen(isTab: true),
-              ),
+              const ClothingCatalogScreen(isTab: true),
               JBackground(
                 variant: HeritageBackgroundVariant.profile,
                 child: SafeArea(

@@ -7,7 +7,7 @@ import '../../widgets/photo_box.dart';
 import '../heritage/cultural_order_sheet.dart';
 import 'explore_data.dart';
 import 'explore_models.dart';
-import 'quiz_screen.dart';
+import '../fashion/screens/clothing_catalog_screen.dart';
 import 'story_detail_screen.dart';
 
 /// Halaman Jelajah Budaya - Implementasi editorial dari Figma Page 2 ('jelajah_budaya.png').
@@ -274,7 +274,7 @@ class _JelajahBudayaScreenState extends State<JelajahBudayaScreen> {
                                 color: JColors.gold.withValues(alpha: 0.22),
                               ),
                               child: const Icon(
-                                Icons.school_rounded,
+                                Icons.storefront_rounded,
                                 color: JColors.gold,
                                 size: 24,
                               ),
@@ -285,7 +285,7 @@ class _JelajahBudayaScreenState extends State<JelajahBudayaScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Uji Pemahamanmu',
+                                    'Katalog Busana Jawa',
                                     style: JText.serif(
                                       15,
                                       weight: FontWeight.w700,
@@ -293,7 +293,7 @@ class _JelajahBudayaScreenState extends State<JelajahBudayaScreen> {
                                     ),
                                   ),
                                   Text(
-                                    'Kuis 10 soal budaya Jawa.',
+                                    'Koleksi busana adat & wastra pilihan.',
                                     style: JText.serif(
                                       11.5,
                                       color: const Color(0xFFDEC5A4),
@@ -306,7 +306,7 @@ class _JelajahBudayaScreenState extends State<JelajahBudayaScreen> {
                               onPressed: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (_) => const QuizScreen(),
+                                    builder: (_) => const ClothingCatalogScreen(),
                                   ),
                                 );
                               },
@@ -323,7 +323,7 @@ class _JelajahBudayaScreenState extends State<JelajahBudayaScreen> {
                                 elevation: 0,
                               ),
                               child: Text(
-                                'Mulai',
+                                'Katalog',
                                 style: JText.serif(
                                   12.5,
                                   weight: FontWeight.w700,

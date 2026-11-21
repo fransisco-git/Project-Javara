@@ -14,7 +14,6 @@ import 'explore_data.dart';
 import 'explore_models.dart';
 import 'interactive_map_widget.dart';
 import 'jelajah_budaya_screen.dart';
-import 'quiz_screen.dart';
 import 'story_detail_screen.dart';
 import '../fashion/screens/batik_motif_gallery_screen.dart';
 import '../fashion/screens/javanese_fashion_map_screen.dart';
@@ -196,8 +195,8 @@ class _ExploreTabState extends State<ExploreTab> {
 
                 const SizedBox(height: 22),
 
-                // 5. BANNER KUIS BUDAYA (Hubungan erat: Belajar & Menguji Pemahaman)
-                _buildQuizBanner(),
+                // 5. BANNER KATALOG BUSANA (Koleksi Busana & Wastra Adat Jawa Tengah)
+                _buildCatalogBanner(),
 
                 const SizedBox(height: 12),
 
@@ -1112,8 +1111,8 @@ class _ExploreTabState extends State<ExploreTab> {
     );
   }
 
-  /// Banner Kuis Budaya Jawa (10 Soal Interaktif)
-  Widget _buildQuizBanner() {
+  /// Banner Katalog Busana Tradisional Jawa (Beli & Sewa)
+  Widget _buildCatalogBanner() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1141,7 +1140,7 @@ class _ExploreTabState extends State<ExploreTab> {
               border: Border.all(color: JColors.gold, width: 1.2),
             ),
             child: const Icon(
-              Icons.school_rounded,
+              Icons.storefront_rounded,
               color: JColors.gold,
               size: 26,
             ),
@@ -1152,7 +1151,7 @@ class _ExploreTabState extends State<ExploreTab> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Kuis Budaya Jawa',
+                  'Katalog Busana Jawa',
                   style: JText.serif(
                     16,
                     weight: FontWeight.w700,
@@ -1161,7 +1160,7 @@ class _ExploreTabState extends State<ExploreTab> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '10 soal asyik • Kumpulkan lencana & XP',
+                  'Koleksi Beskap, Kebaya & Jarik • Beli & Sewa',
                   style: JText.serif(11.5, color: const Color(0xFFDEC5A4)),
                 ),
               ],
@@ -1169,8 +1168,11 @@ class _ExploreTabState extends State<ExploreTab> {
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => const QuizScreen()));
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const ClothingCatalogScreen(),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: JColors.gold,
@@ -1182,7 +1184,7 @@ class _ExploreTabState extends State<ExploreTab> {
               elevation: 0,
             ),
             child: Text(
-              'Mulai',
+              'Katalog',
               style: JText.serif(
                 12.5,
                 weight: FontWeight.w700,

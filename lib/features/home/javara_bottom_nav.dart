@@ -22,7 +22,7 @@ class NavItemData {
 /// Bar navigasi bawah khas JAVARA berdesain Liquid Glass adaptif warisan budaya Jawa.
 ///
 /// Fitur Desain:
-/// 1. Sesuai Image Referensi: 4 item standar (Beranda, Jelajah, Kuis, Profil) + 1 Kapsul Pill Pusat (Wardrobe).
+/// 1. Sesuai Image Referensi: 4 item standar (Beranda, Jelajah, Katalog, Profil) + 1 Kapsul Pill Pusat (Wardrobe).
 /// 2. Liquid Glass Adaptif: Specular reflection halus pada item aktif yang berpadu selaras dengan latar belakang tab.
 /// 3. Zero-Overflow Guarantee: Menggunakan FittedBox protektif & flex adaptif sehingga 100% bebas overflow
 ///    di semua ukuran layar Android (dari 300px hingga 450px+) dan pada skala teks ekstrem.
@@ -42,7 +42,7 @@ class JavaraBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Palet warna mewah khas JAVARA (selalu aktif di semua tab sesuai preferensi estetika tab Kuis)
+    // Palet warna mewah khas JAVARA — Dark Obsidian & Luxury Gold
     const activeTextColor = Color(0xFFFFDF9E);
     const inactiveTextColor = Color(0xFFA39485);
     const activeIconColor = Color(0xFFFFDF9E);
@@ -94,7 +94,7 @@ class JavaraBottomNav extends StatelessWidget {
                             ),
                           )
                         : Expanded(
-                            // 4 Tab Standar (Beranda, Jelajah, Kuis, Profil)
+                            // 4 Tab Standar (Beranda, Jelajah, Katalog, Profil)
                             flex: 10,
                             child: _buildStandardNavButton(
                               context: context,
@@ -220,7 +220,7 @@ class JavaraBottomNav extends StatelessWidget {
   }) {
     final item = items[itemIndex];
 
-    // Warna kapsul pill adaptif sesuai tema & status aktif (Dark Gold Kuis style)
+    // Warna kapsul pill adaptif sesuai tema & status aktif (Dark Gold luxury style)
     final pillBg = isSelected
         ? const Color(0x55DFB76C)
         : const Color(0x25DFB76C);

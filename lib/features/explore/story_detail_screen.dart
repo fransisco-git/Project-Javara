@@ -6,7 +6,7 @@ import '../../data/culture_items.dart';
 import '../../widgets/photo_box.dart';
 import '../heritage/cultural_order_sheet.dart';
 import 'explore_models.dart';
-import 'quiz_screen.dart';
+import '../fashion/screens/clothing_catalog_screen.dart';
 
 /// Halaman Detail Cerita Budaya (Ensiklopedia) - Desain asli dari Figma Page 2 ('joglo_detail.png').
 class StoryDetailScreen extends StatelessWidget {
@@ -205,7 +205,7 @@ class StoryDetailScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
-                                  Icons.quiz_rounded,
+                                  Icons.storefront_rounded,
                                   color: JColors.gold,
                                   size: 24,
                                 ),
@@ -216,7 +216,7 @@ class StoryDetailScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Uji Pemahamanmu',
+                                      'Katalog Busana Terkait',
                                       style: JText.serif(
                                         15,
                                         weight: FontWeight.w700,
@@ -224,7 +224,7 @@ class StoryDetailScreen extends StatelessWidget {
                                       ),
                                     ),
                                     Text(
-                                      'Ikuti Kuis Budaya & kumpulkan lencana.',
+                                      'Temukan busana adat yang selaras dengan cerita ini.',
                                       style: JText.serif(
                                         11.5,
                                         color: JColors.muted,
@@ -237,7 +237,7 @@ class StoryDetailScreen extends StatelessWidget {
                                 onPressed: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (_) => const QuizScreen(),
+                                      builder: (_) => const ClothingCatalogScreen(),
                                     ),
                                   );
                                 },
@@ -254,7 +254,7 @@ class StoryDetailScreen extends StatelessWidget {
                                   elevation: 0,
                                 ),
                                 child: Text(
-                                  'Mulai Kuis',
+                                  'Katalog',
                                   style: JText.serif(
                                     12,
                                     weight: FontWeight.w600,

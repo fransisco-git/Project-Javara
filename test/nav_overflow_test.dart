@@ -21,9 +21,9 @@ void main() {
       isPill: true,
     ),
     NavItemData(
-      label: 'Kuis',
-      activeIcon: Icons.school_rounded,
-      inactiveIcon: Icons.school_outlined,
+      label: 'Katalog',
+      activeIcon: Icons.storefront_rounded,
+      inactiveIcon: Icons.storefront_outlined,
     ),
     NavItemData(
       label: 'Profil',
