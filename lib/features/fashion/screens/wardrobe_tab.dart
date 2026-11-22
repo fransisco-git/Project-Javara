@@ -14,7 +14,7 @@ import 'javanese_fashion_map_screen.dart';
 import 'sinau_busana_screen.dart';
 import 'ai_fashion_studio_screen.dart';
 import 'ai_cultural_assistant_screen.dart';
-import 'javara_studio_screen.dart';
+import 'cermin_busana_screen.dart';
 
 /// Tab Wardrobe — Pusat eksplorasi & Virtual Try-On busana adat Jawa Tengah.
 /// Terintegrasi dengan Anywear Decart AI Live Studio (On-Cam Camera First)
@@ -75,11 +75,9 @@ class _WardrobeTabState extends State<WardrobeTab>
 
   @override
   Widget build(BuildContext context) {
-    // Mode Utama: Live On-Cam Anywear Studio (Decart AI Style)
+    // Mode Utama: Cermin Busana (Virtual Try-On Budaya Jawa Tengah)
     if (_studioModeIndex == 0) {
-      return JavaraStudioScreen(
-        isEmbeddedInTab: true,
-        initialMode: StudioViewingMode.liveCamera,
+      return CerminBusanaScreen(
         onSwitchToCatalogTab: () {
           HapticFeedback.selectionClick();
           setState(() => _studioModeIndex = 1);
