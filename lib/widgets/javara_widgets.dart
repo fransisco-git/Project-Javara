@@ -4,14 +4,68 @@ import 'package:flutter/services.dart';
 
 import '../core/theme.dart';
 
-/// Logo JAVARA: Tipografi adiluhung budaya Jawa Tengah (Aksara Jawa & Serif Elegan),
-/// bersih tanpa stempel bundar "Warisane Jowo" yang terkesan AI slop.
+/// Logo JAVARA: Lambang resmi kerajaan Jawa Tengah beresolusi tinggi (Ultra-HD 1024x1024)
+/// memadukan monogram emas "J", bulir padi kemakmuran, medali Batik Parang, dan Aksara Jawa.
 class JavaraLogo extends StatelessWidget {
-  const JavaraLogo({super.key, this.size = 110});
+  const JavaraLogo({
+    super.key,
+    this.size = 110,
+    this.useImageEmblem = true,
+  });
+
   final double size;
+  final bool useImageEmblem;
 
   @override
   Widget build(BuildContext context) {
+    if (useImageEmblem) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(
+            'assets/images/logo_javara.png',
+            width: size,
+            height: size,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+            errorBuilder: (_, _, _) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'ꦗ ꦮ ꦫ',
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Color(0xFFC79B3A),
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 8,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'JAVARA',
+                  style: JText.serif(
+                    24,
+                    weight: FontWeight.w700,
+                    color: JColors.ink,
+                  ).copyWith(letterSpacing: 4),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'ꦗ ꦮ ꦫ',
+            style: TextStyle(
+              fontSize: 18,
+              color: Color(0xFFC79B3A),
+              fontWeight: FontWeight.w700,
+              letterSpacing: 6,
+            ),
+          ),
+        ],
+      );
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
