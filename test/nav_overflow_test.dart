@@ -10,20 +10,14 @@ void main() {
       inactiveIcon: Icons.home_outlined,
     ),
     NavItemData(
-      label: 'Jelajah',
-      activeIcon: Icons.explore_rounded,
-      inactiveIcon: Icons.explore_outlined,
+      label: 'Koleksi',
+      activeIcon: Icons.grid_view_rounded,
+      inactiveIcon: Icons.grid_view_outlined,
     ),
     NavItemData(
       label: 'Wardrobe',
       activeIcon: Icons.checkroom_rounded,
       inactiveIcon: Icons.checkroom_outlined,
-      isPill: true,
-    ),
-    NavItemData(
-      label: 'Katalog',
-      activeIcon: Icons.storefront_rounded,
-      inactiveIcon: Icons.storefront_outlined,
     ),
     NavItemData(
       label: 'Profil',

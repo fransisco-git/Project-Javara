@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme.dart';
 import '../../../core/transitions.dart';
-import '../../../services/supabase_service.dart';
+import '../../../services/saved_garments_service.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
 import 'clothing_detail_screen.dart';
@@ -55,19 +55,28 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
     _selectedGender = widget.initialGender;
     _selectedRegion = widget.initialRegion;
     _loadFavorites();
+    SavedGarmentsService.instance.savedItemIdsNotifier.addListener(_onSavedIdsChanged);
+  }
+
+  void _onSavedIdsChanged() {
+    if (!mounted) return;
+    setState(() {
+      _favoriteIds = SavedGarmentsService.instance.savedItemIdsNotifier.value;
+    });
   }
 
   @override
   void dispose() {
+    SavedGarmentsService.instance.savedItemIdsNotifier.removeListener(_onSavedIdsChanged);
     _searchController.dispose();
     super.dispose();
   }
 
   Future<void> _loadFavorites() async {
-    final ids = await SupabaseService.instance.getFavoriteItemIds();
+    await SavedGarmentsService.instance.initialize();
     if (mounted) {
       setState(() {
-        _favoriteIds = ids.toSet();
+        _favoriteIds = SavedGarmentsService.instance.savedItemIdsNotifier.value;
         _isLoading = false;
       });
     }
@@ -75,15 +84,33 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
 
   Future<void> _toggleFavorite(String id) async {
     HapticFeedback.lightImpact();
-    final isFav = await SupabaseService.instance.toggleFavorite(id);
+    final isSaved = await SavedGarmentsService.instance.toggleSave(id);
     if (mounted) {
       setState(() {
-        if (isFav) {
+        if (isSaved) {
           _favoriteIds.add(id);
         } else {
           _favoriteIds.remove(id);
         }
       });
+      final item = JavaneseClothingData.getItemById(id);
+      final name = item?.name ?? 'Busana';
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(milliseconds: 1400),
+          backgroundColor: const Color(0xFF241A14),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: const BorderSide(color: Color(0x55E4C590), width: 0.8),
+          ),
+          content: Text(
+            isSaved ? '$name disimpan ke Wardrobe' : '$name dihapus dari Wardrobe',
+            style: const TextStyle(color: Color(0xFFFAF6F0), fontSize: 12.5),
+          ),
+        ),
+      );
     }
   }
 
@@ -248,26 +275,31 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                     onPressed: () => Navigator.of(context).pop(),
                   ),
           ),
-          Column(
-            children: [
-              Text(
-                'KATALOG BUSANA ADAT',
-                style: JText.editorial(
-                  18,
-                  weight: FontWeight.w700,
-                  color: const Color(0xFF382315),
-                  letterSpacing: 1.5,
+          Expanded(
+            child: Column(
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'KATALOG BUSANA ADAT',
+                    style: JText.editorial(
+                      18,
+                      weight: FontWeight.w700,
+                      color: const Color(0xFF382315),
+                      letterSpacing: 1.5,
+                    ),
+                  ),
                 ),
-              ),
-              const Text(
-                'ꦏꦠꦭꦺꦴꦒ꧀ꦧꦸꦱꦤꦗꦮꦶ',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Color(0xFF7D6C5D),
-                  letterSpacing: 0.8,
+                const Text(
+                  'ꦏꦠꦭꦺꦴꦒ꧀ꦧꦸꦱꦤꦗꦮꦶ',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Color(0xFF7D6C5D),
+                    letterSpacing: 0.8,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           // Tombol Buka Lemari Virtual Wardrobe 3D
           CircleAvatar(
@@ -436,12 +468,16 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Menampilkan $resultCount warisan busana adat',
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Color(0xFFC7B7A6),
-                  fontStyle: FontStyle.italic,
+              Expanded(
+                child: Text(
+                  'Menampilkan $resultCount warisan busana adat',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFFC7B7A6),
+                    fontStyle: FontStyle.italic,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               if (_activeFilterCount > 0 || _searchQuery.isNotEmpty)

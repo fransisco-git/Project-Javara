@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme.dart';
 import '../../../core/transitions.dart';
+import '../../../services/saved_garments_service.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
 import 'javara_studio_screen.dart';
@@ -22,6 +23,26 @@ class ClothingDetailScreen extends StatefulWidget {
 
 class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
   bool _isBookmarked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isBookmarked = SavedGarmentsService.instance.isSaved(widget.item.id);
+    SavedGarmentsService.instance.savedItemIdsNotifier.addListener(_onSavedChanged);
+  }
+
+  void _onSavedChanged() {
+    if (!mounted) return;
+    setState(() {
+      _isBookmarked = SavedGarmentsService.instance.isSaved(widget.item.id);
+    });
+  }
+
+  @override
+  void dispose() {
+    SavedGarmentsService.instance.savedItemIdsNotifier.removeListener(_onSavedChanged);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +81,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                 child: CircleAvatar(
                   backgroundColor: const Color(0x99181310),
                   child: IconButton(
+                    tooltip: _isBookmarked ? 'Hapus dari Wardrobe' : 'Simpan ke Wardrobe',
                     icon: Icon(
                       _isBookmarked
                           ? Icons.bookmark_added_rounded
@@ -67,9 +89,12 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                       color: const Color(0xFFE4C590),
                       size: 20,
                     ),
-                    onPressed: () {
-                      setState(() => _isBookmarked = !_isBookmarked);
-                      ScaffoldMessenger.of(context).showSnackBar(
+                    onPressed: () async {
+                      final messenger = ScaffoldMessenger.of(context);
+                      final isSaved = await SavedGarmentsService.instance.toggleSave(item.id);
+                      if (!mounted) return;
+                      messenger.hideCurrentSnackBar();
+                      messenger.showSnackBar(
                         SnackBar(
                           duration: const Duration(milliseconds: 1400),
                           backgroundColor: const Color(0xFF241A14),
@@ -82,9 +107,9 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                             ),
                           ),
                           content: Text(
-                            _isBookmarked
-                                ? '${item.name} disimpan ke Favorit'
-                                : '${item.name} dihapus dari Favorit',
+                            isSaved
+                                ? '${item.name} disimpan ke Wardrobe'
+                                : '${item.name} dihapus dari Wardrobe',
                             style: const TextStyle(
                               color: Color(0xFFFAF6F0),
                               fontSize: 13,

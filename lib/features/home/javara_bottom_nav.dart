@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -19,13 +18,15 @@ class NavItemData {
   final bool isPill;
 }
 
-/// Bar navigasi bawah khas JAVARA berdesain Liquid Glass adaptif warisan budaya Jawa.
+/// Bar navigasi bawah 4-tab docked khas JAVARA berdesain retail minimalis (Uniqlo/H&M clarity).
 ///
-/// Fitur Desain:
-/// 1. Sesuai Image Referensi: 4 item standar (Beranda, Jelajah, Katalog, Profil) + 1 Kapsul Pill Pusat (Wardrobe).
-/// 2. Liquid Glass Adaptif: Specular reflection halus pada item aktif yang berpadu selaras dengan latar belakang tab.
-/// 3. Zero-Overflow Guarantee: Menggunakan FittedBox protektif & flex adaptif sehingga 100% bebas overflow
-///    di semua ukuran layar Android (dari 300px hingga 450px+) dan pada skala teks ekstrem.
+/// Karakteristik Anti-AI-Slop:
+/// 1. Flat, docked container dengan warna permukaan solid yang menyatu dengan tema aplikasi.
+/// 2. Border hairline 1px di sisi atas tanpa drop-shadow tebal, tanpa gradasi dekoratif, dan tanpa efek glow.
+/// 3. Ikon outline bersih saat inaktif, ikon filled solid saat aktif.
+/// 4. Label tipografi Inter 11.5sp semi-bold berkontras tinggi dengan penanganan SafeArea bottom yang presisi.
+/// 5. Menggunakan FittedBox protektif sehingga 100% bebas RenderFlex overflow di layar sempit (300px - 412px)
+///    maupun skala teks besar (hingga 2.0x).
 class JavaraBottomNav extends StatelessWidget {
   const JavaraBottomNav({
     super.key,
@@ -38,180 +39,53 @@ class JavaraBottomNav extends StatelessWidget {
   final ValueChanged<int> onChanged;
   final List<NavItemData> items;
 
-  static const double _barHeight = 64.0;
+  static const double _barHeight = 58.0;
 
   @override
   Widget build(BuildContext context) {
-    // Palet warna mewah khas JAVARA — Dark Obsidian & Luxury Gold
-    const activeTextColor = Color(0xFFFFDF9E);
-    const inactiveTextColor = Color(0xFFA39485);
-    const activeIconColor = Color(0xFFFFDF9E);
-    const inactiveIconColor = Color(0xFF8F8073);
+    // Palet warna retail editorial JAVARA
+    // Permukaan solid gelap mewah, border hairline tipis, warna aktif emas soga adiluhung
+    const surfaceColor = Color(0xFF14100D);
+    const hairlineBorderColor = Color(0x33DFB76C);
+    const activeColor = Color(0xFFFFDF9E);
+    const inactiveColor = Color(0xFF8F8073);
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          decoration: const BoxDecoration(
-            color: Color(0xEB14100D),
-            border: Border(
-              top: BorderSide(
-                color: Color(0x3DDFB76C),
-                width: 1.0,
-              ),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x60000000),
-                blurRadius: 18,
-                offset: Offset(0, -3),
-              ),
-            ],
-          ),
-          child: SafeArea(
-            top: false,
-            bottom: true,
-            child: SizedBox(
-              height: _barHeight,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (var i = 0; i < items.length; i++)
-                    items[i].isPill
-                        ? Expanded(
-                            // Proporsi flex khusus untuk tombol pill tengah (Wardrobe)
-                            // agar lapang, anggun, dan 100% bebas overflow
-                            flex: 13,
-                            child: _buildPillNavButton(
-                              context: context,
-                              itemIndex: i,
-                              isSelected: i == index,
-                              activeColor: activeTextColor,
-                              inactiveColor: inactiveTextColor,
-                            ),
-                          )
-                        : Expanded(
-                            // 4 Tab Standar (Beranda, Jelajah, Katalog, Profil)
-                            flex: 10,
-                            child: _buildStandardNavButton(
-                              context: context,
-                              itemIndex: i,
-                              isSelected: i == index,
-                              activeColor: activeTextColor,
-                              inactiveColor: inactiveTextColor,
-                              activeIconColor: activeIconColor,
-                              inactiveIconColor: inactiveIconColor,
-                            ),
-                          ),
-                ],
-              ),
-            ),
+    return Container(
+      decoration: const BoxDecoration(
+        color: surfaceColor,
+        border: Border(
+          top: BorderSide(
+            color: hairlineBorderColor,
+            width: 1.0,
           ),
         ),
       ),
-    );
-  }
-
-  /// Tombol Navigasi Standar (Ikon di atas + Label di bawah)
-  /// Dilengkapi efek Liquid Glass halus di belakang ikon saat aktif.
-  Widget _buildStandardNavButton({
-    required BuildContext context,
-    required int itemIndex,
-    required bool isSelected,
-    required Color activeColor,
-    required Color inactiveColor,
-    required Color activeIconColor,
-    required Color inactiveIconColor,
-  }) {
-    final item = items[itemIndex];
-
-    return Semantics(
-      button: true,
-      selected: isSelected,
-      label: item.label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          if (!isSelected) HapticFeedback.selectionClick();
-          onChanged(itemIndex);
-        },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Pod Ikon dengan Efek Liquid Glass halus (hanya aktif/berpendar saat dipilih)
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOut,
-              width: 38,
-              height: 30,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(13),
-                gradient: isSelected
-                    ? const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0x45DFB76C), Color(0x20DFB76C)],
-                      )
-                    : null,
-                color: isSelected
-                    ? null
-                    : Colors.transparent, // Bersih & elegan saat tidak dipilih seperti Image 1
-                border: isSelected
-                    ? Border.all(
-                        color: const Color(0x75DFB76C),
-                        width: 0.9,
-                      )
-                    : null,
-                boxShadow: isSelected
-                    ? const [
-                        BoxShadow(
-                          color: Color(0x35DFB76C),
-                          blurRadius: 6,
-                          offset: Offset(0, 1),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Center(
-                child: Icon(
-                  isSelected ? item.activeIcon : item.inactiveIcon,
-                  size: 21,
-                  color: isSelected ? activeIconColor : inactiveIconColor,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 3),
-
-            // Label Teks dengan FittedBox Protektif (Anti-Overflow pada Skala Font Apapun)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  item.label,
-                  maxLines: 1,
-                  style: JText.serif(
-                    11,
-                    weight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                    color: isSelected ? activeColor : inactiveColor,
+      child: SafeArea(
+        top: false,
+        bottom: true,
+        child: SizedBox(
+          height: _barHeight,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < items.length; i++)
+                Expanded(
+                  child: _buildNavItem(
+                    context: context,
+                    itemIndex: i,
+                    isSelected: i == index,
+                    activeColor: activeColor,
+                    inactiveColor: inactiveColor,
                   ),
                 ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// Tombol Navigasi Kapsul Pill Pusat (Wardrobe)
-  /// Menyajikan Ikon Gantungan Busana dan Teks "Wardrobe" berdampingan
-  /// dengan kapsul liquid glass sesuai persis dengan Image 1 referensi.
-  Widget _buildPillNavButton({
+  Widget _buildNavItem({
     required BuildContext context,
     required int itemIndex,
     required bool isSelected,
@@ -220,82 +94,52 @@ class JavaraBottomNav extends StatelessWidget {
   }) {
     final item = items[itemIndex];
 
-    // Warna kapsul pill adaptif sesuai tema & status aktif (Dark Gold luxury style)
-    final pillBg = isSelected
-        ? const Color(0x55DFB76C)
-        : const Color(0x25DFB76C);
-
-    final pillBorder = isSelected
-        ? const Color(0x99DFB76C)
-        : const Color(0x45DFB76C);
-
-    final pillTextColor = isSelected
-        ? const Color(0xFFFFDF9E)
-        : const Color(0xFFD4C4B4);
-
     return Semantics(
       button: true,
       selected: isSelected,
       label: item.label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          if (!isSelected) HapticFeedback.selectionClick();
-          onChanged(itemIndex);
-        },
-        child: Center(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 10),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              decoration: BoxDecoration(
-                color: pillBg,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: pillBorder,
-                  width: isSelected ? 1.1 : 0.85,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          splashColor: activeColor.withAlpha(20),
+          highlightColor: Colors.transparent,
+          onTap: () {
+            if (!isSelected) {
+              HapticFeedback.selectionClick();
+            }
+            onChanged(itemIndex);
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Ikon Navigasi: Clean outline saat inaktif, filled solid saat aktif
+                Icon(
+                  isSelected ? item.activeIcon : item.inactiveIcon,
+                  size: 22,
+                  color: isSelected ? activeColor : inactiveColor,
                 ),
-                boxShadow: [
-                  if (isSelected)
-                    const BoxShadow(
-                      color: Color(0x40DFB76C),
-                      blurRadius: 7,
-                      offset: Offset(0, 2),
-                    )
-                  else
-                    const BoxShadow(
-                      color: Color(0x20000000),
-                      blurRadius: 4,
-                      offset: Offset(0, 1),
-                    ),
-                ],
-              ),
-              // FittedBox membungkus seluruh konten baris untuk menjamin 100% BEBAS OVERFLOW
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      isSelected ? item.activeIcon : item.inactiveIcon,
-                      size: 17,
-                      color: pillTextColor,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
+                const SizedBox(height: 3),
+
+                // Label Teks: Inter 11.5sp, semi-bold saat aktif, terproteksi FittedBox
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
                       item.label,
                       maxLines: 1,
-                      style: JText.serif(
+                      style: JText.sans(
                         11.5,
-                        weight: isSelected ? FontWeight.w800 : FontWeight.w700,
-                        color: pillTextColor,
+                        weight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        color: isSelected ? activeColor : inactiveColor,
+                        letterSpacing: 0.1,
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ),

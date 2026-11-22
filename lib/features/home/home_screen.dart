@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme.dart';
-import '../explore/explore_tab.dart';
 import '../fashion/screens/clothing_catalog_screen.dart';
 import '../fashion/screens/wardrobe_tab.dart';
 import 'home_tab.dart';
 import 'javara_bottom_nav.dart';
 import 'profile_tab.dart';
 
-/// Kerangka utama setelah login: 5 tab fokus busana Jawa Tengah + bar navigasi.
-/// Tab: Beranda · Jelajah · Wardrobe (kapsul pusat) · Katalog · Profil
+/// Kerangka utama setelah login: 4 tab fokus busana Jawa Tengah + bar navigasi docked.
+/// Tab: Beranda · Koleksi · Wardrobe · Profil
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -28,20 +27,14 @@ class _HomeScreenState extends State<HomeScreen> {
       inactiveIcon: Icons.home_outlined,
     ),
     NavItemData(
-      label: 'Jelajah',
-      activeIcon: Icons.explore_rounded,
-      inactiveIcon: Icons.explore_outlined,
+      label: 'Koleksi',
+      activeIcon: Icons.grid_view_rounded,
+      inactiveIcon: Icons.grid_view_outlined,
     ),
     NavItemData(
       label: 'Wardrobe',
       activeIcon: Icons.checkroom_rounded,
       inactiveIcon: Icons.checkroom_outlined,
-      isPill: true,
-    ),
-    NavItemData(
-      label: 'Katalog',
-      activeIcon: Icons.storefront_rounded,
-      inactiveIcon: Icons.storefront_outlined,
     ),
     NavItemData(
       label: 'Profil',
@@ -74,15 +67,10 @@ class _HomeScreenState extends State<HomeScreen> {
             index: _index,
             children: [
               HomeTab(onOpenTab: (i) => setState(() => _index = i)),
-              JBackground(
-                variant: HeritageBackgroundVariant.explore,
-                child: ExploreTab(onOpenTab: (i) => setState(() => _index = i)),
-              ),
-              const JBackground(
-                variant: HeritageBackgroundVariant.wardrobe,
-                child: WardrobeTab(),
-              ),
               const ClothingCatalogScreen(isTab: true),
+              WardrobeTab(
+                onOpenCatalog: () => setState(() => _index = 1),
+              ),
               JBackground(
                 variant: HeritageBackgroundVariant.profile,
                 child: SafeArea(
