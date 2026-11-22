@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -18,16 +19,18 @@ enum GateOpeningVisual {
   buddhaHands,
 }
 
-/// Layar Selamat Datang JAVARA — Cinematic 3D Gate Opening & Sacred Dawn Experience.
+/// Layar Selamat Datang JAVARA — Cinematic 10s 9:16 Candi Bentar Dawn Opening.
 ///
-/// Dibangun murni menggunakan animasi kinematika spasial 3D Flutter native
-/// (terinspirasi dari presisi gerak Mudra Tangan Buddha):
-/// - Bagian 1: Gerbang tertutup rapat di tengah di bawah naungan badai gelap dan kilat dramatis.
-/// - Bagian 2: Daun gerbang (atau tangan mudra) meluncur perlahan terbuka ke arah luar (kiri & kanan)
-///   dengan rotasi 3D yaw, pitch, dan roll yang agung.
-/// - Berkas sinar emas fajar (*golden god rays*) menyembur terang dari celah tengah,
-///   mengusir kegelapan badai dan menyingkap panorama megah Candi Borobudur serta pegunungan Dieng.
-/// - Mendukung interaksi sentuh bebas (drag/geser manual), putar ulang, dan peralihan mode visual.
+/// Mengikuti standar sinematik 9:16 (1080x1920, 10 detik, 24 fps):
+/// - 0–2 detik: Gerbang Candi Bentar tertutup rapat, fajar hening sebelum matahari terbit,
+///   langit biru keabu-abuan dengan awan rendah dan tebal. Tanpa petir. Tangga batu di bawah.
+/// - 2–5 detik: Dua daun pintu batu andesit tebal terayun membuka ke arah luar secara perlahan
+///   dengan inersia bobot batu yang terasa. Berkas sinar emas fajar (golden god-rays) menerobos celah dan melebar.
+/// - 5–8 detik: Kamera maju pelan (slow dolly-in) melewati celah. Menyingkap panorama kerucut Gunung Merapi/Merbabu,
+///   kabut tipis di lembah, sawah berundak, dan hutan tropis. Matahari terbit tepat di belakang puncak.
+/// - 8–10 detik: Gerakan melambat lalu berhenti. Tahan frame terakhir selama 1 detik penuh untuk
+///   crossfade mulus ke layar login/utama.
+/// - Audio: Pure Foley ambient (desau angin fajar, geseran batu berat saat pintu membuka, kicauan burung pagi jauh).
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({
     super.key,
@@ -46,39 +49,41 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   late final AnimationController _ambientController;
   late final AnimationController _uiFadeController;
 
+  AudioPlayer? _ambientPlayer;
   GateOpeningVisual _selectedVisual = GateOpeningVisual.candiGate;
   bool _isGateFullyOpened = false;
+  bool _hasHapticTriggered = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Kontroler utama kinematika terbukanya gerbang (durasi 3200ms)
+    // Kontroler utama sinematik 10 detik (10,000ms)
     _gateController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3200),
+      duration: const Duration(milliseconds: 10000),
       value: widget.playGateOpen ? 0.0 : 1.0,
     );
 
-    // Kontroler ambien berkelanjutan (denyut pendar surya, kabut Dieng, & partikel)
+    // Kontroler ambien berkelanjutan (denyut pendar surya, kabut lembah, & partikel)
     _ambientController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 9000),
+      duration: const Duration(milliseconds: 12000),
     )..repeat();
 
     // Kontroler fade-in antarmuka editorial di bagian bawah
     _uiFadeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 1000),
       value: widget.playGateOpen ? 0.0 : 1.0,
     );
 
     _gateController.addListener(_onGateAnimationUpdate);
 
     if (widget.playGateOpen) {
-      Future.delayed(const Duration(milliseconds: 250), () {
+      _startAmbientFoley();
+      Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) {
-          HapticFeedback.mediumImpact();
           _gateController.forward();
         }
       });
@@ -87,11 +92,40 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     }
   }
 
+  void _startAmbientFoley() async {
+    try {
+      _ambientPlayer = AudioPlayer();
+      await _ambientPlayer?.setSource(AssetSource('audio/candi_bentar_ambient_10s.wav'));
+      await _ambientPlayer?.setVolume(0.85);
+      await _ambientPlayer?.resume();
+    } catch (_) {
+      // Graceful fallback jika audio service sedang tidak aktif atau di mode test
+    }
+  }
+
+  void _stopAmbientFoley() {
+    try {
+      _ambientPlayer?.stop();
+      _ambientPlayer?.dispose();
+      _ambientPlayer = null;
+    } catch (_) {}
+  }
+
   void _onGateAnimationUpdate() {
-    if (_gateController.value >= 0.70 && !_isGateFullyOpened) {
+    final t = _gateController.value;
+
+    // Haptic feedback saat pintu batu mulai bergeser (t = 0.20 atau 2.0 detik)
+    if (t >= 0.20 && t < 0.23 && !_hasHapticTriggered) {
+      _hasHapticTriggered = true;
+      HapticFeedback.heavyImpact();
+    } else if (t < 0.15) {
+      _hasHapticTriggered = false;
+    }
+
+    if (t >= 0.80 && !_isGateFullyOpened) {
       setState(() => _isGateFullyOpened = true);
       _uiFadeController.forward();
-    } else if (_gateController.value < 0.65 && _isGateFullyOpened) {
+    } else if (t < 0.75 && _isGateFullyOpened) {
       setState(() => _isGateFullyOpened = false);
       _uiFadeController.reverse();
     }
@@ -101,6 +135,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Pra-muat aset gambar ke GPU memori untuk render 60fps tanpa jeda
+    precacheImage(
+      const AssetImage('assets/images/candi_bentar_closed_predawn.jpg'),
+      context,
+    );
+    precacheImage(
+      const AssetImage('assets/images/candi_gate_merapi_dawn.jpg'),
+      context,
+    );
     precacheImage(
       const AssetImage('assets/images/temple_gate_left.png'),
       context,
@@ -117,14 +159,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       const AssetImage('assets/images/buddha_hand_right.png'),
       context,
     );
-    precacheImage(
-      const AssetImage('assets/images/candi_gate_mountain_dawn.png'),
-      context,
-    );
   }
 
   @override
   void dispose() {
+    _stopAmbientFoley();
     _gateController.removeListener(_onGateAnimationUpdate);
     _gateController.dispose();
     _ambientController.dispose();
@@ -136,7 +175,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     HapticFeedback.lightImpact();
     _gateController.animateTo(
       1.0,
-      duration: const Duration(milliseconds: 450),
+      duration: const Duration(milliseconds: 650),
       curve: Curves.easeOutCubic,
     );
   }
@@ -145,6 +184,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     HapticFeedback.mediumImpact();
     setState(() => _isGateFullyOpened = false);
     _uiFadeController.reset();
+    _hasHapticTriggered = false;
+    _startAmbientFoley();
     _gateController.forward(from: 0.0);
   }
 
@@ -158,6 +199,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   }
 
   void _onPrimaryExplore() {
+    _stopAmbientFoley();
     HapticFeedback.selectionClick();
     Navigator.of(context).pushReplacement(
       fadeSlideRoute(const HomeScreen()),
@@ -165,6 +207,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   }
 
   void _onLoginAction() {
+    _stopAmbientFoley();
     HapticFeedback.lightImpact();
     Navigator.of(context).push(
       fadeSlideRoute(const LoginScreen()),
@@ -172,6 +215,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   }
 
   void _onSignUpAction() {
+    _stopAmbientFoley();
     HapticFeedback.lightImpact();
     Navigator.of(context).push(
       fadeSlideRoute(const SignUpScreen()),
@@ -203,11 +247,31 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             final gateT = _gateController.value;
             final ambientT = _ambientController.value;
 
-            // Kurva dinamis kinematika pembukaan (easeInOutCubic)
-            final openProgress = Curves.easeInOutCubic.transform(gateT);
+            // ============================================================
+            // LINIMASA 10 DETIK (0.00 - 1.00):
+            // 0–2s (0.00-0.20): Gerbang tertutup rapat, fajar hening.
+            // 2–5s (0.20-0.50): Pintu membuka perlahan dengan inersia batu.
+            // 5–8s (0.50-0.80): Slow dolly-in kamera maju menembus gerbang.
+            // 8–10s (0.80-1.00): Gerakan melambat, tahan 1 detik, fade-in UI.
+            // ============================================================
+
+            // Progress pembukaan daun gerbang (2-5s)
+            double openProgress = 0.0;
+            if (gateT > 0.20) {
+              final rawOpen = ((gateT - 0.20) / 0.30).clamp(0.0, 1.0);
+              openProgress = Curves.easeInOutCubic.transform(rawOpen);
+            }
+
+            // Kamera Slow Dolly-In (5-8s)
+            double cameraDolly = 0.0;
+            if (gateT > 0.50) {
+              final rawDolly = ((gateT - 0.50) / 0.30).clamp(0.0, 1.0);
+              cameraDolly = Curves.easeInOutQuad.transform(rawDolly);
+            }
+            final cameraScale = 1.0 + (cameraDolly * 0.12);
 
             // ============================================================
-            // PERHITUNGAN GEOMETRI & KINEMATIKA 3D (DARI TERTUTUP KE TERBUKA)
+            // PERHITUNGAN GEOMETRI & KINEMATIKA 3D
             // ============================================================
             double leftTargetX;
             double rightTargetX;
@@ -218,32 +282,31 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             Matrix4 rightMatrix;
 
             if (_selectedVisual == GateOpeningVisual.candiGate) {
-              // Dimensi pilar gerbang candi bentar
               elemHeight = (h * 0.72).clamp(420.0, 680.0);
               elemWidth = elemHeight * (512.0 / 1024.0); // Rasio 0.5
               targetY = (h * 0.08).clamp(30.0, 90.0);
 
-              // Posisi tertutup rapat di tengah vs posisi terbuka membingkai layar
+              // Posisi tertutup rapat di tengah vs terbuka membingkai layar
               final leftClosedX = centerX - elemWidth + 2.0;
               final rightClosedX = centerX - 2.0;
-              final leftOpenX = -elemWidth * 0.58;
-              final rightOpenX = w - (elemWidth * 0.42);
+              final leftOpenX = -elemWidth * 0.62;
+              final rightOpenX = w - (elemWidth * 0.38);
 
               leftTargetX = ui.lerpDouble(leftClosedX, leftOpenX, openProgress)!;
               rightTargetX = ui.lerpDouble(rightClosedX, rightOpenX, openProgress)!;
 
-              // Rotasi 3D perspektif gerbang batu saat membuka ke luar
-              final yawLeft = ui.lerpDouble(0.0, -0.42, openProgress)!;
-              final yawRight = ui.lerpDouble(0.0, 0.42, openProgress)!;
-              final pitch = 0.018 * openProgress;
+              // Rotasi 3D perspektif gerbang batu andesit tebal
+              final yawLeft = ui.lerpDouble(0.0, -0.45, openProgress)!;
+              final yawRight = ui.lerpDouble(0.0, 0.45, openProgress)!;
+              final pitch = 0.015 * openProgress;
 
               leftMatrix = Matrix4.identity()
-                ..setEntry(3, 2, 0.0015)
+                ..setEntry(3, 2, 0.0012)
                 ..rotateX(pitch)
                 ..rotateY(yawLeft);
 
               rightMatrix = Matrix4.identity()
-                ..setEntry(3, 2, 0.0015)
+                ..setEntry(3, 2, 0.0012)
                 ..rotateX(pitch)
                 ..rotateY(yawRight);
             } else {
@@ -254,7 +317,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               elemWidth = leftW;
               targetY = (h * 0.22).clamp(140.0, 240.0);
 
-              // Posisi tertutup rapat di tengah (Anjali Mudra) vs terbuka membingkai candi
               final leftClosedX = centerX - leftW + 3.0;
               final rightClosedX = centerX - 3.0;
               final leftOpenX = -leftW * 0.58;
@@ -263,7 +325,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               leftTargetX = ui.lerpDouble(leftClosedX, leftOpenX, openProgress)!;
               rightTargetX = ui.lerpDouble(rightClosedX, rightOpenX, openProgress)!;
 
-              // Rotasi 3D telapak tangan dari tegak merapat menuju miring anggun di pojok
               final yawLeft = ui.lerpDouble(0.015, -0.48, openProgress)!;
               final yawRight = ui.lerpDouble(-0.015, 0.48, openProgress)!;
               final rollLeft = ui.lerpDouble(0.0, -0.18, openProgress)!;
@@ -280,12 +341,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 ..rotateZ(rollRight);
             }
 
-            // Dolly Zoom Kamera Maju (Push-Through Effect)
-            final cameraScale = 1.14 - (openProgress * 0.14);
-
-            // Lapisan Badai & Kegelapan Awal (Meluruh seiring gerbang membuka)
-            final stormOpacity = (1.0 - (openProgress * 1.35)).clamp(0.0, 1.0);
-
             // Berkas Sinar Emas Merekah (Golden God Rays)
             double goldenLightIntensity = 0.0;
             if (gateT >= 0.20 && gateT <= 0.85) {
@@ -295,6 +350,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 goldenLightIntensity = (1.0 - ((gateT - 0.45) / 0.40)).clamp(0.0, 1.0);
               }
             }
+
+            // Opasitas lapisan gerbang tertutup awal (0-2s)
+            final closedGateOpacity = (1.0 - (openProgress * 2.2)).clamp(0.0, 1.0);
 
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
@@ -307,18 +365,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 fit: StackFit.expand,
                 children: [
                   // ============================================================
-                  // 1. LATAR BELAKANG PANORAMA CANDI & FAJAR GUNUNG DIENG
+                  // 1. PANORAMA GUNUNG MERAPI & SURYA FAJAR (5-8s & 8-10s)
                   // ============================================================
                   Positioned.fill(
                     child: Transform.scale(
                       scale: cameraScale,
                       alignment: Alignment.center,
                       child: Image.asset(
-                        'assets/images/candi_gate_mountain_dawn.png',
+                        'assets/images/candi_gate_merapi_dawn.jpg',
                         fit: BoxFit.cover,
                         alignment: Alignment.center,
                         errorBuilder: (_, _, _) => Image.asset(
-                          'assets/images/candi_3d_cinema.jpg',
+                          'assets/images/candi_gate_mountain_dawn.png',
                           fit: BoxFit.cover,
                           alignment: Alignment.center,
                         ),
@@ -326,20 +384,20 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ),
                   ),
 
-                  // Pendaran Surya Fajar Keemasan di Balik Puncak Pegunungan
+                  // Pendaran Surya Fajar di Balik Puncak Gunung Merapi
                   Positioned.fill(
                     child: CustomPaint(
-                      painter: _DiengSunsetGlowPainter(
+                      painter: _MerapiSunriseGlowPainter(
                         ambientTime: ambientT,
                         openProgress: openProgress,
                       ),
                     ),
                   ),
 
-                  // Kabut Pegunungan Dieng Merayap Lembut (Parallax Mist)
+                  // Kabut Lembah & Sawah Berundak Merayap Lembut (Valley Mist)
                   Positioned.fill(
                     child: CustomPaint(
-                      painter: _DiengParallaxMistPainter(
+                      painter: _ValleyMistPainter(
                         time: ambientT,
                         openProgress: openProgress,
                       ),
@@ -358,36 +416,27 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ),
 
                   // ============================================================
-                  // 2. LAPISAN BADAI KOSMIK & KILATAN AWAL (Part 1: Storm Clouds)
+                  // 2. GERBANG TERTUTUP RAPAT PRE-DAWN (0-2s)
                   // ============================================================
-                  if (stormOpacity > 0.0) ...[
+                  if (closedGateOpacity > 0.0) ...[
                     Positioned.fill(
                       child: Opacity(
-                        opacity: stormOpacity,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                const Color(0xFF040207),
-                                const Color(0xFF0C0717).withValues(alpha: 0.95),
-                                const Color(0xFF140C26).withValues(alpha: 0.88),
-                                const Color(0xFF060309),
-                              ],
-                              stops: const [0.0, 0.32, 0.70, 1.0],
-                            ),
-                          ),
+                        opacity: closedGateOpacity,
+                        child: Image.asset(
+                          'assets/images/candi_bentar_closed_predawn.jpg',
+                          fit: BoxFit.cover,
+                          alignment: Alignment.center,
+                          errorBuilder: (_, _, _) => const SizedBox.shrink(),
                         ),
                       ),
                     ),
 
-                    // Awan Badai Berputar
+                    // Awan Rendah Tebal Fajar Biru-Keabuan (Tanpa Petir)
                     Positioned.fill(
                       child: Opacity(
-                        opacity: stormOpacity,
+                        opacity: closedGateOpacity,
                         child: CustomPaint(
-                          painter: _StormCloudscapePainter(
+                          painter: _PreDawnAtmospherePainter(
                             progress: gateT,
                           ),
                         ),
@@ -412,7 +461,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ),
 
                   // ============================================================
-                  // 4. KEDUA ELEMEN PEMBUKA (DAUN GERBANG / TANGAN BUDDHA 3D)
+                  // 4. DUA DAUN PINTU GERBANG BATU ANDESIT 3D (2-5s)
                   // ============================================================
                   if (openProgress < 0.98) ...[
                     // --- BAGIAN KIRI ---
@@ -430,10 +479,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withValues(
-                                    alpha: (0.75 * (1.0 - openProgress)).clamp(0.0, 0.75),
+                                    alpha: (0.80 * (1.0 - openProgress)).clamp(0.0, 0.80),
                                   ),
-                                  blurRadius: 28,
-                                  offset: const Offset(-8, 12),
+                                  blurRadius: 32,
+                                  offset: const Offset(-10, 14),
                                 ),
                               ],
                             ),
@@ -465,10 +514,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withValues(
-                                    alpha: (0.75 * (1.0 - openProgress)).clamp(0.0, 0.75),
+                                    alpha: (0.80 * (1.0 - openProgress)).clamp(0.0, 0.80),
                                   ),
-                                  blurRadius: 28,
-                                  offset: const Offset(8, 12),
+                                  blurRadius: 32,
+                                  offset: const Offset(10, 14),
                                 ),
                               ],
                             ),
@@ -537,7 +586,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                                 ),
                                                 SizedBox(width: 5),
                                                 Text(
-                                                  'Buka Gerbang',
+                                                  'Putar Sinematik',
                                                   style: TextStyle(
                                                     fontSize: 10.5,
                                                     fontWeight: FontWeight.w600,
@@ -892,7 +941,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 }
 
 // ============================================================================
-// CUSTOM PAINTERS: Golden God-Rays, Sunlight Motes, Mist, & Storm Cloudscape
+// CUSTOM PAINTERS: Golden God-Rays, Sunlight Motes, Mist, & Pre-Dawn Atmosphere
 // ============================================================================
 
 /// Melukis berkas cahaya surya emas (Golden God Rays) memancar dari celah tengah
@@ -990,9 +1039,9 @@ class _SunlightMotesPainter extends CustomPainter {
       old.time != time || old.progress != progress;
 }
 
-/// Melukis pendar surya senja/fajar lembut di balik puncak pegunungan
-class _DiengSunsetGlowPainter extends CustomPainter {
-  _DiengSunsetGlowPainter({
+/// Melukis pendar surya fajar lembut di balik puncak Gunung Merapi
+class _MerapiSunriseGlowPainter extends CustomPainter {
+  _MerapiSunriseGlowPainter({
     required this.ambientTime,
     required this.openProgress,
   });
@@ -1005,31 +1054,32 @@ class _DiengSunsetGlowPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    final sunCenter = Offset(w * 0.50, h * 0.40);
+    // Posisi puncak kerucut Merapi di sepertiga tengah
+    final sunCenter = Offset(w * 0.50, h * 0.38);
     final pulse = 1.0 + 0.05 * math.sin(ambientTime * 2 * math.pi);
-    final glowRadius = (w * 0.68) * pulse;
+    final glowRadius = (w * 0.72) * pulse;
 
     final glowPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          Color.fromRGBO(245, 215, 160, 0.36 * openProgress),
-          Color.fromRGBO(190, 140, 160, 0.16 * openProgress),
+          Color.fromRGBO(255, 220, 150, 0.42 * openProgress),
+          Color.fromRGBO(220, 150, 160, 0.20 * openProgress),
           Colors.transparent,
         ],
-        stops: const [0.0, 0.45, 1.0],
+        stops: const [0.0, 0.48, 1.0],
       ).createShader(Rect.fromCircle(center: sunCenter, radius: glowRadius));
 
     canvas.drawCircle(sunCenter, glowRadius, glowPaint);
   }
 
   @override
-  bool shouldRepaint(covariant _DiengSunsetGlowPainter old) =>
+  bool shouldRepaint(covariant _MerapiSunriseGlowPainter old) =>
       old.ambientTime != ambientTime || old.openProgress != openProgress;
 }
 
-/// Melukis lapisan kabut Dataran Tinggi Dieng yang merayap di atas air
-class _DiengParallaxMistPainter extends CustomPainter {
-  _DiengParallaxMistPainter({
+/// Melukis lapisan kabut lembah dan sawah berundak yang merayap tenang
+class _ValleyMistPainter extends CustomPainter {
+  _ValleyMistPainter({
     required this.time,
     required this.openProgress,
   });
@@ -1048,39 +1098,39 @@ class _DiengParallaxMistPainter extends CustomPainter {
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 38)
       ..style = PaintingStyle.fill;
 
-    // Lapisan 1: Halimun melayang di sekitar dasar gerbang candi
-    final offset1 = math.sin(time * 2 * math.pi) * 30.0;
-    mistPaint.color = Color.fromRGBO(210, 200, 215, 0.16 * openProgress);
+    // Lapisan 1: Kabut fajar di lembah sawah berundak
+    final offset1 = math.sin(time * 2 * math.pi) * 28.0;
+    mistPaint.color = Color.fromRGBO(215, 210, 225, 0.18 * openProgress);
     canvas.drawOval(
       Rect.fromCenter(
-        center: Offset(w * 0.46 + offset1, h * 0.58),
-        width: w * 1.15,
-        height: 60,
+        center: Offset(w * 0.48 + offset1, h * 0.56),
+        width: w * 1.20,
+        height: 65,
       ),
       mistPaint,
     );
 
-    // Lapisan 2: Kabut dingin tipis di atas permukaan air
-    final offset2 = math.cos(time * 2 * math.pi * 0.75) * 26.0;
-    mistPaint.color = Color.fromRGBO(170, 185, 205, 0.12 * openProgress);
+    // Lapisan 2: Halimun tipis di atas pepohonan hutan
+    final offset2 = math.cos(time * 2 * math.pi * 0.75) * 24.0;
+    mistPaint.color = Color.fromRGBO(175, 195, 210, 0.14 * openProgress);
     canvas.drawOval(
       Rect.fromCenter(
-        center: Offset(w * 0.54 + offset2, h * 0.72),
-        width: w * 1.25,
-        height: 70,
+        center: Offset(w * 0.52 + offset2, h * 0.70),
+        width: w * 1.30,
+        height: 75,
       ),
       mistPaint,
     );
   }
 
   @override
-  bool shouldRepaint(covariant _DiengParallaxMistPainter old) =>
+  bool shouldRepaint(covariant _ValleyMistPainter old) =>
       old.time != time || old.openProgress != openProgress;
 }
 
-/// Melukis awan badai berputar di langit atas
-class _StormCloudscapePainter extends CustomPainter {
-  _StormCloudscapePainter({
+/// Melukis awan rendah dan tebal sebelum fajar (0-2s, tanpa petir)
+class _PreDawnAtmospherePainter extends CustomPainter {
+  _PreDawnAtmospherePainter({
     required this.progress,
   });
 
@@ -1092,31 +1142,33 @@ class _StormCloudscapePainter extends CustomPainter {
     final h = size.height;
 
     final cloudPaint = Paint()
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 32)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 36)
       ..style = PaintingStyle.fill;
 
-    cloudPaint.color = const Color.fromRGBO(16, 10, 28, 0.65);
+    // Awan rendah tebal biru-keabu-abuan fajar yang tenang (tanpa petir)
+    cloudPaint.color = const Color.fromRGBO(24, 30, 42, 0.60);
     canvas.drawOval(
       Rect.fromCenter(
         center: Offset(w * 0.35, h * 0.18),
-        width: w * 0.90,
-        height: 110,
+        width: w * 0.95,
+        height: 120,
       ),
       cloudPaint,
     );
 
-    cloudPaint.color = const Color.fromRGBO(26, 16, 42, 0.55);
+    cloudPaint.color = const Color.fromRGBO(30, 36, 48, 0.50);
     canvas.drawOval(
       Rect.fromCenter(
-        center: Offset(w * 0.72, h * 0.22),
-        width: w * 0.85,
-        height: 100,
+        center: Offset(w * 0.70, h * 0.22),
+        width: w * 0.90,
+        height: 110,
       ),
       cloudPaint,
     );
   }
 
   @override
-  bool shouldRepaint(covariant _StormCloudscapePainter old) =>
+  bool shouldRepaint(covariant _PreDawnAtmospherePainter old) =>
       old.progress != progress;
 }
+
