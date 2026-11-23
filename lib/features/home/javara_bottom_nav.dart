@@ -18,15 +18,20 @@ class NavItemData {
   final bool isPill;
 }
 
-/// Bar navigasi bawah 4-tab docked khas JAVARA berdesain retail minimalis (Uniqlo/H&M clarity).
+/// Floating Capsule Bottom Navigation Bar khas JAVARA berdesain retail luxury adiluhung.
 ///
-/// Karakteristik Anti-AI-Slop:
-/// 1. Flat, docked container dengan warna permukaan solid yang menyatu dengan tema aplikasi.
-/// 2. Border hairline 1px di sisi atas tanpa drop-shadow tebal, tanpa gradasi dekoratif, dan tanpa efek glow.
-/// 3. Ikon outline bersih saat inaktif, ikon filled solid saat aktif.
-/// 4. Label tipografi Inter 11.5sp semi-bold berkontras tinggi dengan penanganan SafeArea bottom yang presisi.
-/// 5. Menggunakan FittedBox protektif sehingga 100% bebas RenderFlex overflow di layar sempit (300px - 412px)
-///    maupun skala teks besar (hingga 2.0x).
+/// Karakteristik Desain (Anti-AI-Slop & Editorial Parity):
+/// 1. Floating Stadium Capsule: Mengambang di atas bottom SafeArea dengan margin samping 16dp
+///    dan sudut kurva continuous capsule (`BorderRadius.circular(36)`).
+/// 2. Luxury Obsidian Surface: Permukaan solid gelap mewah (`#161311`), dibingkai border hairline
+///    emas Jawa Tengah halus (`Color(0x33DFB76C)`) serta ambient shadow lembut.
+/// 3. Center Hero Action (Hanger Pill): Tombol pil stadium oval di posisi tengah (`#261D16`)
+///    dengan outline emas solid (`Color(0xFFDFB76C)`) yang memuat ikon gantungan busana adat (hanger)
+///    tanpa teks label di bawahnya.
+/// 4. Indikator Titik Aktif: Dot emas (`#FED897`) berukuran 3.5px yang muncul tepat di bawah
+///    teks label tab yang sedang aktif, tanpa menyebabkan layout shift.
+/// 5. 100% Bebas RenderFlex Overflow: Diproteksi dengan FittedBox dan Flexible agar tetap stabil
+///    di layar sekecil 300px hingga skala teks 2.0x.
 class JavaraBottomNav extends StatelessWidget {
   const JavaraBottomNav({
     super.key,
@@ -39,44 +44,62 @@ class JavaraBottomNav extends StatelessWidget {
   final ValueChanged<int> onChanged;
   final List<NavItemData> items;
 
-  static const double _barHeight = 58.0;
+  static const double _barHeight = 64.0;
 
   @override
   Widget build(BuildContext context) {
-    // Palet warna retail editorial JAVARA
-    // Permukaan solid gelap mewah, border hairline tipis, warna aktif emas soga adiluhung
-    const surfaceColor = Color(0xFF14100D);
-    const hairlineBorderColor = Color(0x33DFB76C);
-    const activeColor = Color(0xFFFFDF9E);
-    const inactiveColor = Color(0xFF8F8073);
+    // Palet warna editorial retail mewah JAVARA
+    const surfaceColor = Color(0xFF161311);
+    const capsuleBorderColor = Color(0x33DFB76C);
+    const activeColor = Color(0xFFFED897);
+    const inactiveColor = Color(0xFF8F857B);
+    const pillBgColor = Color(0xFF261D16);
+    const pillBorderColor = Color(0xFFDFB76C);
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: surfaceColor,
-        border: Border(
-          top: BorderSide(
-            color: hairlineBorderColor,
+    return SafeArea(
+      top: false,
+      bottom: true,
+      child: Container(
+        height: _barHeight,
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+        decoration: BoxDecoration(
+          color: surfaceColor,
+          borderRadius: BorderRadius.circular(36.0),
+          border: Border.all(
+            color: capsuleBorderColor,
             width: 1.0,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.45),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
-      ),
-      child: SafeArea(
-        top: false,
-        bottom: true,
-        child: SizedBox(
-          height: _barHeight,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(36.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               for (var i = 0; i < items.length; i++)
                 Expanded(
-                  child: _buildNavItem(
-                    context: context,
-                    itemIndex: i,
-                    isSelected: i == index,
-                    activeColor: activeColor,
-                    inactiveColor: inactiveColor,
-                  ),
+                  child: items[i].isPill
+                      ? _buildPillItem(
+                          context: context,
+                          itemIndex: i,
+                          isSelected: i == index,
+                          pillBgColor: pillBgColor,
+                          pillBorderColor: pillBorderColor,
+                          activeColor: activeColor,
+                        )
+                      : _buildStandardNavItem(
+                          context: context,
+                          itemIndex: i,
+                          isSelected: i == index,
+                          activeColor: activeColor,
+                          inactiveColor: inactiveColor,
+                        ),
                 ),
             ],
           ),
@@ -85,7 +108,68 @@ class JavaraBottomNav extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem({
+  /// Membangun tombol aksi tengah berbentuk kapsul pil dengan outline emas (Hanger Hero)
+  Widget _buildPillItem({
+    required BuildContext context,
+    required int itemIndex,
+    required bool isSelected,
+    required Color pillBgColor,
+    required Color pillBorderColor,
+    required Color activeColor,
+  }) {
+    final item = items[itemIndex];
+
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: item.label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          splashColor: activeColor.withAlpha(30),
+          highlightColor: Colors.transparent,
+          onTap: () {
+            if (!isSelected) {
+              HapticFeedback.selectionClick();
+            }
+            onChanged(itemIndex);
+          },
+          child: Center(
+            child: Container(
+              width: 62,
+              height: 40,
+              decoration: BoxDecoration(
+                color: pillBgColor,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected ? activeColor : pillBorderColor,
+                  width: isSelected ? 1.4 : 1.1,
+                ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: activeColor.withAlpha(40),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                item.activeIcon,
+                size: 23,
+                color: isSelected ? activeColor : const Color(0xFFE4C590),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Membangun item navigasi standar (Icon + Label + Indikator Titik Aktif)
+  Widget _buildStandardNavItem({
     required BuildContext context,
     required int itemIndex,
     required bool isSelected,
@@ -110,7 +194,7 @@ class JavaraBottomNav extends StatelessWidget {
             onChanged(itemIndex);
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
@@ -118,12 +202,12 @@ class JavaraBottomNav extends StatelessWidget {
                 // Ikon Navigasi: Clean outline saat inaktif, filled solid saat aktif
                 Icon(
                   isSelected ? item.activeIcon : item.inactiveIcon,
-                  size: 22,
+                  size: 21,
                   color: isSelected ? activeColor : inactiveColor,
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 2),
 
-                // Label Teks: Inter 11.5sp, semi-bold saat aktif, terproteksi FittedBox
+                // Label Teks: Inter 11sp, semi-bold saat aktif, terproteksi FittedBox
                 Flexible(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
@@ -131,12 +215,24 @@ class JavaraBottomNav extends StatelessWidget {
                       item.label,
                       maxLines: 1,
                       style: JText.sans(
-                        11.5,
+                        11.0,
                         weight: isSelected ? FontWeight.w600 : FontWeight.w500,
                         color: isSelected ? activeColor : inactiveColor,
                         letterSpacing: 0.1,
                       ),
                     ),
+                  ),
+                ),
+                const SizedBox(height: 2.5),
+
+                // Dot Indikator: Titik emas 3.5px saat aktif (tetap memakan ruang saat inaktif agar anti-shift)
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 3.5,
+                  height: 3.5,
+                  decoration: BoxDecoration(
+                    color: isSelected ? activeColor : Colors.transparent,
+                    shape: BoxShape.circle,
                   ),
                 ),
               ],

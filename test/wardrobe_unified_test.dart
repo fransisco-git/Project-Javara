@@ -16,8 +16,8 @@ void main() {
     SavedGarmentsService.instance.savedOutfitsNotifier.value = [];
   });
 
-  group('4-Tab Bottom Navigation Bar & HomeScreen Tests', () {
-    testWidgets('HomeScreen renders exactly 4 docked tabs: Beranda, Koleksi, Wardrobe, Profil', (
+  group('5-Tab Floating Capsule Navigation Bar & HomeScreen Tests', () {
+    testWidgets('HomeScreen renders exactly 5 tabs: Beranda, Koleksi, Hero Hanger Pill, Tersimpan, Profil', (
       tester,
     ) async {
       tester.view.physicalSize = const Size(720, 1280);
@@ -30,13 +30,16 @@ void main() {
       );
       await tester.pump();
 
-      // Verifikasi persis 4 label tab
+      // Verifikasi 4 label teks tab standar
       expect(find.text('Beranda'), findsOneWidget);
       expect(find.text('Koleksi'), findsOneWidget);
-      expect(find.text('Wardrobe'), findsOneWidget);
+      expect(find.text('Tersimpan'), findsOneWidget);
       expect(find.text('Profil'), findsOneWidget);
 
-      // Verifikasi tidak ada tab "Jelajah" atau tab ke-5
+      // Verifikasi tombol hero hanger pill di tengah (berbasis semantic / ikon)
+      expect(find.byIcon(Icons.checkroom_outlined), findsOneWidget);
+
+      // Verifikasi tidak ada label tab lama yang tidak ada di desain baru
       expect(find.text('Jelajah'), findsNothing);
       expect(find.text('Katalog'), findsNothing);
 
@@ -45,13 +48,20 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      // Switch ke Tab Wardrobe (Tab 2)
-      await tester.tap(find.text('Wardrobe'));
+      // Switch ke Tab Wardrobe Hero Pill (Tab 2)
+      await tester.tap(find.byIcon(Icons.checkroom_outlined));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('Wardrobe Pribadi'), findsOneWidget);
       expect(find.text('Kanvas Gaya'), findsOneWidget);
+
+      // Switch ke Tab Tersimpan (Tab 3)
+      await tester.tap(find.text('Tersimpan'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('Item Tersimpan'), findsOneWidget);
 
       // Pastikan timer di HomeTab selesai
       await tester.pump(const Duration(seconds: 2));

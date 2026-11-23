@@ -8,8 +8,8 @@ import 'home_tab.dart';
 import 'javara_bottom_nav.dart';
 import 'profile_tab.dart';
 
-/// Kerangka utama setelah login: 4 tab fokus busana Jawa Tengah + bar navigasi docked.
-/// Tab: Beranda · Koleksi · Wardrobe · Profil
+/// Kerangka utama setelah login: 5 tab fokus busana Jawa Tengah + floating capsule navigation bar.
+/// Tab: Beranda · Koleksi · Wardrobe (Center Hero Pill) · Tersimpan · Profil
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -33,8 +33,14 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     NavItemData(
       label: 'Wardrobe',
-      activeIcon: Icons.checkroom_rounded,
+      activeIcon: Icons.checkroom_outlined,
       inactiveIcon: Icons.checkroom_outlined,
+      isPill: true,
+    ),
+    NavItemData(
+      label: 'Tersimpan',
+      activeIcon: Icons.bookmark_rounded,
+      inactiveIcon: Icons.bookmark_outline_rounded,
     ),
     NavItemData(
       label: 'Profil',
@@ -70,6 +76,11 @@ class _HomeScreenState extends State<HomeScreen> {
               const ClothingCatalogScreen(isTab: true),
               WardrobeTab(
                 onOpenCatalog: () => setState(() => _index = 1),
+                initialSegment: 0,
+              ),
+              WardrobeTab(
+                onOpenCatalog: () => setState(() => _index = 1),
+                initialSegment: 1,
               ),
               JBackground(
                 variant: HeritageBackgroundVariant.profile,

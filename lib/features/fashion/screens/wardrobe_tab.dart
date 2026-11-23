@@ -21,9 +21,11 @@ class WardrobeTab extends StatefulWidget {
   const WardrobeTab({
     super.key,
     this.onOpenCatalog,
+    this.initialSegment = 0,
   });
 
   final VoidCallback? onOpenCatalog;
+  final int initialSegment;
 
   @override
   State<WardrobeTab> createState() => _WardrobeTabState();
@@ -42,8 +44,19 @@ class _WardrobeTabState extends State<WardrobeTab> {
   @override
   void initState() {
     super.initState();
+    _segmentIndex = widget.initialSegment;
     _applyDefaultCanvasOutfit(GenderTarget.pria);
     SavedGarmentsService.instance.initialize();
+  }
+
+  @override
+  void didUpdateWidget(covariant WardrobeTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialSegment != widget.initialSegment) {
+      setState(() {
+        _segmentIndex = widget.initialSegment;
+      });
+    }
   }
 
   void _applyDefaultCanvasOutfit(GenderTarget gender) {
