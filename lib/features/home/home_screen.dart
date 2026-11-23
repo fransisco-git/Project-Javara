@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/theme.dart';
 import '../fashion/screens/clothing_catalog_screen.dart';
+import '../fashion/screens/tersimpan_tab.dart';
 import '../fashion/screens/wardrobe_tab.dart';
 import 'home_tab.dart';
 import 'javara_bottom_nav.dart';
@@ -78,9 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 onOpenCatalog: () => setState(() => _index = 1),
                 initialSegment: 0,
               ),
-              WardrobeTab(
+              TersimpanTab(
                 onOpenCatalog: () => setState(() => _index = 1),
-                initialSegment: 1,
+                onOpenWardrobe: () => setState(() => _index = 2),
               ),
               JBackground(
                 variant: HeritageBackgroundVariant.profile,

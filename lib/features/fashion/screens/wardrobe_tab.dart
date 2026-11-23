@@ -47,6 +47,37 @@ class _WardrobeTabState extends State<WardrobeTab> {
     _segmentIndex = widget.initialSegment;
     _applyDefaultCanvasOutfit(GenderTarget.pria);
     SavedGarmentsService.instance.initialize();
+    SavedGarmentsService.instance.requestedEquipGarmentNotifier
+        .addListener(_onExternalEquipGarment);
+    SavedGarmentsService.instance.requestedEquipOutfitNotifier
+        .addListener(_onExternalApplyOutfit);
+  }
+
+  @override
+  void dispose() {
+    SavedGarmentsService.instance.requestedEquipGarmentNotifier
+        .removeListener(_onExternalEquipGarment);
+    SavedGarmentsService.instance.requestedEquipOutfitNotifier
+        .removeListener(_onExternalApplyOutfit);
+    super.dispose();
+  }
+
+  void _onExternalEquipGarment() {
+    final item =
+        SavedGarmentsService.instance.requestedEquipGarmentNotifier.value;
+    if (item != null) {
+      _equipGarment(item);
+      SavedGarmentsService.instance.requestedEquipGarmentNotifier.value = null;
+    }
+  }
+
+  void _onExternalApplyOutfit() {
+    final outfit =
+        SavedGarmentsService.instance.requestedEquipOutfitNotifier.value;
+    if (outfit != null) {
+      _applySavedOutfitToCanvas(outfit);
+      SavedGarmentsService.instance.requestedEquipOutfitNotifier.value = null;
+    }
   }
 
   @override

@@ -61,7 +61,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.text('Item Tersimpan'), findsOneWidget);
+      expect(find.text('Koleksi Tersimpan'), findsOneWidget);
+      expect(find.text('Item Busana'), findsOneWidget);
 
       // Pastikan timer di HomeTab selesai
       await tester.pump(const Duration(seconds: 2));

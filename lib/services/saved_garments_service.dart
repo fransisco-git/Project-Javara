@@ -26,6 +26,24 @@ class SavedGarmentsService {
   final ValueNotifier<List<SavedOutfit>> savedOutfitsNotifier =
       ValueNotifier<List<SavedOutfit>>([]);
 
+  /// Request reaktif untuk memasang busana ke Kanvas Wardrobe dari layar lain.
+  final ValueNotifier<ClothingItem?> requestedEquipGarmentNotifier =
+      ValueNotifier<ClothingItem?>(null);
+
+  /// Request reaktif untuk menerapkan setelan ke Kanvas Wardrobe dari layar lain.
+  final ValueNotifier<SavedOutfit?> requestedEquipOutfitNotifier =
+      ValueNotifier<SavedOutfit?>(null);
+
+  /// Meminta Wardrobe memasang busana tertentu ke kanvas.
+  void requestEquip(ClothingItem item) {
+    requestedEquipGarmentNotifier.value = item;
+  }
+
+  /// Meminta Wardrobe menerapkan setelan ke kanvas.
+  void requestApplyOutfit(SavedOutfit outfit) {
+    requestedEquipOutfitNotifier.value = outfit;
+  }
+
   bool _initialized = false;
 
   /// Inisialisasi awal membaca dari penyimpanan lokal dan Supabase.
