@@ -10,27 +10,16 @@ import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
 import '../home/home_screen.dart';
 
-/// Gaya visual panorama pada Layar Selamat Datang
-enum GateOpeningVisual {
-  /// Gerbang Candi Bentar (Gerbang batu andesit kuno membuka ke panorama Merapi)
-  candiBentar,
-
-  /// Pelataran Candi Borobudur terbuka (Patung Buddha di sisi kiri + Gunung Merapi fajar)
-  borobudurTerrace,
-}
-
-/// Layar Selamat Datang JAVARA — Cinematic 10s 9:16 Candi Bentar Dawn Opening.
+/// Layar Selamat Datang JAVARA — Cinematic 9:16 First-Person Candi Bentar Walk-Through Opening.
 ///
-/// Mengikuti standar sinematik 9:16 (1080x1920, 10 detik, 24 fps):
-/// - 0–2 detik: Gerbang Candi Bentar tertutup rapat, fajar hening sebelum matahari terbit,
-///   langit biru keabu-abuan dengan awan rendah dan tebal. Tanpa petir. Tangga batu di bawah.
-/// - 2–5 detik: Dua daun pintu batu andesit tebal terayun membuka ke arah luar secara perlahan
-///   dengan inersia bobot batu yang terasa. Berkas sinar emas fajar (golden god-rays) menerobos celah dan melebar.
-/// - 5–8 detik: Kamera maju pelan (slow dolly-in) melewati celah. Menyingkap panorama kerucut Gunung Merapi/Merbabu,
-///   kabut tipis di lembah, sawah berundak, dan hutan tropis. Matahari terbit tepat di belakang puncak.
-/// - 8–10 detik: Gerakan melambat lalu berhenti. Tahan frame terakhir selama 1 detik penuh untuk
-///   crossfade mulus ke layar login/utama.
-/// - Audio: Pure Foley ambient (desau angin fajar, geseran batu berat saat pintu membuka, kicauan burung pagi jauh).
+/// Pengalaman sinematik pertama yang megah dan realistis:
+/// - 0–0.2s: Gerbang Candi Bentar batu andesit berdiri kokoh di tengah keheningan fajar pra-surya.
+/// - 0.2–2.2s: Dua daun pintu batu andesit berayun membuka ke luar dengan kinematika 3D perspektif.
+///   Kamera melangkah maju (first-person walk-in dolly-in), gerbang membesar dan menyibak ke samping.
+///   Celah emas fajar (golden god-rays) menerobos terang ke arah penonton.
+/// - 2.2s+: Menyingkap pelataran megah Candi Borobudur dengan Patung Dhyani Buddha di sisi kiri,
+///   stupa kuno, kabut lembah, dan puncak Gunung Merapi dengan pendar mentari fajar.
+/// - Antarmuka editorial JAVARA meluncur anggun dari bawah untuk menyambut penjelajah budaya.
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({
     super.key,
@@ -50,7 +39,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   late final AnimationController _uiFadeController;
 
   AudioPlayer? _ambientPlayer;
-  GateOpeningVisual _selectedVisual = GateOpeningVisual.candiBentar;
   bool _isGateFullyOpened = false;
   bool _hasHapticTriggered = false;
   double _pointerX = 0.0;
@@ -195,15 +183,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     _gateController.forward(from: 0.0);
   }
 
-  void _toggleVisualMode() {
-    HapticFeedback.selectionClick();
-    setState(() {
-      _selectedVisual = _selectedVisual == GateOpeningVisual.candiBentar
-          ? GateOpeningVisual.borobudurTerrace
-          : GateOpeningVisual.candiBentar;
-    });
-  }
-
   void _onPrimaryExplore() {
     _stopAmbientFoley();
     HapticFeedback.selectionClick();
@@ -253,65 +232,67 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             final gateT = _gateController.value;
             final ambientT = _ambientController.value;
 
-            // Progress pembukaan daun gerbang (0.12 - 0.60)
+            // Fajar hening pra-surya (0.0 - 0.08s) -> Gerbang batu andesit mulai berayun membuka (0.08 - 0.68s)
             double openProgress = 0.0;
-            if (gateT > 0.12) {
-              final rawOpen = ((gateT - 0.12) / 0.48).clamp(0.0, 1.0);
+            if (gateT > 0.08) {
+              final rawOpen = ((gateT - 0.08) / 0.54).clamp(0.0, 1.0);
               openProgress = Curves.easeInOutCubic.transform(rawOpen);
             }
 
-            // Kamera Slow Dolly-In (0.45 - 0.85)
-            double cameraDolly = 0.0;
-            if (gateT > 0.45) {
-              final rawDolly = ((gateT - 0.45) / 0.40).clamp(0.0, 1.0);
-              cameraDolly = Curves.easeInOutQuad.transform(rawDolly);
-            }
-            final cameraScale = 1.0 + (cameraDolly * 0.12);
+            // Sensasi First-Person Walk-In: Kita melangkah maju melewati celah gerbang
+            // Saat melangkah masuk, gerbang membesar (scale 1.0 -> 1.48) dan menyibak ke samping melewati pandangan
+            final double walkProgress = Curves.easeOutQuad.transform(openProgress);
+            final double gateScale = 1.0 + (walkProgress * 0.46);
+            final double gateDipY = (gateScale - 1.0) * (h * 0.07);
 
-            final String panoramaAsset =
-                _selectedVisual == GateOpeningVisual.candiBentar
-                    ? 'assets/images/candi_gapura_buddha_portal.jpg'
-                    : 'assets/images/borobudur_buddha_merapi_dawn.jpg';
+            // Kamera latar belakang bergerak maju lembut (subtle dolly zoom 1.0 -> 1.09)
+            final double bgDolly = Curves.easeInOutQuad.transform(openProgress);
+            final double bgScale = 1.0 + (bgDolly * 0.09);
+
+            // Panorama tunggal otentik: Pelataran Candi Borobudur dengan Patung Buddha & Fajar Merapi
+            const String panoramaAsset = 'assets/images/borobudur_buddha_merapi_dawn.jpg';
 
             // Dimensi & Kinematika 3D Daun Pintu Batu Andesit Candi Bentar
-            final double doorWidth = centerX + 12.0;
+            final double doorWidth = centerX + 18.0;
             final double doorHeight = h;
 
-            // Daun Pintu Kiri: Rotasi 3D membuka ke arah luar (Pivot: Hinge Kiri)
-            final double yawLeft = ui.lerpDouble(0.0, -1.25, openProgress)! + (_pointerX * 0.03);
-            final double slideLeft = ui.lerpDouble(0.0, -doorWidth * 0.95, openProgress)!;
+            // Daun Pintu Kiri: Rotasi 3D membuka ke arah luar (Pivot: Engsel Kiri Luar)
+            final double yawLeft = ui.lerpDouble(0.0, -1.36, openProgress)! + (_pointerX * 0.03);
+            final double slideLeft = ui.lerpDouble(0.0, -doorWidth * 1.10, openProgress)!;
             final Matrix4 leftDoorMatrix = Matrix4.identity()
-              ..setEntry(3, 2, 0.0008)
-              ..setTranslationRaw(slideLeft, 0.0, 0.0)
-              ..rotateX(_pointerY * -0.04)
+              ..setEntry(3, 2, 0.0011)
+              ..translateByDouble(slideLeft, gateDipY, 0.0, 1.0)
+              ..scaleByDouble(gateScale, gateScale, 1.0, 1.0)
+              ..rotateX(_pointerY * -0.03)
               ..rotateY(yawLeft);
 
-            // Daun Pintu Kanan: Rotasi 3D membuka ke arah luar (Pivot: Hinge Kanan)
-            final double yawRight = ui.lerpDouble(0.0, 1.25, openProgress)! + (_pointerX * 0.03);
-            final double slideRight = ui.lerpDouble(0.0, doorWidth * 0.95, openProgress)!;
+            // Daun Pintu Kanan: Rotasi 3D membuka ke arah luar (Pivot: Engsel Kanan Luar)
+            final double yawRight = ui.lerpDouble(0.0, 1.36, openProgress)! + (_pointerX * 0.03);
+            final double slideRight = ui.lerpDouble(0.0, doorWidth * 1.10, openProgress)!;
             final Matrix4 rightDoorMatrix = Matrix4.identity()
-              ..setEntry(3, 2, 0.0008)
-              ..setTranslationRaw(slideRight, 0.0, 0.0)
-              ..rotateX(_pointerY * -0.04)
+              ..setEntry(3, 2, 0.0011)
+              ..translateByDouble(slideRight, gateDipY, 0.0, 1.0)
+              ..scaleByDouble(gateScale, gateScale, 1.0, 1.0)
+              ..rotateX(_pointerY * -0.03)
               ..rotateY(yawRight);
 
-            // Opasitas daun pintu saat terbuka penuh (fade-out anggun di akhir)
-            final double doorOpacity = openProgress < 0.70
+            // Opasitas daun pintu saat terbuka penuh (fade-out anggun ke tepi periferi)
+            final double doorOpacity = openProgress < 0.82
                 ? 1.0
-                : (1.0 - ((openProgress - 0.70) / 0.25)).clamp(0.0, 1.0);
+                : (1.0 - ((openProgress - 0.82) / 0.18)).clamp(0.0, 1.0);
 
-            // Berkas Sinar Emas Merekah (Golden God Rays)
+            // Berkas Sinar Emas Merekah (Golden God Rays) memancar dramatis dari rekahan celah tengah
             double goldenLightIntensity = 0.0;
-            if (gateT >= 0.12 && gateT <= 0.85) {
-              if (gateT < 0.38) {
-                goldenLightIntensity = ((gateT - 0.12) / 0.26).clamp(0.0, 1.0);
+            if (gateT >= 0.08 && gateT <= 0.85) {
+              if (gateT < 0.35) {
+                goldenLightIntensity = ((gateT - 0.08) / 0.27).clamp(0.0, 1.0);
               } else {
-                goldenLightIntensity = (1.0 - ((gateT - 0.38) / 0.47)).clamp(0.0, 1.0);
+                goldenLightIntensity = (1.0 - ((gateT - 0.35) / 0.50)).clamp(0.0, 1.0);
               }
             }
 
-            // Opasitas lapisan gerbang tertutup awal (0-0.12s)
-            final closedGateOpacity = (1.0 - (openProgress * 2.5)).clamp(0.0, 1.0);
+            // Opasitas lapisan gerbang tertutup pra-fajar (0 - 0.08s)
+            final closedGateOpacity = (1.0 - (openProgress * 3.2)).clamp(0.0, 1.0);
 
             return Listener(
               onPointerMove: (e) => _updatePointer(e.localPosition, size),
@@ -327,17 +308,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 children: [
                   // Panorama Megah Candi Borobudur & Fajar Merapi dengan Patung Buddha di Kiri
                   Positioned.fill(
-                    child: Transform.scale(
-                      scale: cameraScale,
-                      alignment: Alignment.center,
-                      child: Image.asset(
-                        panoramaAsset,
-                        fit: BoxFit.cover,
+                    child: Transform.translate(
+                      offset: Offset(_pointerX * -12.0, _pointerY * -8.0),
+                      child: Transform.scale(
+                        scale: bgScale,
                         alignment: Alignment.center,
-                        errorBuilder: (_, _, _) => Image.asset(
-                          'assets/images/borobudur_buddha_merapi_dawn.jpg',
+                        child: Image.asset(
+                          panoramaAsset,
                           fit: BoxFit.cover,
                           alignment: Alignment.center,
+                          errorBuilder: (_, _, _) => const SizedBox.shrink(),
                         ),
                       ),
                     ),
@@ -374,7 +354,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       ),
                     ),
 
-                  // Gerbang tertutup pra-fajar
+                  // Gerbang tertutup pra-fajar (Hening sebelum matahari terbit)
                   if (closedGateOpacity > 0.0) ...[
                     Positioned.fill(
                       child: Opacity(
@@ -401,7 +381,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ),
                   ],
 
-                  // Berkas sinar fajar emas
+                  // Berkas sinar fajar emas (God-Rays menerobos celah gerbang)
                   if (goldenLightIntensity > 0.0)
                     Positioned.fill(
                       child: IgnorePointer(
@@ -416,9 +396,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ),
 
                   // Daun pintu gerbang batu andesit 3D (Candi Bentar Jawa Kuno)
-                  if (_selectedVisual == GateOpeningVisual.candiBentar &&
-                      openProgress < 0.98 &&
-                      doorOpacity > 0.0) ...[
+                  if (openProgress < 0.99 && doorOpacity > 0.0) ...[
                     // Daun Pintu Kiri (Batu Andesit Kuno)
                     Positioned(
                       top: 0,
@@ -436,7 +414,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withValues(
-                                      alpha: (0.85 * (1.0 - openProgress)).clamp(0.0, 0.85),
+                                      alpha: (0.90 * (1.0 - openProgress)).clamp(0.0, 0.90),
                                     ),
                                     blurRadius: 36,
                                     offset: const Offset(-12, 16),
@@ -458,7 +436,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     // Daun Pintu Kanan (Batu Andesit Kuno)
                     Positioned(
                       top: 0,
-                      left: centerX - 12.0,
+                      left: centerX - 18.0,
                       width: doorWidth,
                       height: doorHeight,
                       child: IgnorePointer(
@@ -472,7 +450,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withValues(
-                                      alpha: (0.85 * (1.0 - openProgress)).clamp(0.0, 0.85),
+                                      alpha: (0.90 * (1.0 - openProgress)).clamp(0.0, 0.90),
                                     ),
                                     blurRadius: 36,
                                     offset: const Offset(12, 16),
@@ -492,7 +470,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ),
                   ],
 
-                  // Bilah kontrol atas
+                  // Bilah kontrol atas bersih dan elegan
                   Positioned(
                     top: 0,
                     left: 0,
@@ -506,7 +484,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Tombol Buka Gerbang (Putar Ulang) / Lewati
+                            // Tombol Putar Sinematik / Lewati
                             Flexible(
                               flex: 5,
                               child: FittedBox(
@@ -554,21 +532,28 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                           ),
                                         ),
                                       )
-                                    : Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0x44000000),
-                                          borderRadius: BorderRadius.circular(14),
-                                        ),
-                                        child: const Text(
-                                          'Ketuk untuk lewati',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            color: Color(0x99FFFFFF),
-                                            letterSpacing: 0.2,
+                                    : GestureDetector(
+                                        onTap: _skipToOpen,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 5,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0x44000000),
+                                            borderRadius: BorderRadius.circular(14),
+                                            border: Border.all(
+                                              color: const Color(0x22FFFFFF),
+                                              width: 0.8,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Ketuk untuk lewati',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              color: Color(0xCCFFFFFF),
+                                              letterSpacing: 0.2,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -577,7 +562,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
                             const SizedBox(width: 6),
 
-                            // Tengah: Aksara Jawa
+                            // Tengah: Aksara Jawa "Javara"
                             const Flexible(
                               flex: 3,
                               child: FittedBox(
@@ -596,51 +581,43 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
                             const SizedBox(width: 6),
 
-                            // Kanan: Switcher Mode (Candi vs Tangan Buddha)
+                            // Kanan: Foley Ambien Candi Badge
                             Flexible(
                               flex: 4,
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
                                 alignment: Alignment.centerRight,
-                                child: InkWell(
-                                  onTap: _toggleVisualMode,
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 5,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0x44000000),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: const Color(0x33DFB76C),
+                                      width: 0.8,
                                     ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0x55000000),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: const Color(0x44DFB76C),
-                                        width: 0.8,
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.graphic_eq_rounded,
+                                        size: 13,
+                                        color: Color(0xFFDFB76C),
                                       ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          _selectedVisual == GateOpeningVisual.candiBentar
-                                              ? Icons.temple_hindu_outlined
-                                              : Icons.landscape_outlined,
-                                          size: 13,
-                                          color: const Color(0xFFDFB76C),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        'Foley Candi',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFFFFDF9E),
                                         ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          _selectedVisual == GateOpeningVisual.candiBentar
-                                              ? 'Gerbang'
-                                              : 'Pelataran',
-                                          style: const TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w600,
-                                            color: Color(0xFFFFDF9E),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
