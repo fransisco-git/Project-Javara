@@ -10,13 +10,13 @@ import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
 import '../home/home_screen.dart';
 
-/// Gaya visual elemen pembuka gerbang pada Layar Selamat Datang
+/// Gaya visual panorama pada Layar Selamat Datang
 enum GateOpeningVisual {
-  /// Daun gerbang batu Candi Bentar klasik Jawa Tengah
-  candiGate,
+  /// Pelataran Candi Borobudur terbuka (Patung Buddha di sisi kiri + Gunung Merapi fajar)
+  borobudurTerrace,
 
-  /// Tangan Buddha 3D dalam gestur Anjali Mudra sembah suci
-  buddhaHands,
+  /// Gapura Paduraksa Candi Megah (Gapura Kala membingkai Buddha & Merapi)
+  gapuraCandi,
 }
 
 /// Layar Selamat Datang JAVARA — Cinematic 10s 9:16 Candi Bentar Dawn Opening.
@@ -50,7 +50,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   late final AnimationController _uiFadeController;
 
   AudioPlayer? _ambientPlayer;
-  GateOpeningVisual _selectedVisual = GateOpeningVisual.candiGate;
+  GateOpeningVisual _selectedVisual = GateOpeningVisual.borobudurTerrace;
   bool _isGateFullyOpened = false;
   bool _hasHapticTriggered = false;
 
@@ -140,23 +140,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/candi_gate_merapi_dawn.jpg'),
+      const AssetImage('assets/images/candi_door_left.png'),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/temple_gate_left.png'),
+      const AssetImage('assets/images/candi_door_right.png'),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/temple_gate_right.png'),
+      const AssetImage('assets/images/borobudur_buddha_merapi_dawn.jpg'),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/buddha_hand_left.png'),
-      context,
-    );
-    precacheImage(
-      const AssetImage('assets/images/buddha_hand_right.png'),
+      const AssetImage('assets/images/candi_gapura_buddha_portal.jpg'),
       context,
     );
   }
@@ -192,9 +188,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   void _toggleVisualMode() {
     HapticFeedback.selectionClick();
     setState(() {
-      _selectedVisual = _selectedVisual == GateOpeningVisual.candiGate
-          ? GateOpeningVisual.buddhaHands
-          : GateOpeningVisual.candiGate;
+      _selectedVisual = _selectedVisual == GateOpeningVisual.borobudurTerrace
+          ? GateOpeningVisual.gapuraCandi
+          : GateOpeningVisual.borobudurTerrace;
     });
   }
 
@@ -262,75 +258,35 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             }
             final cameraScale = 1.0 + (cameraDolly * 0.12);
 
-            double leftTargetX;
-            double rightTargetX;
-            double targetY;
-            double elemWidth;
-            double elemHeight;
-            Matrix4 leftMatrix;
-            Matrix4 rightMatrix;
+            final String panoramaAsset =
+                _selectedVisual == GateOpeningVisual.borobudurTerrace
+                    ? 'assets/images/borobudur_buddha_merapi_dawn.jpg'
+                    : 'assets/images/candi_gapura_buddha_portal.jpg';
 
-            if (_selectedVisual == GateOpeningVisual.candiGate) {
-              // Menjangkau FULL SCREEN dari ujung atas ke ujung bawah layar tanpa celah
-              elemHeight = h;
-              // Lebar daun pintu proporsional agar mencakup setengah lebar layar + sedikit overlap tengah
-              elemWidth = math.max(centerX + 24.0, h * 0.52);
-              targetY = 0.0;
+            // Dimensi & Kinematika 3D Daun Pintu Batu Andesit Candi Bentar
+            final double doorWidth = centerX + 12.0;
+            final double doorHeight = h;
 
-              // Posisi tertutup rapat di tengah vs terbuka penuh membingkai tepi layar
-              final leftClosedX = centerX - elemWidth + 2.0;
-              final rightClosedX = centerX - 2.0;
-              final leftOpenX = -elemWidth * 0.95;
-              final rightOpenX = w - (elemWidth * 0.05);
+            // Daun Pintu Kiri: Rotasi 3D membuka ke arah luar (Pivot: Hinge Kiri)
+            final double yawLeft = ui.lerpDouble(0.0, -1.25, openProgress)!;
+            final double slideLeft = ui.lerpDouble(0.0, -doorWidth * 0.95, openProgress)!;
+            final Matrix4 leftDoorMatrix = Matrix4.identity()
+              ..setEntry(3, 2, 0.0008)
+              ..setTranslationRaw(slideLeft, 0.0, 0.0)
+              ..rotateY(yawLeft);
 
-              leftTargetX = ui.lerpDouble(leftClosedX, leftOpenX, openProgress)!;
-              rightTargetX = ui.lerpDouble(rightClosedX, rightOpenX, openProgress)!;
+            // Daun Pintu Kanan: Rotasi 3D membuka ke arah luar (Pivot: Hinge Kanan)
+            final double yawRight = ui.lerpDouble(0.0, 1.25, openProgress)!;
+            final double slideRight = ui.lerpDouble(0.0, doorWidth * 0.95, openProgress)!;
+            final Matrix4 rightDoorMatrix = Matrix4.identity()
+              ..setEntry(3, 2, 0.0008)
+              ..setTranslationRaw(slideRight, 0.0, 0.0)
+              ..rotateY(yawRight);
 
-              // Rotasi 3D perspektif gerbang batu andesit tebal berskala megah
-              final yawLeft = ui.lerpDouble(0.0, -0.52, openProgress)!;
-              final yawRight = ui.lerpDouble(0.0, 0.52, openProgress)!;
-              final pitch = 0.012 * openProgress;
-
-              leftMatrix = Matrix4.identity()
-                ..setEntry(3, 2, 0.0010)
-                ..rotateX(pitch)
-                ..rotateY(yawLeft);
-
-              rightMatrix = Matrix4.identity()
-                ..setEntry(3, 2, 0.0010)
-                ..rotateX(pitch)
-                ..rotateY(yawRight);
-            } else {
-              // Dimensi tangan mudra semadi Buddha
-              elemHeight = (w * 0.78).clamp(280.0, 420.0);
-              final leftW = elemHeight * (682.0 / 735.0);
-              final rightW = elemHeight * (694.0 / 735.0);
-              elemWidth = leftW;
-              targetY = (h * 0.22).clamp(140.0, 240.0);
-
-              final leftClosedX = centerX - leftW + 3.0;
-              final rightClosedX = centerX - 3.0;
-              final leftOpenX = -leftW * 0.58;
-              final rightOpenX = w - (rightW * 0.42);
-
-              leftTargetX = ui.lerpDouble(leftClosedX, leftOpenX, openProgress)!;
-              rightTargetX = ui.lerpDouble(rightClosedX, rightOpenX, openProgress)!;
-
-              final yawLeft = ui.lerpDouble(0.015, -0.48, openProgress)!;
-              final yawRight = ui.lerpDouble(-0.015, 0.48, openProgress)!;
-              final rollLeft = ui.lerpDouble(0.0, -0.18, openProgress)!;
-              final rollRight = ui.lerpDouble(0.0, 0.18, openProgress)!;
-
-              leftMatrix = Matrix4.identity()
-                ..setEntry(3, 2, 0.0016)
-                ..rotateY(yawLeft)
-                ..rotateZ(rollLeft);
-
-              rightMatrix = Matrix4.identity()
-                ..setEntry(3, 2, 0.0016)
-                ..rotateY(yawRight)
-                ..rotateZ(rollRight);
-            }
+            // Opasitas daun pintu saat terbuka penuh (fade-out anggun di akhir)
+            final double doorOpacity = openProgress < 0.70
+                ? 1.0
+                : (1.0 - ((openProgress - 0.70) / 0.25)).clamp(0.0, 1.0);
 
             // Berkas Sinar Emas Merekah (Golden God Rays)
             double goldenLightIntensity = 0.0;
@@ -355,17 +311,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Panorama Merapi fajar
+                  // Panorama Megah Candi Borobudur & Fajar Merapi dengan Patung Buddha di Kiri
                   Positioned.fill(
                     child: Transform.scale(
                       scale: cameraScale,
                       alignment: Alignment.center,
                       child: Image.asset(
-                        'assets/images/candi_gate_merapi_dawn.jpg',
+                        panoramaAsset,
                         fit: BoxFit.cover,
                         alignment: Alignment.center,
                         errorBuilder: (_, _, _) => Image.asset(
-                          'assets/images/candi_gate_mountain_dawn.png',
+                          'assets/images/borobudur_buddha_merapi_dawn.jpg',
                           fit: BoxFit.cover,
                           alignment: Alignment.center,
                         ),
@@ -445,74 +401,74 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       ),
                     ),
 
-                  // Daun pintu gerbang batu andesit
-                  if (openProgress < 0.98) ...[
+                  // Daun pintu gerbang batu andesit 3D (Candi Bentar Jawa Kuno)
+                  if (openProgress < 0.98 && doorOpacity > 0.0) ...[
+                    // Daun Pintu Kiri (Batu Andesit Kuno)
                     Positioned(
-                      top: targetY,
-                      left: leftTargetX,
-                      width: elemWidth,
-                      height: elemHeight,
+                      top: 0,
+                      left: 0,
+                      width: doorWidth,
+                      height: doorHeight,
                       child: IgnorePointer(
-                        child: Transform(
-                          transform: leftMatrix,
-                          alignment: Alignment.centerRight,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(
-                                    alpha: (0.80 * (1.0 - openProgress)).clamp(0.0, 0.80),
+                        child: Opacity(
+                          opacity: doorOpacity,
+                          child: Transform(
+                            transform: leftDoorMatrix,
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(
+                                      alpha: (0.85 * (1.0 - openProgress)).clamp(0.0, 0.85),
+                                    ),
+                                    blurRadius: 36,
+                                    offset: const Offset(-12, 16),
                                   ),
-                                  blurRadius: 32,
-                                  offset: const Offset(-10, 14),
-                                ),
-                              ],
-                            ),
-                            child: Image.asset(
-                              _selectedVisual == GateOpeningVisual.candiGate
-                                  ? 'assets/images/temple_gate_left.png'
-                                  : 'assets/images/buddha_hand_left.png',
-                              fit: _selectedVisual == GateOpeningVisual.candiGate
-                                  ? BoxFit.cover
-                                  : BoxFit.contain,
-                              alignment: Alignment.centerRight,
-                              filterQuality: FilterQuality.high,
+                                ],
+                              ),
+                              child: Image.asset(
+                                'assets/images/candi_door_left.png',
+                                fit: BoxFit.cover,
+                                alignment: Alignment.centerRight,
+                                filterQuality: FilterQuality.high,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
 
+                    // Daun Pintu Kanan (Batu Andesit Kuno)
                     Positioned(
-                      top: targetY,
-                      left: rightTargetX,
-                      width: elemWidth,
-                      height: elemHeight,
+                      top: 0,
+                      left: centerX - 12.0,
+                      width: doorWidth,
+                      height: doorHeight,
                       child: IgnorePointer(
-                        child: Transform(
-                          transform: rightMatrix,
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(
-                                    alpha: (0.80 * (1.0 - openProgress)).clamp(0.0, 0.80),
+                        child: Opacity(
+                          opacity: doorOpacity,
+                          child: Transform(
+                            transform: rightDoorMatrix,
+                            alignment: Alignment.centerRight,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(
+                                      alpha: (0.85 * (1.0 - openProgress)).clamp(0.0, 0.85),
+                                    ),
+                                    blurRadius: 36,
+                                    offset: const Offset(12, 16),
                                   ),
-                                  blurRadius: 32,
-                                  offset: const Offset(10, 14),
-                                ),
-                              ],
-                            ),
-                            child: Image.asset(
-                              _selectedVisual == GateOpeningVisual.candiGate
-                                  ? 'assets/images/temple_gate_right.png'
-                                  : 'assets/images/buddha_hand_right.png',
-                              fit: _selectedVisual == GateOpeningVisual.candiGate
-                                  ? BoxFit.cover
-                                  : BoxFit.contain,
-                              alignment: Alignment.centerLeft,
-                              filterQuality: FilterQuality.high,
+                                ],
+                              ),
+                              child: Image.asset(
+                                'assets/images/candi_door_right.png',
+                                fit: BoxFit.cover,
+                                alignment: Alignment.centerLeft,
+                                filterQuality: FilterQuality.high,
+                              ),
                             ),
                           ),
                         ),
@@ -650,17 +606,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Icon(
-                                          _selectedVisual == GateOpeningVisual.candiGate
-                                              ? Icons.temple_hindu_outlined
-                                              : Icons.spa_outlined,
+                                          _selectedVisual == GateOpeningVisual.borobudurTerrace
+                                              ? Icons.landscape_outlined
+                                              : Icons.temple_hindu_outlined,
                                           size: 13,
                                           color: const Color(0xFFDFB76C),
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          _selectedVisual == GateOpeningVisual.candiGate
-                                              ? 'Candi'
-                                              : 'Mudra',
+                                          _selectedVisual == GateOpeningVisual.borobudurTerrace
+                                              ? 'Pelataran'
+                                              : 'Gapura',
                                           style: const TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.w600,

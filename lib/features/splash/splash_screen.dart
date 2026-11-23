@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -91,11 +92,14 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _boot() {
-    AuthService.instance.isLoggedIn().then((loggedIn) {
-      if (mounted) {
-        _isLoggedIn = loggedIn;
-      }
-    }).catchError((_) {});
+    AuthService.instance
+        .isLoggedIn()
+        .then((loggedIn) {
+          if (mounted) {
+            _isLoggedIn = loggedIn;
+          }
+        })
+        .catchError((_) {});
 
     _bootTimer = Timer(const Duration(milliseconds: 2800), () {
       _navigateToNext();
