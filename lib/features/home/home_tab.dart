@@ -494,6 +494,64 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
 
     final scrollRatio = (_smoothScroll / 650.0).clamp(0.0, 1.2);
 
+    // KINEMATIKA GERAK TANGAN MUDRA BUDDHA (SCROLL-DRIVEN CORNER TO CENTER CLAPPING GESTURE)
+    // 0.0 = tangan di pojok kiri & kanan membingkai pelataran candi secara megah dan lega
+    // 1.0 = kedua telapak tangan meluncur ke tengah & menyatu erat (Anjali Mudra / Sembah suci)
+    final mudraProgress = (_smoothScroll / 320.0).clamp(0.0, 1.0);
+    final mudraCurve = Curves.easeInOutCubic.transform(mudraProgress);
+
+    // Dimensi dan proporsi tangan fotorealistik diperbesar (~22% lebih besar sesuai preferensi)
+    final handHeight = (w * 0.90).clamp(330.0, 450.0);
+    final leftHandWidth = handHeight * (682.0 / 735.0);
+    final rightHandWidth = handHeight * (694.0 / 735.0);
+    final centerX = w / 2;
+
+    // Posisi awal di pojokan (Corner Placement):
+    final leftOpenX = -leftHandWidth * 0.44;
+    final rightOpenX = w - (rightHandWidth * 0.56);
+
+    // Posisi akhir saat menyatu di tengah (Closed Clapping Meeting Point):
+    final leftClosedX = centerX - leftHandWidth + 3.0;
+    final rightClosedX = centerX - 3.0;
+
+    final leftTargetX = ui.lerpDouble(leftOpenX, leftClosedX, mudraCurve)! +
+        (_smoothPointerX * 8.0);
+    final rightTargetX = ui.lerpDouble(rightOpenX, rightClosedX, mudraCurve)! +
+        (_smoothPointerX * 8.0);
+
+    // Parallax posisi vertikal tangan:
+    final handsY = ui.lerpDouble(170.0, 105.0, mudraCurve)! -
+        (_smoothScroll * 0.16) +
+        (_smoothPointerY * 12.0);
+
+    // Rotasi 3D spasial telapak tangan:
+    final leftHandYaw =
+        ui.lerpDouble(-0.50, 0.015, mudraCurve)! + (_smoothPointerX * 0.05);
+    final leftHandPitch = (_smoothPointerY * -0.05) + (scrollRatio * 0.04);
+    final leftHandRoll =
+        ui.lerpDouble(-0.18, 0.0, mudraCurve)! + (_smoothPointerX * 0.02);
+
+    final rightHandYaw =
+        ui.lerpDouble(0.50, -0.015, mudraCurve)! + (_smoothPointerX * 0.05);
+    final rightHandPitch = (_smoothPointerY * -0.05) + (scrollRatio * 0.04);
+    final rightHandRoll =
+        ui.lerpDouble(0.18, 0.0, mudraCurve)! + (_smoothPointerX * 0.02);
+
+    final leftHandMatrix = Matrix4.identity()
+      ..setEntry(3, 2, 0.0016)
+      ..rotateX(leftHandPitch)
+      ..rotateY(leftHandYaw)
+      ..rotateZ(leftHandRoll);
+
+    final rightHandMatrix = Matrix4.identity()
+      ..setEntry(3, 2, 0.0016)
+      ..rotateX(rightHandPitch)
+      ..rotateY(rightHandYaw)
+      ..rotateZ(rightHandRoll);
+
+    final handsOpacity =
+        (1.0 - ((_smoothScroll - 500.0) / 450.0)).clamp(0.40, 1.0);
+
     // DOLLY ZOOM SINEMATIK CANDI:
     final ambientBreath = math.sin(_elapsedTime * 1.3) * 0.012;
     final zoom = 1.0 + (scrollRatio * 0.45) + ambientBreath;
@@ -593,7 +651,69 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           ),
         ),
 
-        // --- 5. PIN KURATORIAL 3D MENGAMBANG (THREEUI KAGE FLOATING BADGES) ---
+        // --- 5. AURA ENERGI SUCI ANJALI MUDRA (BLOOM & SACRED RIPPLES DI TITIK TEMU PALM) ---
+        Positioned.fill(
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: _AnjaliMudraEnergyPainter(
+                contactPoint: Offset(
+                  centerX + (_smoothPointerX * 8.0),
+                  handsY + (handHeight * 0.44),
+                ),
+                mudraCurve: mudraCurve,
+                elapsedTime: _elapsedTime,
+              ),
+            ),
+          ),
+        ),
+
+        // --- 6. TANGAN KIRI BUDDHA 3D (MENUTUP KE TENGAH SEIRING SCROLL) ---
+        Positioned(
+          top: handsY,
+          left: leftTargetX,
+          width: leftHandWidth,
+          height: handHeight,
+          child: IgnorePointer(
+            child: Opacity(
+              opacity: handsOpacity,
+              child: Transform(
+                transform: leftHandMatrix,
+                alignment: Alignment.centerRight,
+                child: Image.asset(
+                  'assets/images/buddha_hand_left.png',
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
+                  excludeFromSemantics: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        // --- 7. TANGAN KANAN BUDDHA 3D (MENUTUP KE TENGAH SEIRING SCROLL) ---
+        Positioned(
+          top: handsY,
+          left: rightTargetX,
+          width: rightHandWidth,
+          height: handHeight,
+          child: IgnorePointer(
+            child: Opacity(
+              opacity: handsOpacity,
+              child: Transform(
+                transform: rightHandMatrix,
+                alignment: Alignment.centerLeft,
+                child: Image.asset(
+                  'assets/images/buddha_hand_right.png',
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
+                  excludeFromSemantics: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        // --- 8. PIN KURATORIAL 3D MENGAMBANG (THREEUI KAGE FLOATING BADGES) ---
         Positioned.fill(
           child: _Javara3DFloatingBadges(
             scrollOffset: _smoothScroll,
@@ -907,6 +1027,87 @@ class _JavaraAtmospherePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _JavaraAtmospherePainter oldDelegate) => true;
+}
+
+/// Melukis Pendaran Aura Emas Suci & Gelombang Anjali Mudra saat telapak tangan bertemu
+class _AnjaliMudraEnergyPainter extends CustomPainter {
+  _AnjaliMudraEnergyPainter({
+    required this.contactPoint,
+    required this.mudraCurve,
+    required this.elapsedTime,
+  });
+
+  final Offset contactPoint;
+  final double mudraCurve;
+  final double elapsedTime;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (mudraCurve < 0.60) return;
+
+    // Intensitas bertahap dari 0.0 sampai 1.0 seiring telapak tangan merapat menepuk
+    final intensity = ((mudraCurve - 0.60) / 0.40).clamp(0.0, 1.0);
+
+    // 1. Pendaran Inti Emas Luhur (Golden Prana Halo Core)
+    final pulse = math.sin(elapsedTime * 3.5) * 6.0;
+    final coreRadius = (46.0 + pulse) * intensity;
+    final corePaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFFFFFBE8).withValues(alpha: 0.95 * intensity),
+          const Color(0xFFFFDF9E).withValues(alpha: 0.75 * intensity),
+          const Color(0xFFFFB84D).withValues(alpha: 0.40 * intensity),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.35, 0.70, 1.0],
+      ).createShader(Rect.fromCircle(center: contactPoint, radius: coreRadius * 2.0));
+
+    canvas.drawCircle(contactPoint, coreRadius * 2.0, corePaint);
+
+    // 2. Lingkaran Gelombang Suci Berkembang (Concentric Sacred Ripples)
+    final ripplePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    for (int i = 0; i < 3; i++) {
+      final phase = (elapsedTime * 1.2 + (i * 0.33)) % 1.0;
+      final r = (22.0 + phase * 95.0) * intensity;
+      final alpha = ((1.0 - phase) * 0.45 * intensity).clamp(0.0, 1.0);
+      ripplePaint.color = const Color(0xFFFFD700).withValues(alpha: alpha);
+      canvas.drawCircle(contactPoint, r, ripplePaint);
+    }
+
+    // 3. Kilau Bintang Berlian 8 Arah (Prabha Starburst) saat tangan hampir/sudah menutup sempurna
+    if (intensity > 0.60) {
+      final starIntensity = ((intensity - 0.60) / 0.40);
+      final starPaint = Paint()
+        ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.90 * starIntensity)
+        ..style = PaintingStyle.fill;
+
+      final longRay = (40.0 + math.sin(elapsedTime * 6.0) * 8.0) * starIntensity;
+      final shortRay = longRay * 0.34;
+
+      final path = Path()
+        ..moveTo(contactPoint.dx, contactPoint.dy - longRay)
+        ..quadraticBezierTo(contactPoint.dx, contactPoint.dy, contactPoint.dx + shortRay, contactPoint.dy - shortRay)
+        ..quadraticBezierTo(contactPoint.dx, contactPoint.dy, contactPoint.dx + longRay, contactPoint.dy)
+        ..quadraticBezierTo(contactPoint.dx, contactPoint.dy, contactPoint.dx + shortRay, contactPoint.dy + shortRay)
+        ..quadraticBezierTo(contactPoint.dx, contactPoint.dy, contactPoint.dx, contactPoint.dy + longRay)
+        ..quadraticBezierTo(contactPoint.dx, contactPoint.dy, contactPoint.dx - shortRay, contactPoint.dy + shortRay)
+        ..quadraticBezierTo(contactPoint.dx, contactPoint.dy, contactPoint.dx - longRay, contactPoint.dy)
+        ..quadraticBezierTo(contactPoint.dx, contactPoint.dy, contactPoint.dx - shortRay, contactPoint.dy - shortRay)
+        ..close();
+
+      canvas.drawPath(path, starPaint);
+
+      // Pusat kilau intan putih murni
+      final diamondCore = Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: 0.95 * starIntensity);
+      canvas.drawCircle(contactPoint, 4.0 * starIntensity, diamondCore);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _AnjaliMudraEnergyPainter oldDelegate) => true;
 }
 
 /// Pin Kuratorial 3D Mengambang di Sekitar Candi (ThreeUI Kage Floating Badges)
