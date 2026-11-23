@@ -12,15 +12,23 @@ class JColors {
 
   // --- Master Palette Utama JAVARA ---
   static const warmIvory = Color(0xFFF5F0E8); // Latar terang utama editorial
-  static const deepJavaBrown = Color(0xFF30251F); // Kayu jati gelap / busana keraton
+  static const deepJavaBrown = Color(
+    0xFF30251F,
+  ); // Kayu jati gelap / busana keraton
   static const antiqueGold = Color(0xFFB08D57); // Aksen prada kencana adiluhung
   static const charcoal = Color(0xFF242321); // Teks kontras tinggi & bingkai
   static const softSand = Color(0xFFE8DED0); // Kartu sekunder & pembatas halus
 
   // --- Master Palette Sekunder ---
-  static const mutedTerracotta = Color(0xFFA8664F); // Genteng candi & tembikar Kasongan
-  static const batikIndigo = Color(0xFF394B5B); // Nila celup alami batik pesisiran
-  static const forestGreen = Color(0xFF465447); // Daun sirih & lumut batu Borobudur
+  static const mutedTerracotta = Color(
+    0xFFA8664F,
+  ); // Genteng candi & tembikar Kasongan
+  static const batikIndigo = Color(
+    0xFF394B5B,
+  ); // Nila celup alami batik pesisiran
+  static const forestGreen = Color(
+    0xFF465447,
+  ); // Daun sirih & lumut batu Borobudur
 
   // --- Kompatibilitas Warisan & Tema Eksisting ---
   static const night = Color(0xFF2E2019); // Splash & latar teks gelap
@@ -28,7 +36,9 @@ class JColors {
   static const cream = Color(0xFFF4E9D8); // Krem naskah kuno
   static const sand = Color(0xFFE0C9A6); // Pasir pantai selatan
   static const field = Color(0xFFE3CDAB); // Latar input & tombol sosial
-  static const surfaceCard = Color(0xFFFFFBF4); // Kartu Beranda naskah primissima
+  static const surfaceCard = Color(
+    0xFFFFFBF4,
+  ); // Kartu Beranda naskah primissima
   static const gold = Color(0xFFC79B3A); // Emas kencana bercahaya
   static const terracotta = Color(0xFFB5603A); // Terakota klasik
   static const sage = Color(0xFF6A7B5B); // Hijau pupus
@@ -104,26 +114,25 @@ class JText {
 
 /// Konstruksi Tema Global JAVARA Material 3
 ThemeData buildJavaraTheme() {
-  final scheme = ColorScheme.fromSeed(
-    seedColor: JColors.antiqueGold,
-    brightness: Brightness.light,
-  ).copyWith(
-    primary: JColors.deepJavaBrown,
-    onPrimary: JColors.warmIvory,
-    secondary: JColors.antiqueGold,
-    onSecondary: JColors.deepJavaBrown,
-    surface: JColors.warmIvory,
-    onSurface: JColors.charcoal,
-    error: JColors.error,
-  );
+  final scheme =
+      ColorScheme.fromSeed(
+        seedColor: JColors.antiqueGold,
+        brightness: Brightness.light,
+      ).copyWith(
+        primary: JColors.deepJavaBrown,
+        onPrimary: JColors.warmIvory,
+        secondary: JColors.antiqueGold,
+        onSecondary: JColors.deepJavaBrown,
+        surface: JColors.warmIvory,
+        onSurface: JColors.charcoal,
+        error: JColors.error,
+      );
 
   final base = ThemeData(useMaterial3: true, colorScheme: scheme);
   return base.copyWith(
     scaffoldBackgroundColor: JColors.warmIvory,
-    textTheme: GoogleFonts.loraTextTheme(base.textTheme).apply(
-      bodyColor: JColors.charcoal,
-      displayColor: JColors.charcoal,
-    ),
+    textTheme: GoogleFonts.loraTextTheme(base.textTheme)
+        .apply(bodyColor: JColors.charcoal, displayColor: JColors.charcoal),
     textSelectionTheme: const TextSelectionThemeData(
       cursorColor: JColors.deepJavaBrown,
       selectionColor: Color(0x33B08D57),
@@ -148,14 +157,12 @@ class JBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveVariant = variant ??
+    final effectiveVariant =
+        variant ??
         (dark
             ? HeritageBackgroundVariant.darkVelvet
             : HeritageBackgroundVariant.warmParchment);
 
-    return JavaraHeritageBackground(
-      variant: effectiveVariant,
-      child: child,
-    );
+    return JavaraHeritageBackground(variant: effectiveVariant, child: child);
   }
 }
