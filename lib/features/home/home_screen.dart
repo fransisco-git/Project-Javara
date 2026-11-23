@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   static const _items = [
     NavItemData(
       label: 'Beranda',
-      activeIcon: Icons.home_rounded,
+      activeIcon: Icons.home,
       inactiveIcon: Icons.home_outlined,
     ),
     NavItemData(

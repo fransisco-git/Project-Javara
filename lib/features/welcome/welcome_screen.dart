@@ -12,11 +12,14 @@ import '../home/home_screen.dart';
 
 /// Gaya visual panorama pada Layar Selamat Datang
 enum GateOpeningVisual {
+  /// Telapak Tangan Buddha 3D Anjali Mudra (Sembah suci membuka ke pelataran Candi Borobudur & Merapi)
+  tapakBuddha,
+
   /// Pelataran Candi Borobudur terbuka (Patung Buddha di sisi kiri + Gunung Merapi fajar)
   borobudurTerrace,
 
-  /// Gapura Paduraksa Candi Megah (Gapura Kala membingkai Buddha & Merapi)
-  gapuraCandi,
+  /// Daun Pintu Batu Andesit Candi Bentar (Gerbang batu kuno membuka ke panorama Merapi)
+  candiBentar,
 }
 
 /// Layar Selamat Datang JAVARA — Cinematic 10s 9:16 Candi Bentar Dawn Opening.
@@ -50,9 +53,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   late final AnimationController _uiFadeController;
 
   AudioPlayer? _ambientPlayer;
-  GateOpeningVisual _selectedVisual = GateOpeningVisual.borobudurTerrace;
+  GateOpeningVisual _selectedVisual = GateOpeningVisual.tapakBuddha;
   bool _isGateFullyOpened = false;
   bool _hasHapticTriggered = false;
+  double _pointerX = 0.0;
+  double _pointerY = 0.0;
 
   @override
   void initState() {
@@ -136,6 +141,22 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     super.didChangeDependencies();
     // Pra-muat aset gambar ke GPU memori untuk render 60fps tanpa jeda
     precacheImage(
+      const AssetImage('assets/images/buddha_hand_left.png'),
+      context,
+    );
+    precacheImage(
+      const AssetImage('assets/images/buddha_hand_right.png'),
+      context,
+    );
+    precacheImage(
+      const AssetImage('assets/images/borobudur_buddha_merapi_dawn.jpg'),
+      context,
+    );
+    precacheImage(
+      const AssetImage('assets/images/candi_gapura_buddha_portal.jpg'),
+      context,
+    );
+    precacheImage(
       const AssetImage('assets/images/candi_bentar_closed_predawn.jpg'),
       context,
     );
@@ -147,14 +168,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       const AssetImage('assets/images/candi_door_right.png'),
       context,
     );
-    precacheImage(
-      const AssetImage('assets/images/borobudur_buddha_merapi_dawn.jpg'),
-      context,
-    );
-    precacheImage(
-      const AssetImage('assets/images/candi_gapura_buddha_portal.jpg'),
-      context,
-    );
+  }
+
+  void _updatePointer(Offset localPosition, Size size) {
+    if (size.width == 0 || size.height == 0) return;
+    final px = ((localPosition.dx / size.width) * 2.0 - 1.0).clamp(-1.0, 1.0);
+    final py = ((localPosition.dy / size.height) * 2.0 - 1.0).clamp(-1.0, 1.0);
+    if ((px - _pointerX).abs() > 0.01 || (py - _pointerY).abs() > 0.01) {
+      setState(() {
+        _pointerX = px;
+        _pointerY = py;
+      });
+    }
   }
 
   @override
@@ -188,9 +213,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   void _toggleVisualMode() {
     HapticFeedback.selectionClick();
     setState(() {
-      _selectedVisual = _selectedVisual == GateOpeningVisual.borobudurTerrace
-          ? GateOpeningVisual.gapuraCandi
-          : GateOpeningVisual.borobudurTerrace;
+      if (_selectedVisual == GateOpeningVisual.tapakBuddha) {
+        _selectedVisual = GateOpeningVisual.borobudurTerrace;
+      } else if (_selectedVisual == GateOpeningVisual.borobudurTerrace) {
+        _selectedVisual = GateOpeningVisual.candiBentar;
+      } else {
+        _selectedVisual = GateOpeningVisual.tapakBuddha;
+      }
     });
   }
 
@@ -259,9 +288,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             final cameraScale = 1.0 + (cameraDolly * 0.12);
 
             final String panoramaAsset =
-                _selectedVisual == GateOpeningVisual.borobudurTerrace
-                    ? 'assets/images/borobudur_buddha_merapi_dawn.jpg'
-                    : 'assets/images/candi_gapura_buddha_portal.jpg';
+                _selectedVisual == GateOpeningVisual.candiBentar
+                    ? 'assets/images/candi_gapura_buddha_portal.jpg'
+                    : 'assets/images/borobudur_buddha_merapi_dawn.jpg';
 
             // Dimensi & Kinematika 3D Daun Pintu Batu Andesit Candi Bentar
             final double doorWidth = centerX + 12.0;
@@ -283,6 +312,39 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               ..setTranslationRaw(slideRight, 0.0, 0.0)
               ..rotateY(yawRight);
 
+            // Dimensi & Kinematika 3D Telapak Tangan Buddha (Anjali Mudra Sembah Suci)
+            final double handWidth = (w * 0.58).clamp(210.0, 360.0);
+            final double handHeight = handWidth * (735.0 / 682.0);
+            final double handY = (h * 0.38) - (handHeight * 0.44);
+
+            final double leftHandYaw = ui.lerpDouble(-0.02, -0.95, openProgress)! + (_pointerX * 0.05);
+            final double leftHandPitch = (_pointerY * -0.05);
+            final double leftHandRoll = ui.lerpDouble(0.0, -0.18, openProgress)! + (_pointerX * 0.02);
+            final double leftHandSlide = ui.lerpDouble(0.0, -w * 0.58, openProgress)!;
+
+            final double rightHandYaw = ui.lerpDouble(0.02, 0.95, openProgress)! + (_pointerX * 0.05);
+            final double rightHandPitch = (_pointerY * -0.05);
+            final double rightHandRoll = ui.lerpDouble(0.0, 0.18, openProgress)! + (_pointerX * 0.02);
+            final double rightHandSlide = ui.lerpDouble(0.0, w * 0.58, openProgress)!;
+
+            final Matrix4 leftHandMatrix = Matrix4.identity()
+              ..setEntry(3, 2, 0.0016)
+              ..setTranslationRaw(leftHandSlide, 0.0, 0.0)
+              ..rotateX(leftHandPitch)
+              ..rotateY(leftHandYaw)
+              ..rotateZ(leftHandRoll);
+
+            final Matrix4 rightHandMatrix = Matrix4.identity()
+              ..setEntry(3, 2, 0.0016)
+              ..setTranslationRaw(rightHandSlide, 0.0, 0.0)
+              ..rotateX(rightHandPitch)
+              ..rotateY(rightHandYaw)
+              ..rotateZ(rightHandRoll);
+
+            final double handsOpacity = openProgress < 0.65
+                ? 1.0
+                : (1.0 - ((openProgress - 0.65) / 0.28)).clamp(0.0, 1.0);
+
             // Opasitas daun pintu saat terbuka penuh (fade-out anggun di akhir)
             final double doorOpacity = openProgress < 0.70
                 ? 1.0
@@ -301,14 +363,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             // Opasitas lapisan gerbang tertutup awal (0-0.12s)
             final closedGateOpacity = (1.0 - (openProgress * 2.5)).clamp(0.0, 1.0);
 
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: openProgress < 0.85 ? _skipToOpen : null,
-              onHorizontalDragUpdate: (details) {
-                final delta = details.primaryDelta ?? 0.0;
-                _gateController.value = (_gateController.value + (delta / w)).clamp(0.0, 1.0);
-              },
-              child: Stack(
+            return Listener(
+              onPointerMove: (e) => _updatePointer(e.localPosition, size),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: openProgress < 0.85 ? _skipToOpen : null,
+                onHorizontalDragUpdate: (details) {
+                  final delta = details.primaryDelta ?? 0.0;
+                  _gateController.value = (_gateController.value + (delta / w)).clamp(0.0, 1.0);
+                },
+                child: Stack(
                 fit: StackFit.expand,
                 children: [
                   // Panorama Megah Candi Borobudur & Fajar Merapi dengan Patung Buddha di Kiri
@@ -401,8 +465,71 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       ),
                     ),
 
+                  // 3D Telapak Tangan Buddha (Anjali Mudra / Sembah Suci Kinematics)
+                  if (_selectedVisual == GateOpeningVisual.tapakBuddha && handsOpacity > 0.0) ...[
+                    // Pendaran Surya Mandala Suci di Sela Telapak Tangan
+                    if (openProgress < 0.75)
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: CustomPaint(
+                            painter: _AnjaliMudraEnergyPainter(
+                              contactPoint: Offset(centerX, handY + (handHeight * 0.46)),
+                              mudraCurve: openProgress,
+                              elapsedTime: ambientT * 8.0,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    // Telapak Tangan Kiri Buddha 3D
+                    Positioned(
+                      top: handY,
+                      left: centerX - handWidth * 0.88,
+                      width: handWidth,
+                      height: handHeight,
+                      child: IgnorePointer(
+                        child: Opacity(
+                          opacity: handsOpacity,
+                          child: Transform(
+                            transform: leftHandMatrix,
+                            alignment: Alignment.centerRight,
+                            child: Image.asset(
+                              'assets/images/buddha_hand_left.png',
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.high,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Telapak Tangan Kanan Buddha 3D
+                    Positioned(
+                      top: handY,
+                      left: centerX - handWidth * 0.12,
+                      width: handWidth,
+                      height: handHeight,
+                      child: IgnorePointer(
+                        child: Opacity(
+                          opacity: handsOpacity,
+                          child: Transform(
+                            transform: rightHandMatrix,
+                            alignment: Alignment.centerLeft,
+                            child: Image.asset(
+                              'assets/images/buddha_hand_right.png',
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.high,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+
                   // Daun pintu gerbang batu andesit 3D (Candi Bentar Jawa Kuno)
-                  if (openProgress < 0.98 && doorOpacity > 0.0) ...[
+                  if (_selectedVisual == GateOpeningVisual.candiBentar &&
+                      openProgress < 0.98 &&
+                      doorOpacity > 0.0) ...[
                     // Daun Pintu Kiri (Batu Andesit Kuno)
                     Positioned(
                       top: 0,
@@ -606,17 +733,21 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Icon(
-                                          _selectedVisual == GateOpeningVisual.borobudurTerrace
-                                              ? Icons.landscape_outlined
-                                              : Icons.temple_hindu_outlined,
+                                          _selectedVisual == GateOpeningVisual.tapakBuddha
+                                              ? Icons.auto_awesome_rounded
+                                              : (_selectedVisual == GateOpeningVisual.borobudurTerrace
+                                                  ? Icons.landscape_outlined
+                                                  : Icons.temple_hindu_outlined),
                                           size: 13,
                                           color: const Color(0xFFDFB76C),
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          _selectedVisual == GateOpeningVisual.borobudurTerrace
-                                              ? 'Pelataran'
-                                              : 'Gapura',
+                                          _selectedVisual == GateOpeningVisual.tapakBuddha
+                                              ? 'Tapak 3D'
+                                              : (_selectedVisual == GateOpeningVisual.borobudurTerrace
+                                                  ? 'Pelataran'
+                                                  : 'Gapura'),
                                           style: const TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.w600,
@@ -869,8 +1000,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ),
                 ],
               ),
-            );
-          },
+            ),
+          );
+        },
         ),
       ),
     );
@@ -1104,4 +1236,77 @@ class _PreDawnAtmospherePainter extends CustomPainter {
   bool shouldRepaint(covariant _PreDawnAtmospherePainter old) =>
       old.progress != progress;
 }
+
+/// Melukis Pendaran Aura Emas Suci & Gelombang Anjali Mudra saat telapak tangan bertemu
+class _AnjaliMudraEnergyPainter extends CustomPainter {
+  _AnjaliMudraEnergyPainter({
+    required this.contactPoint,
+    required this.mudraCurve,
+    required this.elapsedTime,
+  });
+
+  final Offset contactPoint;
+  final double mudraCurve;
+  final double elapsedTime;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (mudraCurve > 0.85) return;
+
+    // Intensitas bertahap: pudar saat telapak tangan membuka
+    final intensity = (1.0 - (mudraCurve / 0.70)).clamp(0.0, 1.0);
+    if (intensity <= 0.0) return;
+
+    // 1. Pendaran Inti Emas Luhur (Golden Prana Halo Core)
+    final pulse = math.sin(elapsedTime * 3.5) * 6.0;
+    final coreRadius = (46.0 + pulse) * intensity;
+    final corePaint = Paint()
+      ..shader = ui.Gradient.radial(
+        contactPoint,
+        coreRadius,
+        [
+          const Color(0xFFFFF6D6).withValues(alpha: 0.95 * intensity),
+          const Color(0xFFFFD56B).withValues(alpha: 0.70 * intensity),
+          const Color(0xFFDFB76C).withValues(alpha: 0.35 * intensity),
+          Colors.transparent,
+        ],
+        [0.0, 0.30, 0.70, 1.0],
+      );
+    canvas.drawCircle(contactPoint, coreRadius, corePaint);
+
+    // 2. Lingkaran Surya Mandala Suci (Sacred Mandala Ring)
+    final ringRadius = (76.0 + pulse * 1.5) * intensity;
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6
+      ..color = const Color(0xFFFED897).withValues(alpha: 0.65 * intensity);
+    canvas.drawCircle(contactPoint, ringRadius, ringPaint);
+
+    // 3. Gelombang Berkas Prana Radial (Radial Prana Rays)
+    final rayPaint = Paint()
+      ..strokeWidth = 1.0
+      ..strokeCap = StrokeCap.round;
+    const rayCount = 12;
+    final angleStep = (math.pi * 2) / rayCount;
+    final rotation = elapsedTime * 0.8;
+
+    for (var i = 0; i < rayCount; i++) {
+      final angle = (i * angleStep) + rotation;
+      final startDist = ringRadius * 0.75;
+      final endDist = ringRadius * (1.25 + (math.sin(elapsedTime * 4.0 + i) * 0.15));
+      final p1 = contactPoint + Offset(math.cos(angle) * startDist, math.sin(angle) * startDist);
+      final p2 = contactPoint + Offset(math.cos(angle) * endDist, math.sin(angle) * endDist);
+
+      rayPaint.color = const Color(0xFFFFEAA7).withValues(
+        alpha: (0.45 * intensity * ((i % 2 == 0) ? 1.0 : 0.6)).clamp(0.0, 1.0),
+      );
+      canvas.drawLine(p1, p2, rayPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _AnjaliMudraEnergyPainter old) =>
+      old.mudraCurve != mudraCurve || old.elapsedTime != elapsedTime;
+}
+
 

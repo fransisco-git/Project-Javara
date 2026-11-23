@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -95,10 +96,7 @@ class JavaraBottomNav extends StatelessWidget {
                     const Color(0xFF120E0B).withValues(alpha: 0.82),
                   ],
                 ),
-                border: Border.all(
-                  color: const Color(0x38DFB76C),
-                  width: 1.0,
-                ),
+                border: Border.all(color: const Color(0x38DFB76C), width: 1.0),
               ),
               child: Stack(
                 children: [
@@ -106,28 +104,32 @@ class JavaraBottomNav extends StatelessWidget {
                     child: AnimatedAlign(
                       duration: const Duration(milliseconds: 280),
                       curve: Curves.easeOutCubic,
-                      alignment: Alignment(slidingAlignmentX, 0.88),
+                      alignment: Alignment(slidingAlignmentX, 0.62),
                       child: AnimatedScale(
                         duration: const Duration(milliseconds: 200),
-                        scale: (index < items.length && items[index].isPill) ? 0.0 : 1.0,
+                        scale: (index < items.length && items[index].isPill)
+                            ? 0.0
+                            : 1.0,
                         child: AnimatedOpacity(
                           duration: const Duration(milliseconds: 200),
-                          opacity: (index < items.length && items[index].isPill) ? 0.0 : 1.0,
+                          opacity: (index < items.length && items[index].isPill)
+                              ? 0.0
+                              : 1.0,
                           child: Container(
                             width: 22,
                             height: 6,
                             alignment: Alignment.center,
                             child: Container(
-                              width: 4.0,
-                              height: 4.0,
+                              width: 4.5,
+                              height: 4.5,
                               decoration: BoxDecoration(
                                 color: activeColor,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: activeColor.withValues(alpha: 0.8),
-                                    blurRadius: 6,
-                                    spreadRadius: 1,
+                                    color: activeColor.withValues(alpha: 0.85),
+                                    blurRadius: 5,
+                                    spreadRadius: 0.5,
                                   ),
                                 ],
                               ),
@@ -249,7 +251,9 @@ class _InteractiveNavItemState extends State<_InteractiveNavItem> {
                       widget.isSelected
                           ? widget.item.activeIcon
                           : widget.item.inactiveIcon,
-                      key: ValueKey('${widget.item.label}_${widget.isSelected}'),
+                      key: ValueKey(
+                        '${widget.item.label}_${widget.isSelected}',
+                      ),
                       size: 21,
                       color: widget.isSelected
                           ? widget.activeColor
@@ -267,20 +271,19 @@ class _InteractiveNavItemState extends State<_InteractiveNavItem> {
                       duration: const Duration(milliseconds: 200),
                       style: JText.sans(
                         11.0,
-                        weight: widget.isSelected ? FontWeight.w600 : FontWeight.w500,
+                        weight: widget.isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
                         color: widget.isSelected
                             ? widget.activeColor
                             : widget.inactiveColor,
                         letterSpacing: 0.1,
                       ),
-                      child: Text(
-                        widget.item.label,
-                        maxLines: 1,
-                      ),
+                      child: Text(widget.item.label, maxLines: 1),
                     ),
                   ),
                 ),
-                const SizedBox(height: 5.5),
+                const SizedBox(height: 8.0),
               ],
             ),
           ),
@@ -342,18 +345,18 @@ class _InteractivePillItemState extends State<_InteractivePillItem> {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 240),
               curve: Curves.easeOutCubic,
-              width: 62,
-              height: 40,
+              width: 66,
+              height: 38,
               decoration: BoxDecoration(
                 color: widget.isSelected
-                    ? const Color(0xFF322318)
+                    ? const Color(0xFF2E2218)
                     : widget.pillBgColor,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: widget.isSelected
                       ? widget.activeColor
                       : widget.pillBorderColor,
-                  width: widget.isSelected ? 1.4 : 1.1,
+                  width: widget.isSelected ? 1.3 : 1.1,
                 ),
                 boxShadow: widget.isSelected
                     ? [
@@ -378,7 +381,7 @@ class _InteractivePillItemState extends State<_InteractivePillItem> {
                 curve: Curves.easeOutBack,
                 child: Icon(
                   widget.item.activeIcon,
-                  size: 23,
+                  size: 24,
                   color: widget.isSelected
                       ? widget.activeColor
                       : const Color(0xFFE4C590),
