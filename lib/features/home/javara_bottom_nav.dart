@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -18,20 +19,20 @@ class NavItemData {
   final bool isPill;
 }
 
-/// Floating Capsule Bottom Navigation Bar khas JAVARA berdesain retail luxury adiluhung.
+/// Floating Frosted Glass Capsule Bottom Navigation Bar khas JAVARA.
 ///
-/// Karakteristik Desain (Anti-AI-Slop & Editorial Parity):
-/// 1. Floating Stadium Capsule: Mengambang di atas bottom SafeArea dengan margin samping 16dp
-///    dan sudut kurva continuous capsule (`BorderRadius.circular(36)`).
-/// 2. Luxury Obsidian Surface: Permukaan solid gelap mewah (`#161311`), dibingkai border hairline
-///    emas Jawa Tengah halus (`Color(0x33DFB76C)`) serta ambient shadow lembut.
-/// 3. Center Hero Action (Hanger Pill): Tombol pil stadium oval di posisi tengah (`#261D16`)
-///    dengan outline emas solid (`Color(0xFFDFB76C)`) yang memuat ikon gantungan busana adat (hanger)
-///    tanpa teks label di bawahnya.
-/// 4. Indikator Titik Aktif: Dot emas (`#FED897`) berukuran 3.5px yang muncul tepat di bawah
-///    teks label tab yang sedang aktif, tanpa menyebabkan layout shift.
-/// 5. 100% Bebas RenderFlex Overflow: Diproteksi dengan FittedBox dan Flexible agar tetap stabil
-///    di layar sekecil 300px hingga skala teks 2.0x.
+/// Karakteristik Desain & Interaktivitas:
+/// 1. Frosted Obsidian Glassmorphism: Latar belakang kaca gelap translusen mewah
+///    (`BackdropFilter` blur sigma 18) dengan gradien obsidian, specular hairline gold border,
+///    dan bayangan elevasi bertingkat.
+/// 2. Fluid Sliding Active Indicator: Titik emas adiluhung (`#FED897`) dan pendaran aura hangat
+///    meluncur mulus (`AnimatedAlign` curve `easeOutCubic`) di atas permukaan kaca saat berpindah tab.
+/// 3. Tactile Spring Feedback: Efek pegas elastis pada ikon saat ditekan (`0.92x` squash -> `1.08x` bounce)
+///    disertai respon haptic getaran halus.
+/// 4. Animated Icon & Typography Morph: Transisi crossfade mulus antara ikon outline dan solid,
+///    serta transisi warna tipografi emas soga dinamis.
+/// 5. 100% Bebas RenderFlex Overflow: Terproteksi dengan `FittedBox` dan `Flexible` untuk
+///    layar sekecil 300px hingga skala teks 2.0x.
 class JavaraBottomNav extends StatelessWidget {
   const JavaraBottomNav({
     super.key,
@@ -48,13 +49,15 @@ class JavaraBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Palet warna editorial retail mewah JAVARA
-    const surfaceColor = Color(0xFF161311);
-    const capsuleBorderColor = Color(0x33DFB76C);
     const activeColor = Color(0xFFFED897);
     const inactiveColor = Color(0xFF8F857B);
     const pillBgColor = Color(0xFF261D16);
     const pillBorderColor = Color(0xFFDFB76C);
+
+    // Hitung posisi horizontal alignment untuk sliding indicator (-0.80 sampai +0.80)
+    final double slidingAlignmentX = items.length > 1
+        ? -0.80 + (index * (1.60 / (items.length - 1)))
+        : 0.0;
 
     return SafeArea(
       top: false,
@@ -63,103 +66,115 @@ class JavaraBottomNav extends StatelessWidget {
         height: _barHeight,
         margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
         decoration: BoxDecoration(
-          color: surfaceColor,
           borderRadius: BorderRadius.circular(36.0),
-          border: Border.all(
-            color: capsuleBorderColor,
-            width: 1.0,
-          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.45),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+              color: Colors.black.withValues(alpha: 0.50),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: const Color(0xFFDFB76C).withValues(alpha: 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, -1),
             ),
           ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(36.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (var i = 0; i < items.length; i++)
-                Expanded(
-                  child: items[i].isPill
-                      ? _buildPillItem(
-                          context: context,
-                          itemIndex: i,
-                          isSelected: i == index,
-                          pillBgColor: pillBgColor,
-                          pillBorderColor: pillBorderColor,
-                          activeColor: activeColor,
-                        )
-                      : _buildStandardNavItem(
-                          context: context,
-                          itemIndex: i,
-                          isSelected: i == index,
-                          activeColor: activeColor,
-                          inactiveColor: inactiveColor,
-                        ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Membangun tombol aksi tengah berbentuk kapsul pil dengan outline emas (Hanger Hero)
-  Widget _buildPillItem({
-    required BuildContext context,
-    required int itemIndex,
-    required bool isSelected,
-    required Color pillBgColor,
-    required Color pillBorderColor,
-    required Color activeColor,
-  }) {
-    final item = items[itemIndex];
-
-    return Semantics(
-      button: true,
-      selected: isSelected,
-      label: item.label,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          splashColor: activeColor.withAlpha(30),
-          highlightColor: Colors.transparent,
-          onTap: () {
-            if (!isSelected) {
-              HapticFeedback.selectionClick();
-            }
-            onChanged(itemIndex);
-          },
-          child: Center(
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
             child: Container(
-              width: 62,
-              height: 40,
               decoration: BoxDecoration(
-                color: pillBgColor,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected ? activeColor : pillBorderColor,
-                  width: isSelected ? 1.4 : 1.1,
+                borderRadius: BorderRadius.circular(36.0),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFF1E1712).withValues(alpha: 0.88),
+                    const Color(0xFF120E0B).withValues(alpha: 0.82),
+                  ],
                 ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: activeColor.withAlpha(40),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
+                border: Border.all(
+                  color: const Color(0x38DFB76C),
+                  width: 1.0,
+                ),
               ),
-              alignment: Alignment.center,
-              child: Icon(
-                item.activeIcon,
-                size: 23,
-                color: isSelected ? activeColor : const Color(0xFFE4C590),
+              child: Stack(
+                children: [
+                  // 1. Fluid Gliding Active Indicator (Titik Emas & Aura Cahaya yang Meluncur Mulus)
+                  IgnorePointer(
+                    child: AnimatedAlign(
+                      duration: const Duration(milliseconds: 280),
+                      curve: Curves.easeOutCubic,
+                      alignment: Alignment(slidingAlignmentX, 0.88),
+                      child: AnimatedScale(
+                        duration: const Duration(milliseconds: 200),
+                        scale: (index < items.length && items[index].isPill) ? 0.0 : 1.0,
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 200),
+                          opacity: (index < items.length && items[index].isPill) ? 0.0 : 1.0,
+                          child: Container(
+                            width: 22,
+                            height: 6,
+                            alignment: Alignment.center,
+                            child: Container(
+                              width: 4.0,
+                              height: 4.0,
+                              decoration: BoxDecoration(
+                                color: activeColor,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: activeColor.withValues(alpha: 0.8),
+                                    blurRadius: 6,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // 2. Barisan Item Navigasi Interaktif
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < items.length; i++)
+                        Expanded(
+                          child: items[i].isPill
+                              ? _InteractivePillItem(
+                                  item: items[i],
+                                  isSelected: i == index,
+                                  pillBgColor: pillBgColor,
+                                  pillBorderColor: pillBorderColor,
+                                  activeColor: activeColor,
+                                  onTap: () {
+                                    if (i != index) {
+                                      HapticFeedback.selectionClick();
+                                      onChanged(i);
+                                    }
+                                  },
+                                )
+                              : _InteractiveNavItem(
+                                  item: items[i],
+                                  isSelected: i == index,
+                                  activeColor: activeColor,
+                                  inactiveColor: inactiveColor,
+                                  onTap: () {
+                                    if (i != index) {
+                                      HapticFeedback.selectionClick();
+                                      onChanged(i);
+                                    }
+                                  },
+                                ),
+                        ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
@@ -167,43 +182,82 @@ class JavaraBottomNav extends StatelessWidget {
       ),
     );
   }
+}
 
-  /// Membangun item navigasi standar (Icon + Label + Indikator Titik Aktif)
-  Widget _buildStandardNavItem({
-    required BuildContext context,
-    required int itemIndex,
-    required bool isSelected,
-    required Color activeColor,
-    required Color inactiveColor,
-  }) {
-    final item = items[itemIndex];
+/// Item Navigasi Standar Interaktif dengan Efek Pegas & Transisi Mulus
+class _InteractiveNavItem extends StatefulWidget {
+  const _InteractiveNavItem({
+    required this.item,
+    required this.isSelected,
+    required this.activeColor,
+    required this.inactiveColor,
+    required this.onTap,
+  });
 
+  final NavItemData item;
+  final bool isSelected;
+  final Color activeColor;
+  final Color inactiveColor;
+  final VoidCallback onTap;
+
+  @override
+  State<_InteractiveNavItem> createState() => _InteractiveNavItemState();
+}
+
+class _InteractiveNavItemState extends State<_InteractiveNavItem> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      selected: isSelected,
-      label: item.label,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          splashColor: activeColor.withAlpha(20),
-          highlightColor: Colors.transparent,
-          onTap: () {
-            if (!isSelected) {
-              HapticFeedback.selectionClick();
-            }
-            onChanged(itemIndex);
-          },
+      selected: widget.isSelected,
+      label: widget.item.label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) {
+          setState(() => _isPressed = true);
+          HapticFeedback.lightImpact();
+        },
+        onTapUp: (_) {
+          setState(() => _isPressed = false);
+          widget.onTap();
+        },
+        onTapCancel: () {
+          setState(() => _isPressed = false);
+        },
+        child: AnimatedScale(
+          scale: _isPressed ? 0.90 : (widget.isSelected ? 1.04 : 1.0),
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutBack,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Ikon Navigasi: Clean outline saat inaktif, filled solid saat aktif
-                Icon(
-                  isSelected ? item.activeIcon : item.inactiveIcon,
-                  size: 21,
-                  color: isSelected ? activeColor : inactiveColor,
+                // Ikon Navigasi dengan Efek Skala & Pendaran Halus
+                AnimatedScale(
+                  scale: widget.isSelected ? 1.08 : 1.0,
+                  duration: const Duration(milliseconds: 240),
+                  curve: Curves.easeOutBack,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    transitionBuilder: (child, anim) => FadeTransition(
+                      opacity: anim,
+                      child: ScaleTransition(scale: anim, child: child),
+                    ),
+                    child: Icon(
+                      widget.isSelected
+                          ? widget.item.activeIcon
+                          : widget.item.inactiveIcon,
+                      key: ValueKey('${widget.item.label}_${widget.isSelected}'),
+                      size: 21,
+                      color: widget.isSelected
+                          ? widget.activeColor
+                          : widget.inactiveColor,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 2),
 
@@ -211,31 +265,127 @@ class JavaraBottomNav extends StatelessWidget {
                 Flexible(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text(
-                      item.label,
-                      maxLines: 1,
+                    child: AnimatedDefaultTextStyle(
+                      duration: const Duration(milliseconds: 200),
                       style: JText.sans(
                         11.0,
-                        weight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                        color: isSelected ? activeColor : inactiveColor,
+                        weight: widget.isSelected ? FontWeight.w600 : FontWeight.w500,
+                        color: widget.isSelected
+                            ? widget.activeColor
+                            : widget.inactiveColor,
                         letterSpacing: 0.1,
+                      ),
+                      child: Text(
+                        widget.item.label,
+                        maxLines: 1,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 2.5),
-
-                // Dot Indikator: Titik emas 3.5px saat aktif (tetap memakan ruang saat inaktif agar anti-shift)
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 3.5,
-                  height: 3.5,
-                  decoration: BoxDecoration(
-                    color: isSelected ? activeColor : Colors.transparent,
-                    shape: BoxShape.circle,
-                  ),
-                ),
+                const SizedBox(height: 5.5),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tombol Aksi Pil Tengah (Hero Hanger) Interaktif
+class _InteractivePillItem extends StatefulWidget {
+  const _InteractivePillItem({
+    required this.item,
+    required this.isSelected,
+    required this.pillBgColor,
+    required this.pillBorderColor,
+    required this.activeColor,
+    required this.onTap,
+  });
+
+  final NavItemData item;
+  final bool isSelected;
+  final Color pillBgColor;
+  final Color pillBorderColor;
+  final Color activeColor;
+  final VoidCallback onTap;
+
+  @override
+  State<_InteractivePillItem> createState() => _InteractivePillItemState();
+}
+
+class _InteractivePillItemState extends State<_InteractivePillItem> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: widget.isSelected,
+      label: widget.item.label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) {
+          setState(() => _isPressed = true);
+          HapticFeedback.lightImpact();
+        },
+        onTapUp: (_) {
+          setState(() => _isPressed = false);
+          widget.onTap();
+        },
+        onTapCancel: () {
+          setState(() => _isPressed = false);
+        },
+        child: AnimatedScale(
+          scale: _isPressed ? 0.92 : (widget.isSelected ? 1.03 : 1.0),
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutBack,
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 240),
+              curve: Curves.easeOutCubic,
+              width: 62,
+              height: 40,
+              decoration: BoxDecoration(
+                color: widget.isSelected
+                    ? const Color(0xFF322318)
+                    : widget.pillBgColor,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: widget.isSelected
+                      ? widget.activeColor
+                      : widget.pillBorderColor,
+                  width: widget.isSelected ? 1.4 : 1.1,
+                ),
+                boxShadow: widget.isSelected
+                    ? [
+                        BoxShadow(
+                          color: widget.activeColor.withValues(alpha: 0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+              ),
+              alignment: Alignment.center,
+              child: AnimatedScale(
+                scale: widget.isSelected ? 1.08 : 1.0,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutBack,
+                child: Icon(
+                  widget.item.activeIcon,
+                  size: 23,
+                  color: widget.isSelected
+                      ? widget.activeColor
+                      : const Color(0xFFE4C590),
+                ),
+              ),
             ),
           ),
         ),
