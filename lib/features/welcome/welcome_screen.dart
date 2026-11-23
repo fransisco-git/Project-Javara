@@ -58,23 +58,23 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   void initState() {
     super.initState();
 
-    // Kontroler utama sinematik 10 detik (10,000ms)
+    // Kontroler utama sinematik: dipercepat menjadi 2800ms (snappy, dinamis & imersif)
     _gateController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 10000),
+      duration: const Duration(milliseconds: 2800),
       value: widget.playGateOpen ? 0.0 : 1.0,
     );
 
     // Kontroler ambien berkelanjutan (denyut pendar surya, kabut lembah, & partikel)
     _ambientController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 12000),
+      duration: const Duration(milliseconds: 8000),
     )..repeat();
 
     // Kontroler fade-in antarmuka editorial di bagian bawah
     _uiFadeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 600),
       value: widget.playGateOpen ? 0.0 : 1.0,
     );
 
@@ -82,7 +82,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
     if (widget.playGateOpen) {
       _startAmbientFoley();
-      Future.delayed(const Duration(milliseconds: 300), () {
+      Future.delayed(const Duration(milliseconds: 150), () {
         if (mounted) {
           _gateController.forward();
         }
@@ -114,18 +114,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   void _onGateAnimationUpdate() {
     final t = _gateController.value;
 
-    // Haptic feedback saat pintu batu mulai bergeser (t = 0.20 atau 2.0 detik)
-    if (t >= 0.20 && t < 0.23 && !_hasHapticTriggered) {
+    // Haptic feedback saat pintu batu mulai bergeser (t = 0.12)
+    if (t >= 0.12 && t < 0.20 && !_hasHapticTriggered) {
       _hasHapticTriggered = true;
       HapticFeedback.heavyImpact();
-    } else if (t < 0.15) {
+    } else if (t < 0.10) {
       _hasHapticTriggered = false;
     }
 
-    if (t >= 0.80 && !_isGateFullyOpened) {
+    if (t >= 0.65 && !_isGateFullyOpened) {
       setState(() => _isGateFullyOpened = true);
       _uiFadeController.forward();
-    } else if (t < 0.75 && _isGateFullyOpened) {
+    } else if (t < 0.60 && _isGateFullyOpened) {
       setState(() => _isGateFullyOpened = false);
       _uiFadeController.reverse();
     }
@@ -175,7 +175,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     HapticFeedback.lightImpact();
     _gateController.animateTo(
       1.0,
-      duration: const Duration(milliseconds: 650),
+      duration: const Duration(milliseconds: 350),
       curve: Curves.easeOutCubic,
     );
   }
@@ -255,17 +255,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             // 8–10s (0.80-1.00): Gerakan melambat, tahan 1 detik, fade-in UI.
             // ============================================================
 
-            // Progress pembukaan daun gerbang (2-5s)
+            // Progress pembukaan daun gerbang (0.12 - 0.60)
             double openProgress = 0.0;
-            if (gateT > 0.20) {
-              final rawOpen = ((gateT - 0.20) / 0.30).clamp(0.0, 1.0);
+            if (gateT > 0.12) {
+              final rawOpen = ((gateT - 0.12) / 0.48).clamp(0.0, 1.0);
               openProgress = Curves.easeInOutCubic.transform(rawOpen);
             }
 
-            // Kamera Slow Dolly-In (5-8s)
+            // Kamera Slow Dolly-In (0.45 - 0.85)
             double cameraDolly = 0.0;
-            if (gateT > 0.50) {
-              final rawDolly = ((gateT - 0.50) / 0.30).clamp(0.0, 1.0);
+            if (gateT > 0.45) {
+              final rawDolly = ((gateT - 0.45) / 0.40).clamp(0.0, 1.0);
               cameraDolly = Curves.easeInOutQuad.transform(rawDolly);
             }
             final cameraScale = 1.0 + (cameraDolly * 0.12);
@@ -282,31 +282,33 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             Matrix4 rightMatrix;
 
             if (_selectedVisual == GateOpeningVisual.candiGate) {
-              elemHeight = (h * 0.72).clamp(420.0, 680.0);
-              elemWidth = elemHeight * (512.0 / 1024.0); // Rasio 0.5
-              targetY = (h * 0.08).clamp(30.0, 90.0);
+              // Menjangkau FULL SCREEN dari ujung atas ke ujung bawah layar tanpa celah
+              elemHeight = h;
+              // Lebar daun pintu proporsional agar mencakup setengah lebar layar + sedikit overlap tengah
+              elemWidth = math.max(centerX + 24.0, h * 0.52);
+              targetY = 0.0;
 
-              // Posisi tertutup rapat di tengah vs terbuka membingkai layar
+              // Posisi tertutup rapat di tengah vs terbuka penuh membingkai tepi layar
               final leftClosedX = centerX - elemWidth + 2.0;
               final rightClosedX = centerX - 2.0;
-              final leftOpenX = -elemWidth * 0.62;
-              final rightOpenX = w - (elemWidth * 0.38);
+              final leftOpenX = -elemWidth * 0.95;
+              final rightOpenX = w - (elemWidth * 0.05);
 
               leftTargetX = ui.lerpDouble(leftClosedX, leftOpenX, openProgress)!;
               rightTargetX = ui.lerpDouble(rightClosedX, rightOpenX, openProgress)!;
 
-              // Rotasi 3D perspektif gerbang batu andesit tebal
-              final yawLeft = ui.lerpDouble(0.0, -0.45, openProgress)!;
-              final yawRight = ui.lerpDouble(0.0, 0.45, openProgress)!;
-              final pitch = 0.015 * openProgress;
+              // Rotasi 3D perspektif gerbang batu andesit tebal berskala megah
+              final yawLeft = ui.lerpDouble(0.0, -0.52, openProgress)!;
+              final yawRight = ui.lerpDouble(0.0, 0.52, openProgress)!;
+              final pitch = 0.012 * openProgress;
 
               leftMatrix = Matrix4.identity()
-                ..setEntry(3, 2, 0.0012)
+                ..setEntry(3, 2, 0.0010)
                 ..rotateX(pitch)
                 ..rotateY(yawLeft);
 
               rightMatrix = Matrix4.identity()
-                ..setEntry(3, 2, 0.0012)
+                ..setEntry(3, 2, 0.0010)
                 ..rotateX(pitch)
                 ..rotateY(yawRight);
             } else {
@@ -343,16 +345,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
             // Berkas Sinar Emas Merekah (Golden God Rays)
             double goldenLightIntensity = 0.0;
-            if (gateT >= 0.20 && gateT <= 0.85) {
-              if (gateT < 0.45) {
-                goldenLightIntensity = ((gateT - 0.20) / 0.25).clamp(0.0, 1.0);
+            if (gateT >= 0.12 && gateT <= 0.85) {
+              if (gateT < 0.38) {
+                goldenLightIntensity = ((gateT - 0.12) / 0.26).clamp(0.0, 1.0);
               } else {
-                goldenLightIntensity = (1.0 - ((gateT - 0.45) / 0.40)).clamp(0.0, 1.0);
+                goldenLightIntensity = (1.0 - ((gateT - 0.38) / 0.47)).clamp(0.0, 1.0);
               }
             }
 
-            // Opasitas lapisan gerbang tertutup awal (0-2s)
-            final closedGateOpacity = (1.0 - (openProgress * 2.2)).clamp(0.0, 1.0);
+            // Opasitas lapisan gerbang tertutup awal (0-0.12s)
+            final closedGateOpacity = (1.0 - (openProgress * 2.5)).clamp(0.0, 1.0);
 
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
@@ -490,7 +492,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               _selectedVisual == GateOpeningVisual.candiGate
                                   ? 'assets/images/temple_gate_left.png'
                                   : 'assets/images/buddha_hand_left.png',
-                              fit: BoxFit.contain,
+                              fit: _selectedVisual == GateOpeningVisual.candiGate
+                                  ? BoxFit.cover
+                                  : BoxFit.contain,
                               alignment: Alignment.centerRight,
                               filterQuality: FilterQuality.high,
                             ),
@@ -525,7 +529,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               _selectedVisual == GateOpeningVisual.candiGate
                                   ? 'assets/images/temple_gate_right.png'
                                   : 'assets/images/buddha_hand_right.png',
-                              fit: BoxFit.contain,
+                              fit: _selectedVisual == GateOpeningVisual.candiGate
+                                  ? BoxFit.cover
+                                  : BoxFit.contain,
                               alignment: Alignment.centerLeft,
                               filterQuality: FilterQuality.high,
                             ),
