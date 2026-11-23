@@ -2,21 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'core/theme.dart';
-import 'features/home/home_screen.dart';
-import 'features/welcome/welcome_screen.dart';
-import 'services/auth_service.dart';
+import 'features/splash/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  final isLoggedIn = await AuthService.instance.isLoggedIn().catchError((_) => false);
-  runApp(JavaraApp(isLoggedIn: isLoggedIn));
+  runApp(const JavaraApp());
 }
 
 class JavaraApp extends StatelessWidget {
-  const JavaraApp({super.key, this.isLoggedIn = false});
-
-  final bool isLoggedIn;
+  const JavaraApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +19,7 @@ class JavaraApp extends StatelessWidget {
       title: 'Javara',
       debugShowCheckedModeBanner: false,
       theme: buildJavaraTheme(),
-      home: isLoggedIn
-          ? const HomeScreen()
-          : const WelcomeScreen(playGateOpen: true),
+      home: const SplashScreen(),
     );
   }
 }

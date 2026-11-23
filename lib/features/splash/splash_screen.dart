@@ -144,7 +144,6 @@ class _SplashScreenState extends State<SplashScreen>
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // 1. Pendaran Surya Mandala Emas Kosmik di Balik Logo
               Positioned.fill(
                 child: AnimatedBuilder(
                   animation: _auraAnim,
@@ -156,7 +155,6 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
 
-              // 2. Tombol Lewati / Akses Cepat di Sudut Kanan Atas
               Positioned(
                 top: MediaQuery.of(context).padding.top + 16,
                 right: 20,
@@ -203,7 +201,6 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
 
-              // 3. Konten Tengah: Logo JAVARA & Tipografi Adiluhung
               Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -234,7 +231,6 @@ class _SplashScreenState extends State<SplashScreen>
 
                     const SizedBox(height: 24),
 
-                    // Aksara Jawa & Subjudul Emas
                     FadeTransition(
                       opacity: _textAnim,
                       child: Column(
@@ -265,7 +261,6 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
 
-              // 4. Bilah Pemuatan Realistis Budaya (Realistic Cultural Loading Bar)
               Positioned(
                 bottom: 40,
                 left: 36,
