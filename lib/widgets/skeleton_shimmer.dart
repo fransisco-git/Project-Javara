@@ -142,7 +142,6 @@ class HomeTabSkeletonView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Bilah Pencarian Skeleton
             Row(
               children: [
                 const Expanded(
@@ -162,7 +161,6 @@ class HomeTabSkeletonView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // 2. Hero Candi Borobudur 3D Showcase Skeleton
             Container(
               height: 240,
               width: double.infinity,
@@ -204,7 +202,6 @@ class HomeTabSkeletonView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // 3. Chip Kategori Skeleton (Kategori Budaya)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(

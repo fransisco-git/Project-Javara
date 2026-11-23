@@ -53,11 +53,9 @@ class SavedGarmentsService {
       _prefs ??= await SharedPreferences.getInstance();
     } catch (_) {}
 
-    // 1. Baca item tersimpan lokal
     final localFavorites = _prefs?.getStringList(_prefKeyFavorites) ?? [];
     savedItemIdsNotifier.value = localFavorites.toSet();
 
-    // 2. Baca setelan tersimpan lokal
     final localOutfitsRaw = _prefs?.getStringList(_prefKeySavedOutfits) ?? [];
     final loadedOutfits = <SavedOutfit>[];
     for (final raw in localOutfitsRaw) {
@@ -70,7 +68,6 @@ class SavedGarmentsService {
 
     _initialized = true;
 
-    // 3. Sinkronisasi dengan Supabase di latar belakang
     _syncWithSupabase();
   }
 

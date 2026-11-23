@@ -84,11 +84,7 @@ class SupabaseService {
     );
   }
 
-  // ===========================================================================
-  // 1. MANAJEMEN FAVORIT BUDAYA
-  // ===========================================================================
-
-  /// Ambil daftar ID item favorit pengguna
+  /// Manajemen favorit budaya
   Future<List<String>> getFavoriteItemIds({String userId = 'guest_user'}) async {
     await initialize();
 
@@ -163,11 +159,7 @@ class SupabaseService {
     return !isFav;
   }
 
-  // ===========================================================================
-  // 2. RIWAYAT GENERASI AI FASHION STUDIO
-  // ===========================================================================
-
-  /// Ambil riwayat hasil Virtual Try-On
+  /// Riwayat generasi AI fashion studio
   Future<List<AiGenerationRecord>> getAiGenerations({
     String userId = 'guest_user',
   }) async {
@@ -227,10 +219,7 @@ class SupabaseService {
     }
   }
 
-  // ===========================================================================
-  // 3. SETELAN BUSANA 3D TERSIMPAN (SAVED OUTFITS)
-  // ===========================================================================
-
+  /// Setelan busana 3D tersimpan
   Future<List<SavedOutfit>> getSavedOutfits() async {
     await initialize();
     final raw = _prefs?.getStringList(_prefKeySavedOutfits) ?? [];
@@ -246,10 +235,6 @@ class SupabaseService {
     final raw = list.map((o) => jsonEncode(o.toJson())).toList();
     await _prefs?.setStringList(_prefKeySavedOutfits, raw);
   }
-
-  // ===========================================================================
-  // 4. KATALOG BUSANA & SETELAN KURASI (SUPABASE / LOCAL OFFLINE REPOSITORY)
-  // ===========================================================================
 
   /// Ambil seluruh item busana adat dengan sinkronisasi Supabase + fallback lokal
   Future<List<ClothingItem>> getClothingItems() async {

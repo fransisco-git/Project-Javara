@@ -247,14 +247,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             final gateT = _gateController.value;
             final ambientT = _ambientController.value;
 
-            // ============================================================
-            // LINIMASA 10 DETIK (0.00 - 1.00):
-            // 0–2s (0.00-0.20): Gerbang tertutup rapat, fajar hening.
-            // 2–5s (0.20-0.50): Pintu membuka perlahan dengan inersia batu.
-            // 5–8s (0.50-0.80): Slow dolly-in kamera maju menembus gerbang.
-            // 8–10s (0.80-1.00): Gerakan melambat, tahan 1 detik, fade-in UI.
-            // ============================================================
-
             // Progress pembukaan daun gerbang (0.12 - 0.60)
             double openProgress = 0.0;
             if (gateT > 0.12) {
@@ -270,9 +262,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             }
             final cameraScale = 1.0 + (cameraDolly * 0.12);
 
-            // ============================================================
-            // PERHITUNGAN GEOMETRI & KINEMATIKA 3D
-            // ============================================================
             double leftTargetX;
             double rightTargetX;
             double targetY;
@@ -366,9 +355,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // ============================================================
-                  // 1. PANORAMA GUNUNG MERAPI & SURYA FAJAR (5-8s & 8-10s)
-                  // ============================================================
+                  // Panorama Merapi fajar
                   Positioned.fill(
                     child: Transform.scale(
                       scale: cameraScale,
@@ -417,9 +404,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       ),
                     ),
 
-                  // ============================================================
-                  // 2. GERBANG TERTUTUP RAPAT PRE-DAWN (0-2s)
-                  // ============================================================
+                  // Gerbang tertutup pra-fajar
                   if (closedGateOpacity > 0.0) ...[
                     Positioned.fill(
                       child: Opacity(
@@ -446,9 +431,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ),
                   ],
 
-                  // ============================================================
-                  // 3. BERKAS SINAR EMAS MEREKAH (Golden God Rays)
-                  // ============================================================
+                  // Berkas sinar fajar emas
                   if (goldenLightIntensity > 0.0)
                     Positioned.fill(
                       child: IgnorePointer(
@@ -462,11 +445,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       ),
                     ),
 
-                  // ============================================================
-                  // 4. DUA DAUN PINTU GERBANG BATU ANDESIT 3D (2-5s)
-                  // ============================================================
+                  // Daun pintu gerbang batu andesit
                   if (openProgress < 0.98) ...[
-                    // --- BAGIAN KIRI ---
                     Positioned(
                       top: targetY,
                       left: leftTargetX,
@@ -503,7 +483,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       ),
                     ),
 
-                    // --- BAGIAN KANAN ---
                     Positioned(
                       top: targetY,
                       left: rightTargetX,
@@ -541,9 +520,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ),
                   ],
 
-                  // ============================================================
-                  // 5. BILAH KONTROL ATAS: Aksara Jawa, Putar Ulang, & Mode Switcher
-                  // ============================================================
+                  // Bilah kontrol atas
                   Positioned(
                     top: 0,
                     left: 0,
@@ -702,9 +679,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ),
                   ),
 
-                  // ============================================================
-                  // 6. KONTEN EDITORIAL SELAMAT DATANG (Fade-In Saat Terbuka)
-                  // ============================================================
+                  // Konten selamat datang
                   if (_isGateFullyOpened || !widget.playGateOpen)
                     Positioned(
                       left: 0,
@@ -945,10 +920,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 }
-
-// ============================================================================
-// CUSTOM PAINTERS: Golden God-Rays, Sunlight Motes, Mist, & Pre-Dawn Atmosphere
-// ============================================================================
 
 /// Melukis berkas cahaya surya emas (Golden God Rays) memancar dari celah tengah
 class _GoldenGodRaysPainter extends CustomPainter {

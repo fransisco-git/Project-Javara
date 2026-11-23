@@ -66,7 +66,6 @@ Prinsip:
   Future<AssistantChatMessage> sendMessage(String query) async {
     final lower = query.toLowerCase();
 
-    // 1. Integrasi API LLM jika API Key Disuplai
     if (AppConfig.isLlmConfigured) {
       try {
         final res = await _callExternalLlmApi(query);
@@ -76,8 +75,7 @@ Prinsip:
       }
     }
 
-    // 2. Mesin Penalaran Budaya Lokal Berbasis Kurasi JAVARA
-    await Future.delayed(const Duration(milliseconds: 650)); // Latensi alami penalaran
+    await Future.delayed(const Duration(milliseconds: 650));
 
     // Kasus A: Rekomendasi Busana Pernikahan / Upacara Ageng
     if (lower.contains('nikah') ||

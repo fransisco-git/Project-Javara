@@ -191,9 +191,6 @@ class _SoundOfJavaScreenState extends State<SoundOfJavaScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // ==========================================
-                    // 1. FILTER KATEGORI (BERSIH & ELEGAN)
-                    // ==========================================
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(
@@ -260,9 +257,6 @@ class _SoundOfJavaScreenState extends State<SoundOfJavaScreen>
                       ),
                     ),
 
-                    // ==========================================
-                    // 2. KARTU HERO PEMUTAR / LIRIK BERJALAN
-                    // ==========================================
                     Container(
                       margin: const EdgeInsets.fromLTRB(16, 6, 16, 16),
                       padding: const EdgeInsets.all(20),
@@ -730,9 +724,6 @@ class _SoundOfJavaScreenState extends State<SoundOfJavaScreen>
                       ),
                     ),
 
-                    // ==========================================
-                    // 3. DAFTAR LAGU DENGAN TIPOGRAFI BERSIH
-                    // ==========================================
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
                       child: Row(

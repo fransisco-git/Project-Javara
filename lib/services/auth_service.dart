@@ -106,8 +106,7 @@ class AuthService {
     await p.remove(_kSession);
   }
 
-  // ---- Alur Lupa Password (simulasi) ----
-
+  /// Alur lupa password (simulasi)
   Future<void> requestReset(String email) async {
     await Future<void>.delayed(const Duration(milliseconds: 1000));
     // Produksi: panggil backend. Jangan bocorkan apakah email terdaftar atau tidak.

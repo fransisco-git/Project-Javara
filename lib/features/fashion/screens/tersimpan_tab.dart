@@ -121,13 +121,8 @@ class _TersimpanTabState extends State<TersimpanTab> {
           bottom: false,
           child: Column(
             children: [
-              // 1. Header Khusus Koleksi Tersimpan
               _buildHeader(),
-
-              // 2. Segment Switcher: Item Busana vs Setelan Pusaka
               _buildSubTabSwitcher(),
-
-              // 3. Konten List Reaktif
               Expanded(
                 child: _activeSubTab == 0
                     ? _buildSavedGarmentsList()

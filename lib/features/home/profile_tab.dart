@@ -974,9 +974,6 @@ class _ProfileTabState extends State<ProfileTab> {
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
           children: [
-            // =============================================================
-            // 1. HEADER PROFILE (TITLE & AKSARA JAWA)
-            // =============================================================
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -1015,9 +1012,6 @@ class _ProfileTabState extends State<ProfileTab> {
 
             const SizedBox(height: 18),
 
-            // =============================================================
-            // 2. KARTU IDENTITAS PENGGUNA (AVATAR, NAMA, BADGE, TOMBOL AKSI)
-            // =============================================================
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
@@ -1149,9 +1143,6 @@ class _ProfileTabState extends State<ProfileTab> {
 
             const SizedBox(height: 20),
 
-            // =============================================================
-            // 3. MENU AKTIVITAS BUSANA (PESANAN/SEWA, WISHLIST, RIWAYAT TRY-ON)
-            // =============================================================
             Text(
               'Aktivitas Busana Saya',
               style: JText.serif(17, weight: FontWeight.w700, color: const Color(0xFF382315)),
@@ -1213,9 +1204,6 @@ class _ProfileTabState extends State<ProfileTab> {
 
             const SizedBox(height: 20),
 
-            // =============================================================
-            // 4. BAGIAN "UKURAN BUSANA SAYA (MY SIZE)"
-            // =============================================================
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -1308,9 +1296,6 @@ class _ProfileTabState extends State<ProfileTab> {
 
             const SizedBox(height: 20),
 
-            // =============================================================
-            // 5. PREFERENSI & PANDUAN PENDUKUNG
-            // =============================================================
             Text(
               'Preferensi & Bantuan',
               style: JText.serif(17, weight: FontWeight.w700, color: const Color(0xFF382315)),
@@ -1396,9 +1381,6 @@ class _ProfileTabState extends State<ProfileTab> {
 
             const SizedBox(height: 24),
 
-            // =============================================================
-            // 6. TOMBOL KELUAR DARI AKUN
-            // =============================================================
             SizedBox(
               width: double.infinity,
               height: 48,

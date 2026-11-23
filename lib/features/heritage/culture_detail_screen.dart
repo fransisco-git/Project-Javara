@@ -106,9 +106,6 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
                 child: SizedBox.shrink(),
               ),
             ),
-            // ===============================================================
-            // KONTEN SCROLLABLE DENGAN PARALLAX HERO
-            // ===============================================================
             CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: [
@@ -381,9 +378,6 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
               ],
             ),
 
-            // ===============================================================
-            // BOTTOM STICKY BAR: ORDER / VISIT BUTTON
-            // ===============================================================
             Positioned(
               bottom: 0,
               left: 0,

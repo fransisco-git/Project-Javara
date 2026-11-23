@@ -74,12 +74,6 @@ class JavaMusicService extends ChangeNotifier {
   int _currentIndex = 0;
   String _selectedCategory = 'Semua';
 
-  // =========================================================================
-  // DAFTAR LAGU RESMI JAVARA LENGKAP DENGAN ASSET SUARA ASLI & LIRIK
-  // =========================================================================
-// =========================================================================
-  // DAFTAR 12 LAGU RESMI JAVARA LENGKAP DENGAN AUDIO ASLI DARI YOUTUBE
-  // =========================================================================
   static final List<JavaMusicTrack> _allTracks = [
     // --- 1. DJ JAWA KEKINIAN (TRENDING VIRAL) ---
     const JavaMusicTrack(

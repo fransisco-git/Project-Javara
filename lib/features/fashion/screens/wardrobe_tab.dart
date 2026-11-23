@@ -337,7 +337,6 @@ class _WardrobeTabState extends State<WardrobeTab> {
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
-            // 1. TOP BAR & EDITORIAL HEADER
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
@@ -414,7 +413,6 @@ class _WardrobeTabState extends State<WardrobeTab> {
               ),
             ),
 
-            // 2. TOP STYLING CANVAS / STAGE (ANYWEAR-INSPIRED)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -424,7 +422,6 @@ class _WardrobeTabState extends State<WardrobeTab> {
 
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-            // 3. SEGMENTED SWITCHER (Kanvas Gaya | Item Tersimpan | Setelan Saya)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -434,7 +431,6 @@ class _WardrobeTabState extends State<WardrobeTab> {
 
             const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
-            // 4. SEGMENT CONTENT BODY
             _buildActiveSegmentView(),
 
             // Bottom Inset Padding (Clear bottom navigation bar)
@@ -983,7 +979,6 @@ class _WardrobeTabState extends State<WardrobeTab> {
     }
   }
 
-  // 1. SEGMENT 0: KANVAS GAYA TRAY
   Widget _buildKanvasGayaTray() {
     final items = JavaneseClothingData.clothingItems
         .where((item) =>
@@ -1176,7 +1171,6 @@ class _WardrobeTabState extends State<WardrobeTab> {
     );
   }
 
-  // 2. SEGMENT 1: ITEM TERSIMPAN VIEW
   Widget _buildItemTersimpanView() {
     return ValueListenableBuilder<Set<String>>(
       valueListenable: SavedGarmentsService.instance.savedItemIdsNotifier,
@@ -1392,7 +1386,6 @@ class _WardrobeTabState extends State<WardrobeTab> {
     );
   }
 
-  // 3. SEGMENT 2: SETELAN SAYA VIEW
   Widget _buildSetelanSayaView() {
     return ValueListenableBuilder<List<SavedOutfit>>(
       valueListenable: SavedGarmentsService.instance.savedOutfitsNotifier,

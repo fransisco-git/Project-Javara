@@ -111,7 +111,6 @@ class FashnAiService implements AiTryOnProvider {
   /// Mengirim permintaan Virtual Try-On ke FASHN AI REST API
   @override
   Future<String> initiateTryOn(TryOnRequest request) async {
-    // 1. Jika API Key FASHN dikonfigurasi melalui compile-time define
     if (AppConfig.isFashnConfigured) {
       try {
         final url = Uri.parse('${AppConfig.fashnApiBaseUrl}/run');
@@ -142,7 +141,6 @@ class FashnAiService implements AiTryOnProvider {
       }
     }
 
-    // 2. Mode Studio Demonstrasi Terintegrasi (Jika API Key belum disuplai)
     debugPrint(
       'FASHN API Key belum dikonfigurasi. Menggunakan pipeline kurasi fotografi fotorealistis JAVARA.',
     );

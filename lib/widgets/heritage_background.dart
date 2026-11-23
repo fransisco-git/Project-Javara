@@ -40,17 +40,12 @@ class JavaraHeritageBackground extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // 1. Lapisan Gradasi Dasar & Pencahayaan Ambient
         _BaseGradientLayer(variant: variant),
-
-        // 2. Lapisan Pola Wastra Kawung Halus (Subtle Cultural Watermark)
         Positioned.fill(
           child: CustomPaint(
             painter: _JavaneseKawungWatermarkPainter(variant: variant),
           ),
         ),
-
-        // 3. Lapisan Vignette & Kedalaman Optik Lembut
         Positioned.fill(
           child: DecoratedBox(
             decoration: BoxDecoration(

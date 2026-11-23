@@ -131,9 +131,6 @@ class _HomeTabState extends State<HomeTab> {
             _updatePointer(e.localPosition, MediaQuery.of(context).size),
         child: Stack(
           children: [
-            // =====================================================================
-            // 1. LATAR BELAKANG 3D JAVARA (REMBULAN EMAS + MODEL 3D CANDI DOLLY ZOOM)
-            // =====================================================================
             Positioned.fill(
               child: _Javara3DTempleBackground(
                 scrollController: _scrollController,
@@ -141,9 +138,6 @@ class _HomeTabState extends State<HomeTab> {
               ),
             ),
 
-            // =====================================================================
-            // 2. KONTEN EDITORIAL JAVARA DENGAN PANEL OBSIDIAN GLASS & GOLD
-            // =====================================================================
             Positioned.fill(
               child: Align(
                 alignment: Alignment.topCenter,

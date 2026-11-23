@@ -102,7 +102,6 @@ class JavaraBottomNav extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  // 1. Fluid Gliding Active Indicator (Titik Emas & Aura Cahaya yang Meluncur Mulus)
                   IgnorePointer(
                     child: AnimatedAlign(
                       duration: const Duration(milliseconds: 280),
@@ -139,7 +138,6 @@ class JavaraBottomNav extends StatelessWidget {
                     ),
                   ),
 
-                  // 2. Barisan Item Navigasi Interaktif
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [

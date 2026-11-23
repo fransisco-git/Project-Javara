@@ -340,9 +340,6 @@ class _InteractiveCentralJavaMapState extends State<InteractiveCentralJavaMap>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ==========================================
-          // 1. GOOGLE MAPS FLOATING HEADER & SEARCH BAR
-          // ==========================================
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
             child: Container(
@@ -470,9 +467,6 @@ class _InteractiveCentralJavaMapState extends State<InteractiveCentralJavaMap>
             ),
           ),
 
-          // ==========================================
-          // 2. GOOGLE FILTER CHIPS KABUPATEN / KOTA
-          // ==========================================
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
@@ -576,9 +570,6 @@ class _InteractiveCentralJavaMapState extends State<InteractiveCentralJavaMap>
 
           const SizedBox(height: 6),
 
-          // ==========================================
-          // 3. KANVAS PETA ASLI GOOGLE MAPS (FLUTTER_MAP)
-          // ==========================================
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: ClipRRect(
@@ -773,10 +764,6 @@ class _InteractiveCentralJavaMapState extends State<InteractiveCentralJavaMap>
                           ),
                         ],
                       ),
-
-                      // ==========================================
-                      // KONTROL RESMI GOOGLE MAPS (UI OVERLAYS)
-                      // ==========================================
 
                       // Kompas Google Maps di Kanan Atas
                       Positioned(
@@ -1089,9 +1076,6 @@ class _InteractiveCentralJavaMapState extends State<InteractiveCentralJavaMap>
             ),
           ),
 
-          // ==========================================
-          // 4. GOOGLE MAPS PLACE DETAIL SHEET (BOTTOM)
-          // ==========================================
           AnimatedCrossFade(
             duration: const Duration(milliseconds: 320),
             crossFadeState: active != null

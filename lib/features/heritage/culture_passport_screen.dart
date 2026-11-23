@@ -341,9 +341,6 @@ class _CulturePassportScreenState extends State<CulturePassportScreen>
         backgroundColor: leatherDark,
         body: Stack(
           children: [
-            // =================================================================
-            // 1. LATAR BELAKANG KULIT GELAP BUKU PASPOR DENGAN JAHITAN EMAS
-            // =================================================================
             Positioned.fill(
               child: Container(
                 decoration: const BoxDecoration(
@@ -373,9 +370,6 @@ class _CulturePassportScreenState extends State<CulturePassportScreen>
               ),
             ),
 
-            // =================================================================
-            // 2. KONTEN UTAMA: LEMBAR PERKAMEN KUNO PASPOR BUDAYA
-            // =================================================================
             SafeArea(
               child: Column(
                 children: [
@@ -394,9 +388,6 @@ class _CulturePassportScreenState extends State<CulturePassportScreen>
               ),
             ),
 
-            // =================================================================
-            // 3. PITA PEMBATAS MERAH MARUN (BOOKMARK RIBBON)
-            // =================================================================
             Positioned(
               top: 0,
               right: 32,
@@ -553,37 +544,14 @@ class _CulturePassportScreenState extends State<CulturePassportScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // =============================================================
-                // A. KARTU IDENTITAS RESMI PASPOR PRAJA JAWA TENGAH
-                // =============================================================
                 _buildPassportIdentityHeader(progress),
-
                 const SizedBox(height: 22),
-
-                // =============================================================
-                // B. TAB SWITCHER BUKU: LEMBAR CAP SEGEL VS CATATAN LOG
-                // =============================================================
                 _buildBookTabSwitcher(),
-
                 const SizedBox(height: 16),
-
-                // =============================================================
-                // C. FILTER KELOMPOK WILAYAH (SOLO RAYA, KEDU, DLL)
-                // =============================================================
                 _buildRegionFilterChips(),
-
                 const SizedBox(height: 20),
-
-                // =============================================================
-                // D. GRID SEGEL LILIN KERAJAAN & CAP TERKUNCI EMBOSS
-                // =============================================================
                 _buildWaxSealsStampGrid(),
-
                 const SizedBox(height: 24),
-
-                // =============================================================
-                // E. FOOTER RESMI LEMBAR PENGESAHAN KERATON
-                // =============================================================
                 _buildOfficialParchmentFooter(),
               ],
             ),
@@ -1167,9 +1135,6 @@ class _CulturePassportScreenState extends State<CulturePassportScreen>
   }
 }
 
-// =============================================================================
-// MODAL SHEET: DETAIL INSPEKSI SEGEL LILIN KERAJAAN (ROYAL WAX SEAL SHEET)
-// =============================================================================
 class _RoyalSealDetailSheet extends StatelessWidget {
   const _RoyalSealDetailSheet({
     required this.stamp,
@@ -1378,9 +1343,6 @@ class _RoyalSealDetailSheet extends StatelessWidget {
   }
 }
 
-// =============================================================================
-// CUSTOM PAINTER: SEGEL LILIN KERAJAAN BERFILIGRI EMAS (ROYAL WAX SEAL)
-// =============================================================================
 class _RoyalWaxSealPainter extends CustomPainter {
   const _RoyalWaxSealPainter({
     required this.waxColor,
@@ -1490,9 +1452,6 @@ class _RoyalWaxSealPainter extends CustomPainter {
   bool shouldRepaint(covariant _RoyalWaxSealPainter oldDelegate) => false;
 }
 
-// =============================================================================
-// CUSTOM PAINTER: CAP TERKUNCI EMBOSS DEBOSSED LETTERPRESS
-// =============================================================================
 class _LockedDebossedSealPainter extends CustomPainter {
   const _LockedDebossedSealPainter({
     required this.outlineColor,
@@ -1553,9 +1512,6 @@ class _LockedDebossedSealPainter extends CustomPainter {
   bool shouldRepaint(covariant _LockedDebossedSealPainter oldDelegate) => false;
 }
 
-// =============================================================================
-// PAINTERS HIASAN PERKAMEN: JAHITAN KULIT, WATERMARK KAWUNG, SUDUT FILIGRI & PITA
-// =============================================================================
 class _LeatherSpineStitchPainter extends CustomPainter {
   const _LeatherSpineStitchPainter({required this.stitchColor});
   final Color stitchColor;
