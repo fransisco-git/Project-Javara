@@ -33,6 +33,7 @@ class _ProfileTabState extends State<ProfileTab> {
   String _sizeJarik = 'Standar (220 cm)';
 
   // Data Pengguna
+  bool _isGuest = false;
   String _userName = 'Raden Mas Aryo';
   String _userEmail = 'aryo.kusumo@javara.id';
   String _userPhone = '+62 812-3456-7890';
@@ -47,9 +48,11 @@ class _ProfileTabState extends State<ProfileTab> {
   Future<void> _loadSavedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final authUser = await AuthService.instance.currentUser();
+    final isGuest = (authUser?.isGuest ?? false) || (prefs.getBool('javara_is_guest') ?? false);
 
     if (mounted) {
       setState(() {
+        _isGuest = isGuest;
         _showJavaneseScript = prefs.getBool('javara_pref_aksara') ?? true;
         _ambientGamelan = prefs.getBool('javara_pref_gamelan') ?? true;
 
@@ -57,10 +60,17 @@ class _ProfileTabState extends State<ProfileTab> {
         _sizeHead = prefs.getString('javara_size_head') ?? 'No. 7 (57 cm)';
         _sizeJarik = prefs.getString('javara_size_jarik') ?? 'Standar (220 cm)';
 
-        _userName = prefs.getString('javara_profile_name') ?? (authUser?.name ?? 'Raden Mas Aryo');
-        _userEmail = prefs.getString('javara_profile_email') ?? (authUser?.email ?? 'aryo.kusumo@javara.id');
-        _userPhone = prefs.getString('javara_profile_phone') ?? '+62 812-3456-7890';
-        _userAddress = prefs.getString('javara_profile_address') ?? 'Jl. Slamet Riyadi No. 42, Surakarta, Jawa Tengah';
+        if (_isGuest) {
+          _userName = prefs.getString('javara_profile_name') ?? 'Tamu JAVARA';
+          _userEmail = prefs.getString('javara_profile_email') ?? 'tamu.budaya@javara.id';
+          _userPhone = prefs.getString('javara_profile_phone') ?? '-';
+          _userAddress = prefs.getString('javara_profile_address') ?? 'Mode Tamu (Belum ada alamat)';
+        } else {
+          _userName = prefs.getString('javara_profile_name') ?? (authUser?.name ?? 'Raden Mas Aryo');
+          _userEmail = prefs.getString('javara_profile_email') ?? (authUser?.email ?? 'aryo.kusumo@javara.id');
+          _userPhone = prefs.getString('javara_profile_phone') ?? '+62 812-3456-7890';
+          _userAddress = prefs.getString('javara_profile_address') ?? 'Jl. Slamet Riyadi No. 42, Surakarta, Jawa Tengah';
+        }
       });
     }
   }
@@ -111,7 +121,7 @@ class _ProfileTabState extends State<ProfileTab> {
           side: const BorderSide(color: Color(0x44B08D57), width: 1.0),
         ),
         title: Text(
-          'Keluar dari JAVARA?',
+          _isGuest ? 'Keluar dari Mode Tamu?' : 'Keluar dari JAVARA?',
           style: JText.serif(
             18,
             weight: FontWeight.w700,
@@ -119,7 +129,9 @@ class _ProfileTabState extends State<ProfileTab> {
           ),
         ),
         content: Text(
-          'Seluruh pesanan, data ukuran busana, dan koleksi setelan Anda tetap tersimpan dengan aman.',
+          _isGuest
+              ? 'Anda akan dialihkan kembali ke layar awal dan sesi tamu Anda akan direset.'
+              : 'Seluruh pesanan, data ukuran busana, dan koleksi setelan Anda tetap tersimpan dengan aman.',
           style: JText.serif(13.5, color: const Color(0xFF5C4738), height: 1.45),
         ),
         actions: [
@@ -964,7 +976,9 @@ class _ProfileTabState extends State<ProfileTab> {
 
   @override
   Widget build(BuildContext context) {
-    final initial = _userName.isNotEmpty ? _userName.substring(0, 1).toUpperCase() : 'J';
+    final initial = _isGuest
+        ? 'T'
+        : (_userName.isNotEmpty ? _userName.substring(0, 1).toUpperCase() : 'J');
 
     return Align(
       alignment: Alignment.topCenter,
@@ -1081,17 +1095,26 @@ class _ProfileTabState extends State<ProfileTab> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: const Color(0x14B08D57),
+                                color: _isGuest ? const Color(0x22DFB76C) : const Color(0x14B08D57),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0x38B08D57), width: 0.8),
+                                border: Border.all(
+                                  color: _isGuest ? const Color(0x66DFB76C) : const Color(0x38B08D57),
+                                  width: 0.8,
+                                ),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.checkroom_rounded, size: 12, color: Color(0xFFB08D57)),
+                                  Icon(
+                                    _isGuest ? Icons.explore_rounded : Icons.checkroom_rounded,
+                                    size: 12,
+                                    color: _isGuest ? const Color(0xFF9E7E50) : const Color(0xFFB08D57),
+                                  ),
                                   const SizedBox(width: 5),
                                   Text(
-                                    'Pelestari Wastra Jawa Tengah',
+                                    _isGuest
+                                        ? 'Akun Tamu · Penjelajah Budaya'
+                                        : 'Pelestari Wastra Jawa Tengah',
                                     style: JText.serif(10, weight: FontWeight.w700, color: const Color(0xFF382315)),
                                   ),
                                 ],
@@ -1140,6 +1163,99 @@ class _ProfileTabState extends State<ProfileTab> {
                 ],
               ),
             ),
+
+            if (_isGuest) ...[
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2E2019), Color(0xFF1E1712)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFDFB76C), width: 1.2),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x18000000),
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: Color(0x33DFB76C),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.stars_rounded,
+                            color: Color(0xFFFFDF9E),
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Anda Menggunakan Akun Tamu',
+                            style: JText.serif(
+                              14,
+                              weight: FontWeight.w700,
+                              color: const Color(0xFFFFDF9E),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Masuk atau daftar akun untuk menyimpan ukuran busana adat, riwayat fitting AI, dan pesanan secara permanen.',
+                      style: JText.serif(
+                        12,
+                        color: const Color(0xFFEADBCA),
+                        height: 1.45,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 38,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            fadeSlideRoute(const LoginScreen()),
+                          );
+                        },
+                        icon: const Icon(Icons.login_rounded, size: 16, color: Color(0xFF1E1712)),
+                        label: Text(
+                          'Masuk atau Daftar Akun',
+                          style: JText.sans(
+                            13,
+                            weight: FontWeight.w700,
+                            color: const Color(0xFF1E1712),
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFDFB76C),
+                          foregroundColor: const Color(0xFF1E1712),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
 
             const SizedBox(height: 20),
 
@@ -1393,7 +1509,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 onPressed: () => _logout(context),
                 icon: const Icon(Icons.logout_rounded, color: Color(0xFFB5603A), size: 18),
                 label: Text(
-                  'Keluar dari Akun',
+                  _isGuest ? 'Keluar dari Mode Tamu' : 'Keluar dari Akun',
                   style: JText.serif(13.5, weight: FontWeight.w700, color: const Color(0xFFB5603A)),
                 ),
               ),

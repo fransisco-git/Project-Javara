@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jawara_app/features/welcome/welcome_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -78,6 +79,32 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200));
 
       expect(find.byType(WelcomeScreen), findsOneWidget);
+    });
+
+    testWidgets('Tapping Mulai Eksplorasi Budaya signs in as guest automatically', (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      tester.view.physicalSize = const Size(390 * 2, 844 * 2);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: WelcomeScreen(),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final exploreFinder = find.text('Mulai Eksplorasi Budaya');
+      expect(exploreFinder, findsOneWidget);
+
+      await tester.tap(exploreFinder);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1200));
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('javara_is_guest'), isTrue);
+      expect(prefs.getString('javara_profile_name'), 'Tamu JAVARA');
+      expect(prefs.getString('javara_profile_email'), 'tamu.budaya@javara.id');
     });
   });
 }

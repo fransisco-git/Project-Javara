@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/theme.dart';
 import '../../core/transitions.dart';
+import '../../services/auth_service.dart';
 import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
 import '../home/home_screen.dart';
@@ -114,9 +115,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     super.dispose();
   }
 
-  void _onPrimaryExplore() {
+  Future<void> _onPrimaryExplore() async {
     _stopAmbientFoley();
     HapticFeedback.selectionClick();
+    // Otomatis masuk menggunakan Akun Tamu (Guest User)
+    await AuthService.instance.signInAsGuest();
+    if (!mounted) return;
     Navigator.of(context).pushReplacement(
       fadeSlideRoute(const HomeScreen()),
     );
