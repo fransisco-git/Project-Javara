@@ -221,6 +221,8 @@ class _HomeTabState extends State<HomeTab> {
 
                       // --- HERO CARD FITUR UTAMA ---
                       if (_q.isEmpty) ...[
+                        // Panggung visual terbuka agar tangan Buddha tertutup di tengah & Candi Borobudur tampak megah
+                        const SizedBox(height: 140),
                         StaggerIn(
                           index: 1,
                           child: _HeroCard(

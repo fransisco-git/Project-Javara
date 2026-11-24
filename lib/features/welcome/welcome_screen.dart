@@ -318,25 +318,31 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Wordmark JAVARA kiri atas (teks polos serif, letterSpacing lebar, bayangan tipis)
-                            Semantics(
-                              header: true,
-                              label: 'JAVARA',
-                              child: Text(
-                                'JAVARA',
-                                style: JText.editorial(
-                                  22,
-                                  weight: FontWeight.w700,
-                                  color: const Color(0xFFFFFDF8),
-                                  letterSpacing: 4.8,
-                                ).copyWith(
-                                  shadows: const [
-                                    Shadow(
-                                      color: Color(0x66000000),
-                                      blurRadius: 4,
-                                      offset: Offset(0, 1),
+                            // Wordmark JAVARA kiri atas (teks polos sans-serif bold & spaced sesuai foto referensi)
+                            Flexible(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Semantics(
+                                  header: true,
+                                  label: 'JAVARA',
+                                  child: Text(
+                                    'J A V A R A',
+                                    style: JText.sans(
+                                      20,
+                                      weight: FontWeight.w800,
+                                      color: const Color(0xFFFFFDF8),
+                                      letterSpacing: 4.8,
+                                    ).copyWith(
+                                      shadows: const [
+                                        Shadow(
+                                          color: Color(0xAA000000),
+                                          blurRadius: 6,
+                                          offset: Offset(0, 1.5),
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ),
