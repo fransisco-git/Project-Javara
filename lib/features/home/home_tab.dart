@@ -1532,78 +1532,83 @@ class _HeroCard extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.all(18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3.5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0x44DFB76C),
-                        borderRadius: BorderRadius.circular(5),
-                        border: Border.all(
-                          color: const Color(0xFFDFB76C),
-                          width: 0.8,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.bottomLeft,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3.5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0x44DFB76C),
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(
+                            color: const Color(0xFFDFB76C),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Text(
+                          'WARISAN ADAT · JAWA TENGAH',
+                          style: JText.serif(
+                            9,
+                            weight: FontWeight.w700,
+                            color: const Color(0xFFFFDF9E),
+                          ).copyWith(letterSpacing: 0.9),
                         ),
                       ),
-                      child: Text(
-                        'WARISAN ADAT · JAWA TENGAH',
+                      const SizedBox(height: 6),
+                      Text(
+                        'Busana Luhur Keraton\n& Busana Adat Rakyat',
                         style: JText.serif(
-                          9,
+                          22,
+                          color: Colors.white,
+                          height: 1.15,
                           weight: FontWeight.w700,
-                          color: const Color(0xFFFFDF9E),
-                        ).copyWith(letterSpacing: 0.9),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Busana Luhur Keraton\n& Busana Adat Rakyat',
-                      style: JText.serif(
-                        22,
-                        color: Colors.white,
-                        height: 1.15,
-                        weight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    InteractiveScale(
-                      onTap: onStart,
-                      pressedScale: 0.93,
-                      child: Material(
-                        color: const Color(0xFFDFB76C),
-                        borderRadius: BorderRadius.circular(8),
-                        clipBehavior: Clip.antiAlias,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 9,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Jelajahi Busana',
-                                style: JText.serif(
-                                  13,
-                                  weight: FontWeight.w700,
-                                  color: const Color(0xFF150F1E),
+                      const SizedBox(height: 12),
+                      InteractiveScale(
+                        onTap: onStart,
+                        pressedScale: 0.93,
+                        child: Material(
+                          color: const Color(0xFFDFB76C),
+                          borderRadius: BorderRadius.circular(8),
+                          clipBehavior: Clip.antiAlias,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 9,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Jelajahi Busana',
+                                  style: JText.serif(
+                                    13,
+                                    weight: FontWeight.w700,
+                                    color: const Color(0xFF150F1E),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Icon(
-                                Icons.arrow_forward_rounded,
-                                size: 15,
-                                color: Color(0xFF150F1E),
-                              ),
-                            ],
+                                const SizedBox(width: 8),
+                                const Icon(
+                                  Icons.arrow_forward_rounded,
+                                  size: 15,
+                                  color: Color(0xFF150F1E),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -1634,20 +1639,20 @@ class _Categories extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         for (final (icon, label) in _items)
-          InteractiveScale(
-            pressedScale: 0.90,
-            semanticLabel: 'Kategori $label',
-            onTap: () => onTap(label),
-            child: SizedBox(
-              width: 76,
+          Expanded(
+            child: InteractiveScale(
+              pressedScale: 0.90,
+              semanticLabel: 'Kategori $label',
+              onTap: () => onTap(label),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   _JavaraGlassPanel(
                     padding: EdgeInsets.zero,
                     radius: 18,
                     child: Container(
-                      width: 56,
-                      height: 56,
+                      width: 52,
+                      height: 52,
                       alignment: Alignment.center,
                       child: Icon(
                         icon,
@@ -1657,15 +1662,21 @@ class _Categories extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    label,
-                    style: JText.serif(
-                      11.5,
-                      weight: FontWeight.w600,
-                      color: const Color(0xFFFFF0D0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        label,
+                        style: JText.serif(
+                          11.5,
+                          weight: FontWeight.w600,
+                          color: const Color(0xFFFFF0D0),
+                        ),
+                        maxLines: 1,
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                    maxLines: 1,
-                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -1707,10 +1718,14 @@ class _FeatureDiscoveryRibbon extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 4,
           children: [
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(
                   Icons.auto_awesome,
@@ -1959,7 +1974,10 @@ class _HomeFashion3DBanner extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -1984,7 +2002,6 @@ class _HomeFashion3DBanner extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 6),
                         const Text(
                           'ꦩꦸꦱꦶꦪꦸꦩ꧀ꦧꦸꦱꦤꦗꦮ',
                           style: TextStyle(
@@ -2031,20 +2048,26 @@ class _HomeFashion3DBanner extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   alignment: Alignment.center,
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.view_in_ar_rounded, size: 14, color: Color(0xFF14100D)),
-                      SizedBox(width: 6),
-                      Text(
-                        'Buka Studio 3D',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF14100D),
-                        ),
+                  child: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.view_in_ar_rounded, size: 14, color: Color(0xFF14100D)),
+                          SizedBox(width: 6),
+                          Text(
+                            'Buka Studio 3D',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF14100D),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -2058,20 +2081,23 @@ class _HomeFashion3DBanner extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: const Color(0x55E4C590), width: 0.9),
                   ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.auto_awesome_rounded, size: 13, color: Color(0xFFE4C590)),
-                      SizedBox(width: 4),
-                      Text(
-                        'Jelajahi Set',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFFFAF6F0),
+                  child: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.auto_awesome_rounded, size: 13, color: Color(0xFFE4C590)),
+                        SizedBox(width: 4),
+                        Text(
+                          'Jelajahi Set',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFFFAF6F0),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -2328,8 +2354,11 @@ class _FeaturedOutfitOfTheDayCard extends StatelessWidget {
           // Header Badge & Aksara Jawa
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -2339,6 +2368,7 @@ class _FeaturedOutfitOfTheDayCard extends StatelessWidget {
                     border: Border.all(color: const Color(0x66E4C590), width: 0.8),
                   ),
                   child: const Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.star_rounded, size: 12, color: Color(0xFFE4C590)),
                       SizedBox(width: 4),
@@ -2521,28 +2551,36 @@ class _FeaturedGarmentsCarousel extends StatelessWidget {
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Khasanah Busana Unggulan',
-                  style: JText.serif(
-                    17,
-                    weight: FontWeight.w800,
-                    color: const Color(0xFFFAF6F0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Khasanah Busana Unggulan',
+                    style: JText.serif(
+                      17,
+                      weight: FontWeight.w800,
+                      color: const Color(0xFFFAF6F0),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(height: 2),
-                const Text(
-                  'Rasukan, bebet, dan ricikan Jawa Tengah',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFFA69383),
+                  const SizedBox(height: 2),
+                  const Text(
+                    'Rasukan, bebet, dan ricikan Jawa Tengah',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFFA69383),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+            const SizedBox(width: 8),
             TextButton(
               onPressed: onSeeAll,
               child: const Text(

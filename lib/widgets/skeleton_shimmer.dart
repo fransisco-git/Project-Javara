@@ -203,13 +203,17 @@ class HomeTabSkeletonView extends StatelessWidget {
             const SizedBox(height: 24),
 
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(
                 4,
-                (i) => const ShimmerBox(
-                  width: 72,
-                  height: 36,
-                  borderRadius: 10,
+                (i) => Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: i < 3 ? 8 : 0),
+                    child: const ShimmerBox(
+                      width: double.infinity,
+                      height: 36,
+                      borderRadius: 10,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -251,7 +255,14 @@ class HomeTabSkeletonView extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [
-                ShimmerBox(width: 160, height: 18, borderRadius: 6),
+                Expanded(
+                  child: ShimmerBox(
+                    width: double.infinity,
+                    height: 18,
+                    borderRadius: 6,
+                  ),
+                ),
+                SizedBox(width: 12),
                 ShimmerBox(width: 70, height: 14, borderRadius: 4),
               ],
             ),
