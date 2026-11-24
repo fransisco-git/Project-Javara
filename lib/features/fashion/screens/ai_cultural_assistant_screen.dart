@@ -13,7 +13,9 @@ import 'javanese_wardrobe_screen.dart';
 /// Asisten kurasi cerdas berbasis kecerdasan buatan dan basis data terverifikasi
 /// adat istiadat Jawa Tengah, dilengkapi function calling untuk mengontrol lemari 3D.
 class AiCulturalAssistantScreen extends StatefulWidget {
-  const AiCulturalAssistantScreen({super.key});
+  const AiCulturalAssistantScreen({super.key, this.initialQuery});
+
+  final String? initialQuery;
 
   @override
   State<AiCulturalAssistantScreen> createState() =>
@@ -37,6 +39,9 @@ class _AiCulturalAssistantScreenState extends State<AiCulturalAssistantScreen> {
   @override
   void initState() {
     super.initState();
+    // Sinkronisasi sesi baru
+    AiCulturalAssistantService.instance.clearSession();
+
     // Pesan Pembuka Hangat dari Abdi Pakar Busana
     _messages.add(
       AssistantChatMessage(
@@ -48,10 +53,19 @@ class _AiCulturalAssistantScreenState extends State<AiCulturalAssistantScreen> {
         sourceReference: 'Kurasi Karaton Surakarta Hadiningrat',
       ),
     );
+
+    if (widget.initialQuery != null && widget.initialQuery!.trim().isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _handleSendMessage(widget.initialQuery!.trim());
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
+    AiCulturalAssistantService.instance.clearSession();
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -59,7 +73,7 @@ class _AiCulturalAssistantScreenState extends State<AiCulturalAssistantScreen> {
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
+      if (mounted && _scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 300),
@@ -70,6 +84,8 @@ class _AiCulturalAssistantScreenState extends State<AiCulturalAssistantScreen> {
   }
 
   Future<void> _handleSendMessage([String? predefinedText]) async {
+    if (_isTyping) return;
+
     final text = predefinedText ?? _textController.text.trim();
     if (text.isEmpty) return;
 
@@ -90,7 +106,10 @@ class _AiCulturalAssistantScreenState extends State<AiCulturalAssistantScreen> {
     _scrollToBottom();
 
     try {
-      final reply = await AiCulturalAssistantService.instance.sendMessage(text);
+      final reply = await AiCulturalAssistantService.instance.sendMessage(
+        text,
+        history: _messages,
+      );
       if (mounted) {
         setState(() {
           _isTyping = false;
@@ -100,7 +119,20 @@ class _AiCulturalAssistantScreenState extends State<AiCulturalAssistantScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isTyping = false);
+        setState(() {
+          _isTyping = false;
+          _messages.add(
+            AssistantChatMessage(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              role: AssistantRole.assistant,
+              text:
+                  'Nyuwun pangapunten, wonten pambengan sambungan. Mangga nyobi malih sakmenika utawi pirsani kurasi busana ing katalog.',
+              timestamp: DateTime.now(),
+              sourceReference: 'Kurasi Karaton Surakarta Hadiningrat',
+            ),
+          );
+        });
+        _scrollToBottom();
       }
     }
   }
@@ -178,7 +210,7 @@ class _AiCulturalAssistantScreenState extends State<AiCulturalAssistantScreen> {
                           fontWeight: FontWeight.w600,
                           color: Color(0xFFE4C590)),
                     ),
-                    onPressed: () => _handleSendMessage(prompt),
+                    onPressed: _isTyping ? null : () => _handleSendMessage(prompt),
                   );
                 },
               ),
@@ -209,6 +241,7 @@ class _AiCulturalAssistantScreenState extends State<AiCulturalAssistantScreen> {
                         ),
                         child: TextField(
                           controller: _textController,
+                          enabled: !_isTyping,
                           style: const TextStyle(
                               color: Color(0xFFFAF6F0), fontSize: 13.5),
                           decoration: const InputDecoration(
@@ -217,20 +250,22 @@ class _AiCulturalAssistantScreenState extends State<AiCulturalAssistantScreen> {
                                 color: Color(0xFF9E8E80), fontSize: 13),
                             border: InputBorder.none,
                           ),
-                          onSubmitted: (_) => _handleSendMessage(),
+                          onSubmitted: _isTyping ? null : (_) => _handleSendMessage(),
                         ),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Container(
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFDFB76C),
+                      decoration: BoxDecoration(
+                        color: _isTyping
+                            ? const Color(0xFF5A4838)
+                            : const Color(0xFFDFB76C),
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
                         icon: const Icon(Icons.arrow_upward_rounded,
                             color: Color(0xFF1E1712), size: 20),
-                        onPressed: () => _handleSendMessage(),
+                        onPressed: _isTyping ? null : () => _handleSendMessage(),
                       ),
                     ),
                   ],
@@ -435,31 +470,38 @@ class _AiCulturalAssistantScreenState extends State<AiCulturalAssistantScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1F1813),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0x33DFB76C)),
-            ),
-            child: Row(
-              children: [
-                const SizedBox(
-                  width: 12,
-                  height: 12,
-                  child: CircularProgressIndicator(
-                      strokeWidth: 1.8, color: Color(0xFFDFB76C)),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Abdi Pakar sedang menimbang paugeran adat...',
-                  style: JText.serif(
-                    11,
-                    color: const Color(0xFFE4C590),
-                  ).copyWith(fontStyle: FontStyle.italic),
-                ),
-              ],
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1F1813),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0x33DFB76C)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(
+                    width: 12,
+                    height: 12,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 1.8, color: Color(0xFFDFB76C)),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      'Abdi Pakar sedang menimbang paugeran adat...',
+                      style: JText.serif(
+                        11,
+                        color: const Color(0xFFE4C590),
+                      ).copyWith(fontStyle: FontStyle.italic),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

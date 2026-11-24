@@ -363,7 +363,12 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                     onTap: () {
                       HapticFeedback.lightImpact();
                       Navigator.of(context).push(
-                        fadeSlideRoute(const AiCulturalAssistantScreen()),
+                        fadeSlideRoute(
+                          AiCulturalAssistantScreen(
+                            initialQuery:
+                                'Tanya pakem dan filosofi busana ${widget.item.name}',
+                          ),
+                        ),
                       );
                     },
                     child: Padding(

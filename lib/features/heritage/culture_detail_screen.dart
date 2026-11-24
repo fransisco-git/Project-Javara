@@ -521,7 +521,12 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
           onTap: () {
             HapticFeedback.lightImpact();
             Navigator.of(context).push(
-              fadeSlideRoute(const AiCulturalAssistantScreen()),
+              fadeSlideRoute(
+                AiCulturalAssistantScreen(
+                  initialQuery:
+                      'Tanya filosofi dan tatakrama busana ${item.title}',
+                ),
+              ),
             );
           },
           child: Padding(
