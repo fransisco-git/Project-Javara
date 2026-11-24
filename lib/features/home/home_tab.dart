@@ -213,6 +213,8 @@ class _HomeTabState extends State<HomeTab> {
                               children: [
                       // --- HERO CARD FITUR UTAMA ---
                       if (_q.isEmpty) ...[
+                        // Panggung visual terbuka agar tangan Buddha tertutup di tengah & Candi Borobudur tampak megah
+                        const SizedBox(height: 140),
                         StaggerIn(
                           index: 1,
                           child: _HeroCard(
@@ -552,48 +554,51 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
 
     final scrollRatio = (_smoothScroll / 650.0).clamp(0.0, 1.2);
 
-    // KINEMATIKA GERAK TANGAN MUDRA BUDDHA (SCROLL-DRIVEN CORNER TO CENTER CLAPPING GESTURE)
-    // 0.0 = tangan di pojok kiri & kanan membingkai pelataran candi secara megah dan lega
-    // 1.0 = kedua telapak tangan meluncur ke tengah & menyatu erat (Anjali Mudra / Sembah suci)
-    final mudraProgress = (_smoothScroll / 320.0).clamp(0.0, 1.0);
-    final mudraCurve = Curves.easeInOutCubic.transform(mudraProgress);
+    // KINEMATIKA GERAK TANGAN MUDRA BUDDHA (DARI TERTUTUP MENJADI TERBUKA SAAT DI-SCROLL)
+    // 0.0 (Scroll = 0) : Kedua tangan TERTUTUP menyatu rapat di tengah (Anjali Mudra / Sembah Suci)
+    // 1.0 (Scroll > 0) : Kedua tangan TERBUKA menyibak ke pojok kiri & kanan menyingkap Candi Borobudur
+    final openProgress = (_smoothScroll / 260.0).clamp(0.0, 1.0);
+    final openCurve = Curves.easeOutCubic.transform(openProgress);
 
-    // Dimensi dan proporsi tangan fotorealistik diperbesar (~22% lebih besar sesuai preferensi)
-    final handHeight = (w * 0.90).clamp(330.0, 450.0);
+    // Dimensi dan proporsi tangan fotorealistik diperbesar sesuai preferensi user
+    final handHeight = (w * 0.98).clamp(360.0, 480.0);
     final leftHandWidth = handHeight * (682.0 / 735.0);
     final rightHandWidth = handHeight * (694.0 / 735.0);
     final centerX = w / 2;
 
-    // Posisi awal di pojokan (Corner Placement):
-    final leftOpenX = -leftHandWidth * 0.44;
-    final rightOpenX = w - (rightHandWidth * 0.56);
-
-    // Posisi akhir saat menyatu di tengah (Closed Clapping Meeting Point):
+    // Posisi Tertutup di tengah (Closed Clapping Meeting Point):
     final leftClosedX = centerX - leftHandWidth + 3.0;
     final rightClosedX = centerX - 3.0;
 
-    final leftTargetX = ui.lerpDouble(leftOpenX, leftClosedX, mudraCurve)! +
+    // Posisi Terbuka di pojokan (Corner Placement):
+    final leftOpenX = -leftHandWidth * 0.46;
+    final rightOpenX = w - (rightHandWidth * 0.54);
+
+    // Interpolasi dari TERTUTUP -> TERBUKA seiring scroll
+    final leftTargetX = ui.lerpDouble(leftClosedX, leftOpenX, openCurve)! +
         (_smoothPointerX * 8.0);
-    final rightTargetX = ui.lerpDouble(rightOpenX, rightClosedX, mudraCurve)! +
+    final rightTargetX = ui.lerpDouble(rightClosedX, rightOpenX, openCurve)! +
         (_smoothPointerX * 8.0);
 
     // Parallax posisi vertikal tangan:
-    final handsY = ui.lerpDouble(170.0, 105.0, mudraCurve)! -
+    final handsY = ui.lerpDouble(115.0, 160.0, openCurve)! -
         (_smoothScroll * 0.16) +
         (_smoothPointerY * 12.0);
 
     // Rotasi 3D spasial telapak tangan:
+    // Saat tertutup (0.0): tegak menghadap satu sama lain menyatu (sembah suci)
+    // Saat terbuka (1.0): berotasi menyibak ke luar secara 3D
     final leftHandYaw =
-        ui.lerpDouble(-0.50, 0.015, mudraCurve)! + (_smoothPointerX * 0.05);
+        ui.lerpDouble(0.015, -0.50, openCurve)! + (_smoothPointerX * 0.05);
     final leftHandPitch = (_smoothPointerY * -0.05) + (scrollRatio * 0.04);
     final leftHandRoll =
-        ui.lerpDouble(-0.18, 0.0, mudraCurve)! + (_smoothPointerX * 0.02);
+        ui.lerpDouble(0.0, -0.18, openCurve)! + (_smoothPointerX * 0.02);
 
     final rightHandYaw =
-        ui.lerpDouble(0.50, -0.015, mudraCurve)! + (_smoothPointerX * 0.05);
+        ui.lerpDouble(-0.015, 0.50, openCurve)! + (_smoothPointerX * 0.05);
     final rightHandPitch = (_smoothPointerY * -0.05) + (scrollRatio * 0.04);
     final rightHandRoll =
-        ui.lerpDouble(0.18, 0.0, mudraCurve)! + (_smoothPointerX * 0.02);
+        ui.lerpDouble(0.0, 0.18, openCurve)! + (_smoothPointerX * 0.02);
 
     final leftHandMatrix = Matrix4.identity()
       ..setEntry(3, 2, 0.0016)
@@ -709,7 +714,7 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           ),
         ),
 
-        // --- 5. AURA ENERGI SUCI ANJALI MUDRA (BLOOM & SACRED RIPPLES DI TITIK TEMU PALM) ---
+        // --- 5. AURA ENERGI SUCI ANJALI MUDRA (BLOOM & SACRED RIPPLES SAAT TELAPAK BERTEMU DI TENGAH) ---
         Positioned.fill(
           child: IgnorePointer(
             child: CustomPaint(
@@ -718,14 +723,14 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
                   centerX + (_smoothPointerX * 8.0),
                   handsY + (handHeight * 0.44),
                 ),
-                mudraCurve: mudraCurve,
+                openCurve: openCurve,
                 elapsedTime: _elapsedTime,
               ),
             ),
           ),
         ),
 
-        // --- 6. TANGAN KIRI BUDDHA 3D (MENUTUP KE TENGAH SEIRING SCROLL) ---
+        // --- 6. TANGAN KIRI BUDDHA 3D (MEMBUKA MENYIBAK KE KIRI SEIRING SCROLL) ---
         Positioned(
           top: handsY,
           left: leftTargetX,
@@ -748,7 +753,7 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           ),
         ),
 
-        // --- 7. TANGAN KANAN BUDDHA 3D (MENUTUP KE TENGAH SEIRING SCROLL) ---
+        // --- 7. TANGAN KANAN BUDDHA 3D (MEMBUKA MENYIBAK KE KANAN SEIRING SCROLL) ---
         Positioned(
           top: handsY,
           left: rightTargetX,
@@ -1087,24 +1092,25 @@ class _JavaraAtmospherePainter extends CustomPainter {
   bool shouldRepaint(covariant _JavaraAtmospherePainter oldDelegate) => true;
 }
 
-/// Melukis Pendaran Aura Emas Suci & Gelombang Anjali Mudra saat telapak tangan bertemu
+/// Melukis Pendaran Aura Emas Suci & Gelombang Anjali Mudra saat telapak tangan bertemu di tengah
 class _AnjaliMudraEnergyPainter extends CustomPainter {
   _AnjaliMudraEnergyPainter({
     required this.contactPoint,
-    required this.mudraCurve,
+    required this.openCurve,
     required this.elapsedTime,
   });
 
   final Offset contactPoint;
-  final double mudraCurve;
+  final double openCurve;
   final double elapsedTime;
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (mudraCurve < 0.60) return;
+    // Pendaran sakral paling terang saat tangan menyatu tertutup di tengah (openCurve = 0),
+    // dan menghilang perlahan seiring tangan membuka menyibak (openCurve > 0.45)
+    if (openCurve > 0.45) return;
 
-    // Intensitas bertahap dari 0.0 sampai 1.0 seiring telapak tangan merapat menepuk
-    final intensity = ((mudraCurve - 0.60) / 0.40).clamp(0.0, 1.0);
+    final intensity = ((0.45 - openCurve) / 0.45).clamp(0.0, 1.0);
 
     // 1. Pendaran Inti Emas Luhur (Golden Prana Halo Core)
     final pulse = math.sin(elapsedTime * 3.5) * 6.0;
@@ -1135,9 +1141,9 @@ class _AnjaliMudraEnergyPainter extends CustomPainter {
       canvas.drawCircle(contactPoint, r, ripplePaint);
     }
 
-    // 3. Kilau Bintang Berlian 8 Arah (Prabha Starburst) saat tangan hampir/sudah menutup sempurna
-    if (intensity > 0.60) {
-      final starIntensity = ((intensity - 0.60) / 0.40);
+    // 3. Kilau Bintang Berlian 8 Arah (Prabha Starburst) saat tangan tertutup rapat di tengah
+    if (intensity > 0.40) {
+      final starIntensity = ((intensity - 0.40) / 0.60);
       final starPaint = Paint()
         ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.90 * starIntensity)
         ..style = PaintingStyle.fill;

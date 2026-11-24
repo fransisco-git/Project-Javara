@@ -47,6 +47,40 @@ void main() {
     expect(find.text('J A V A R A'), findsOneWidget);
   });
 
+  testWidgets('HomeTab scrolls and opens Buddha hands smoothly without crash or overflow', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390 * 2, 844 * 2);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: HomeTab(onOpenTab: (_) {}),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 1000));
+
+    // Find the ListView and scroll down
+    final listFinder = find.byType(ListView);
+    expect(listFinder, findsOneWidget);
+
+    // Scroll down 300px
+    await tester.drag(listFinder, const Offset(0, -300));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Scroll back up 300px
+    await tester.drag(listFinder, const Offset(0, 300));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Header remains stable
+    expect(find.text('J A V A R A'), findsOneWidget);
+  });
+
   testWidgets('HomeTab zero RenderFlex overflow across various widths and text scales', (
     WidgetTester tester,
   ) async {
