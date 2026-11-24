@@ -5,15 +5,15 @@ import 'package:jawara_app/features/welcome/welcome_screen.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('WelcomeScreen Cinematic Candi Bentar Gate Tests', () {
-    testWidgets('Renders opened gate and shows editorial UI and CTAs', (tester) async {
+  group('WelcomeScreen Heritage Borobudur Tests', () {
+    testWidgets('Renders heritage background and shows editorial UI and CTAs immediately', (tester) async {
       tester.view.physicalSize = const Size(390 * 2, 844 * 2);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
         const MaterialApp(
-          home: WelcomeScreen(playGateOpen: false),
+          home: WelcomeScreen(),
         ),
       );
 
@@ -23,10 +23,11 @@ void main() {
       // Verify WelcomeScreen mounts
       expect(find.byType(WelcomeScreen), findsOneWidget);
 
-      // In playGateOpen: false (immediately opened), editorial UI and buttons exist
+      // Editorial UI and buttons exist immediately without opening delays
       expect(find.text('Mengenal warisan.\nMemahami makna.'), findsOneWidget);
       expect(find.text('Mulai Eksplorasi Budaya'), findsOneWidget);
       expect(find.text('Masuk ke Akun Anda'), findsOneWidget);
+      expect(find.text('Daftar Akun Baru'), findsOneWidget);
       expect(find.textContaining('ꦗ ꦮ ꦫ'), findsWidgets);
     });
 
@@ -43,7 +44,7 @@ void main() {
 
           await tester.pumpWidget(
             const MaterialApp(
-              home: WelcomeScreen(playGateOpen: false),
+              home: WelcomeScreen(),
             ),
           );
           await tester.pump(const Duration(milliseconds: 100));
@@ -57,24 +58,24 @@ void main() {
       }
     });
 
-    testWidgets('Tapping anywhere triggers skipToOpen cleanly', (tester) async {
+    testWidgets('Audio toggle button can be tapped cleanly', (tester) async {
       tester.view.physicalSize = const Size(390 * 2, 844 * 2);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
         const MaterialApp(
-          home: WelcomeScreen(playGateOpen: true),
+          home: WelcomeScreen(),
         ),
       );
+      await tester.pump(const Duration(milliseconds: 100));
 
-      // Initially closed / opening
-      await tester.pump(const Duration(milliseconds: 50));
+      // Look for audio toggle or foley badge
+      final audioToggleFinder = find.byType(InkWell);
+      expect(audioToggleFinder, findsWidgets);
 
-      // Tap screen to skipToOpen
-      await tester.tap(find.byType(GestureDetector).first);
-      // Pump with fixed duration (not pumpAndSettle, since ambient animation loops infinitely)
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(audioToggleFinder.first);
+      await tester.pump(const Duration(milliseconds: 200));
 
       expect(find.byType(WelcomeScreen), findsOneWidget);
     });
