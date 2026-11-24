@@ -10,7 +10,6 @@ import '../../data/culture_items.dart';
 import '../../widgets/motion.dart';
 import '../../widgets/photo_box.dart';
 import '../heritage/aksara_jawa_screen.dart';
-import '../heritage/cultural_order_sheet.dart';
 import '../heritage/culture_detail_screen.dart';
 import '../heritage/culture_passport_screen.dart';
 import '../heritage/hidden_heritage_screen.dart';
@@ -146,9 +145,9 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(BuildContext context) {
-    final popular = _filter(popularItems);
-    final picked = _filter(pickedItems);
-    final empty = popular.isEmpty && picked.isEmpty;
+    final allItems = [...popularItems, ...pickedItems];
+    final popular = _q.isEmpty ? popularItems : _filter(allItems);
+    final empty = popular.isEmpty;
     final topPadding = MediaQuery.of(context).padding.top;
 
     return MouseRegion(
@@ -359,36 +358,7 @@ class _HomeTabState extends State<HomeTab> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 26),
-                      ],
-
-                      // --- DAFTAR WASTRA & BUSANA PILIHAN ---
-                      if (picked.isNotEmpty) ...[
-                        _SectionHeader(
-                          title: 'Wastra & Busana Pilihan',
-                          onSeeAll: () => widget.onOpenTab(2),
-                        ),
-                        const SizedBox(height: 14),
-                        for (final item in picked) ...[
-                          _PickedCard(
-                            item: item,
-                            onTap: () => Navigator.of(context).push(
-                              fadeSlideRoute(
-                                CultureDetailScreen(
-                                  item: item,
-                                  onOpenMap: () => widget.onOpenTab(1),
-                                ),
-                              ),
-                            ),
-                            onOrder: () => showModalBottomSheet<void>(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (_) => CulturalOrderSheet(item: item),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                        ],
+                        const SizedBox(height: 16),
                       ],
                     ],
                   ),
@@ -2486,13 +2456,11 @@ class _PopularGrid extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        item.price ?? '${item.actionLabel} →',
+                        'Pelajari Tradisi →',
                         style: JText.serif(
-                          12.5,
+                          12,
                           weight: FontWeight.w700,
-                          color: item.price == null
-                              ? const Color(0xFFFFD700)
-                              : const Color(0xFFDFB76C),
+                          color: const Color(0xFFDFB76C),
                         ),
                       ),
                     ],
@@ -2502,91 +2470,6 @@ class _PopularGrid extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-
-
-/// KARTU KARYA & KULINER
-class _PickedCard extends StatelessWidget {
-  const _PickedCard({
-    required this.item,
-    required this.onTap,
-    required this.onOrder,
-  });
-  final CultureItem item;
-  final VoidCallback onTap;
-  final VoidCallback onOrder;
-
-  @override
-  Widget build(BuildContext context) {
-    return InteractiveCard(
-      semanticLabel: item.title,
-      borderRadius: 18,
-      padding: const EdgeInsets.all(12),
-      backgroundColor: const Color(0xCC1A1022),
-      border: Border.all(color: const Color(0x44DFB76C), width: 0.8),
-      onTap: onTap,
-      child: Row(
-        children: [
-          AssetPhoto(file: item.image, width: 72, height: 72, radius: 12.0),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.tag,
-                  style: tagStyle().copyWith(color: const Color(0xFFDFB76C)),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  item.title,
-                  style: JText.serif(
-                    15,
-                    weight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  item.price ?? '',
-                  style: JText.serif(
-                    13,
-                    weight: FontWeight.w600,
-                    color: const Color(0xFFFFD700),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          InteractiveScale(
-            onTap: onOrder,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 8,
-              ),
-              decoration: BoxDecoration(
-                color: const Color(0x33DFB76C),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0x66DFB76C), width: 0.8),
-              ),
-              child: Text(
-                '${item.actionLabel} →',
-                style: JText.serif(
-                  12,
-                  weight: FontWeight.w700,
-                  color: const Color(0xFFDFB76C),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
