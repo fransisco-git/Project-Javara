@@ -106,5 +106,39 @@ void main() {
       expect(prefs.getString('javara_profile_name'), 'Tamu JAVARA');
       expect(prefs.getString('javara_profile_email'), 'tamu.budaya@javara.id');
     });
+
+    testWidgets('Renders J A V A R A reference header and action buttons on welcome screen', (tester) async {
+      tester.view.physicalSize = const Size(390 * 2, 844 * 2);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: WelcomeScreen(),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Verify J A V A R A logo
+      expect(find.text('J A V A R A'), findsOneWidget);
+
+      // Verify icons
+      expect(find.byIcon(Icons.auto_awesome_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.ios_share_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.search_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.inventory_2_outlined), findsOneWidget);
+
+      // Tap search icon to open search bar
+      await tester.tap(find.byIcon(Icons.search_rounded));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Verify search input is shown
+      expect(find.byType(TextField), findsOneWidget);
+
+      // Close search
+      await tester.tap(find.byIcon(Icons.close_rounded));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('J A V A R A'), findsOneWidget);
+    });
   });
 }

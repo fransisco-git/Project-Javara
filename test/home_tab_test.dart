@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jawara_app/features/home/home_tab.dart';
 
 void main() {
-  testWidgets('HomeTab renders luxury JAVARA header and action buttons', (
+  testWidgets('HomeTab renders inline search bar and filters items', (
     WidgetTester tester,
   ) async {
     tester.view.physicalSize = const Size(390 * 2, 844 * 2);
@@ -17,34 +17,21 @@ void main() {
         ),
       ),
     );
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 1200));
 
-    // Verify J A V A R A header logo is present
-    expect(find.text('J A V A R A'), findsOneWidget);
-
-    // Verify Search button is present
-    final searchIconFinder = find.byIcon(Icons.search_rounded);
-    expect(searchIconFinder, findsAtLeastNWidgets(1));
-
-    // Tap search button to open search bar
-    await tester.tap(searchIconFinder.first);
-    await tester.pump(const Duration(milliseconds: 300));
-
-    // Verify search text field is now displayed
+    // Verify Search text field is present inline
     expect(find.byType(TextField), findsOneWidget);
+    expect(find.text('Cari busana, kebaya, beskap, batik, jarik...'), findsOneWidget);
 
     // Enter search text
     await tester.enterText(find.byType(TextField), 'kebaya');
     await tester.pump(const Duration(milliseconds: 300));
 
-    // Close search
+    // Clear search
     final closeFinder = find.byIcon(Icons.close_rounded);
     expect(closeFinder, findsOneWidget);
     await tester.tap(closeFinder);
     await tester.pump(const Duration(milliseconds: 300));
-
-    // Should return to logo bar
-    expect(find.text('J A V A R A'), findsOneWidget);
   });
 
   testWidgets('HomeTab scrolls and opens Buddha hands smoothly without crash or overflow', (
@@ -77,8 +64,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 300));
 
-    // Header remains stable
-    expect(find.text('J A V A R A'), findsOneWidget);
+    // ListView and inline search remain stable
+    expect(find.byType(ListView), findsOneWidget);
+    expect(find.byType(TextField), findsOneWidget);
   });
 
   testWidgets('HomeTab zero RenderFlex overflow across various widths and text scales', (

@@ -33,6 +33,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   late final AnimationController _ambientController;
   AudioPlayer? _ambientPlayer;
   bool _isAudioPlaying = false;
+  bool _isSearchOpen = false;
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   double _pointerX = 0.0;
   double _pointerY = 0.0;
 
@@ -110,6 +113,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
     _stopAmbientFoley();
     _ambientController.dispose();
     super.dispose();
@@ -216,7 +221,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ),
                   ),
 
-                  // 5. Bilah Navigasi Atas Bersih & Elegan
+                  // 5. Bilah Navigasi Atas Bersih & Elegan Sesuai Gambar Referensi JAVARA
                   Positioned(
                     top: 0,
                     left: 0,
@@ -227,107 +232,189 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           horizontal: 20,
                           vertical: 12,
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // Kiri: Logo Teks Luxury JAVARA
-                            Flexible(
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerLeft,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 250),
+                          switchInCurve: Curves.easeOutCubic,
+                          switchOutCurve: Curves.easeInCubic,
+                          child: _isSearchOpen
+                              ? Container(
+                                  key: const ValueKey('welcome_search_input'),
+                                  height: 44,
+                                  padding: const EdgeInsets.symmetric(horizontal: 14),
                                   decoration: BoxDecoration(
-                                    color: const Color(0x55000000),
-                                    borderRadius: BorderRadius.circular(16),
+                                    color: const Color(0xE6140E1B),
+                                    borderRadius: BorderRadius.circular(22),
                                     border: Border.all(
-                                      color: const Color(0x44DFB76C),
-                                      width: 0.8,
+                                      color: const Color(0x66DFB76C),
+                                      width: 1.0,
                                     ),
-                                  ),
-                                  child: const Text(
-                                    'J A V A R A',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 3.5,
-                                      color: Color(0xFFFFFDF8),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(width: 8),
-
-                            // Tengah: Aksara Jawa "Javara"
-                            const Flexible(
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  'ꦗ ꦮ ꦫ',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Color(0xCCDFB76C),
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 4,
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(width: 8),
-
-                            // Kanan: Foley Ambien Candi Audio Badge / Toggle
-                            Flexible(
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerRight,
-                                child: InkWell(
-                                  onTap: _toggleAudio,
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 5,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0x55000000),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: const Color(0x44DFB76C),
-                                        width: 0.8,
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Color(0x44000000),
+                                        blurRadius: 12,
+                                        offset: Offset(0, 3),
                                       ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          _isAudioPlaying
-                                              ? Icons.graphic_eq_rounded
-                                              : Icons.volume_off_rounded,
-                                          size: 13,
-                                          color: const Color(0xFFDFB76C),
-                                        ),
-                                        const SizedBox(width: 5),
-                                        Text(
-                                          _isAudioPlaying ? 'Foley Candi' : 'Suara Mati',
-                                          style: const TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w600,
-                                            color: Color(0xFFFFDF9E),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.search_rounded,
+                                        color: Color(0xFFDFB76C),
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _searchController,
+                                          focusNode: _searchFocusNode,
+                                          autofocus: true,
+                                          textInputAction: TextInputAction.search,
+                                          onSubmitted: (query) {
+                                            if (query.trim().isNotEmpty) {
+                                              _onPrimaryExplore();
+                                            }
+                                          },
+                                          style: JText.serif(14, color: Colors.white),
+                                          cursorColor: const Color(0xFFFFD700),
+                                          decoration: InputDecoration(
+                                            hintText: 'Cari busana, kebaya, beskap, batik...',
+                                            hintStyle: JText.serif(13.5, color: const Color(0xFFA69584)),
+                                            border: InputBorder.none,
+                                            isDense: true,
+                                            contentPadding: const EdgeInsets.symmetric(vertical: 10),
                                           ),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                      IconButton(
+                                        tooltip: 'Tutup pencarian',
+                                        icon: const Icon(
+                                          Icons.close_rounded,
+                                          size: 19,
+                                          color: Color(0xFFDFB76C),
+                                        ),
+                                        onPressed: () {
+                                          HapticFeedback.lightImpact();
+                                          _searchController.clear();
+                                          _searchFocusNode.unfocus();
+                                          setState(() => _isSearchOpen = false);
+                                        },
+                                        splashRadius: 20,
+                                      ),
+                                    ],
                                   ),
+                                )
+                              : Row(
+                                  key: const ValueKey('welcome_logo_bar'),
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    // LOGO JAVARA DI ATAS KIRI (Clean, Bold, Spaced Out sesuai Gambar Referensi)
+                                    Flexible(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerLeft,
+                                        child: Semantics(
+                                          header: true,
+                                          label: 'Javara Logo',
+                                          child: const Text(
+                                            'J A V A R A',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: 4.8,
+                                              color: Color(0xFFFFFDF8),
+                                              shadows: [
+                                                Shadow(
+                                                  color: Color(0xAA000000),
+                                                  blurRadius: 8,
+                                                  offset: Offset(0, 1.5),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+
+                                    const SizedBox(width: 8),
+
+                                    // TOMBOL AKSI MINIMALIS DI ATAS KANAN SESUAI REFERENSI GAMBAR
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerRight,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          // 1. Sparkle / AI Features
+                                          _WelcomeHeaderIconButton(
+                                            icon: Icons.auto_awesome_rounded,
+                                            tooltip: 'AI Cultural Assistant',
+                                            onTap: () {
+                                              HapticFeedback.lightImpact();
+                                              _onPrimaryExplore();
+                                            },
+                                          ),
+                                          const SizedBox(width: 6),
+
+                                          // 2. Share / Bagikan Icon
+                                          _WelcomeHeaderIconButton(
+                                            icon: Icons.ios_share_rounded,
+                                            tooltip: 'Bagikan JAVARA',
+                                            onTap: () {
+                                              HapticFeedback.lightImpact();
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'Tautan JAVARA disalin ke papan klip',
+                                                    style: JText.serif(13, color: const Color(0xFFFAF6EE)),
+                                                  ),
+                                                  backgroundColor: const Color(0xFF2E2019),
+                                                  behavior: SnackBarBehavior.floating,
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                                  duration: const Duration(seconds: 2),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                          const SizedBox(width: 6),
+
+                                          // 3. Search Icon (membuka search bar simpel)
+                                          _WelcomeHeaderIconButton(
+                                            icon: Icons.search_rounded,
+                                            tooltip: 'Cari Busana & Khasanah',
+                                            onTap: () {
+                                              HapticFeedback.lightImpact();
+                                              setState(() => _isSearchOpen = true);
+                                              _searchFocusNode.requestFocus();
+                                            },
+                                          ),
+                                          const SizedBox(width: 6),
+
+                                          // 4. Box / Inventory Koleksi Busana Adat
+                                          _WelcomeHeaderIconButton(
+                                            icon: Icons.inventory_2_outlined,
+                                            tooltip: 'Koleksi Busana Adat',
+                                            onTap: () {
+                                              HapticFeedback.lightImpact();
+                                              _onPrimaryExplore();
+                                            },
+                                          ),
+                                          const SizedBox(width: 6),
+
+                                          // 5. Foley Audio Ambien Toggle
+                                          _WelcomeHeaderIconButton(
+                                            icon: _isAudioPlaying
+                                                ? Icons.graphic_eq_rounded
+                                                : Icons.volume_off_rounded,
+                                            tooltip: _isAudioPlaying ? 'Matikan Suara Ambien' : 'Nyalakan Suara Ambien',
+                                            iconColor: _isAudioPlaying ? const Color(0xFFDFB76C) : const Color(0xFFA69584),
+                                            onTap: _toggleAudio,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                     ),
@@ -698,4 +785,58 @@ class _ValleyMistPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _ValleyMistPainter old) =>
       old.time != time || old.openProgress != openProgress;
+}
+
+/// Tombol Ikon Minimalis di Header Layar Selamat Datang Sesuai Gambar Referensi
+class _WelcomeHeaderIconButton extends StatelessWidget {
+  const _WelcomeHeaderIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+    this.iconColor = const Color(0xFFFAF6F0),
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+  final Color iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: const Color(0x33000000),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0x28DFB76C),
+                width: 0.8,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x22000000),
+                  blurRadius: 6,
+                  offset: Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Icon(
+              icon,
+              color: iconColor,
+              size: 19,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
