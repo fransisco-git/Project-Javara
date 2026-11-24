@@ -11,7 +11,7 @@ import '../home/home_screen.dart';
 import 'forgot/forgot_email_screen.dart';
 import 'signup_screen.dart';
 
-/// LOG IN: email + password, Lupa Password?, Log In, atau Google / Apple, link ke Sign Up.
+/// LOG IN: email + password, Lupa Password?, Log In, link ke Sign Up.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, this.notice});
 
@@ -71,9 +71,6 @@ class _LoginScreenState extends State<LoginScreen> {
       _shake.currentState?.shake();
     }
   }
-
-  void _soon(String what) =>
-      showJavaraSnack(context, 'Log In dengan $what akan segera tersedia.');
 
   @override
   Widget build(BuildContext context) {
@@ -185,71 +182,41 @@ class _LoginScreenState extends State<LoginScreen> {
             onPressed: _submit,
           ),
         ),
-        const SizedBox(height: 18),
-        const StaggerIn(index: 5, child: OrDivider()),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         StaggerIn(
-          index: 6,
-          child: Row(
-            children: [
-              Expanded(
-                child: SocialButton(
-                  icon: const GoogleGlyph(),
-                  semanticLabel: 'Log In dengan Google',
-                  onPressed: _loading ? null : () => _soon('Google'),
+          index: 5,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Belum punya akun?',
+                  style: JText.serif(12, color: JColors.muted),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SocialButton(
-                  icon: const Icon(Icons.apple, size: 24, color: JColors.ink),
-                  semanticLabel: 'Log In dengan Apple',
-                  onPressed: _loading ? null : () => _soon('Apple'),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        StaggerIn(
-          index: 7,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Belum punya akun?',
-                      style: JText.serif(12, color: JColors.muted),
+                InkWell(
+                  onTap: _loading
+                      ? null
+                      : () =>
+                            Navigator.of(context)
+                                .push(fadeSlideRoute(const SignUpScreen())),
+                  borderRadius: BorderRadius.circular(6),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 12,
                     ),
-                    InkWell(
-                      onTap: _loading
-                          ? null
-                          : () =>
-                                Navigator.of(context)
-                                    .push(fadeSlideRoute(const SignUpScreen())),
-                      borderRadius: BorderRadius.circular(6),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 12,
-                        ),
-                        child: Text(
-                          'Sign Up',
-                          style: JText.serif(
-                            12,
-                            weight: FontWeight.w700,
-                            color: JColors.button,
-                          ),
-                        ),
+                    child: Text(
+                      'Sign Up',
+                      style: JText.serif(
+                        12,
+                        weight: FontWeight.w700,
+                        color: JColors.button,
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

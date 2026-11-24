@@ -9,7 +9,7 @@ import '../../widgets/javara_widgets.dart';
 import '../../widgets/motion.dart';
 import '../home/home_screen.dart';
 
-/// SIGN UP: nama lengkap, email, password; atau Google / Apple; link ke Log In.
+/// SIGN UP: nama lengkap, email, password, link ke Log In.
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -71,9 +71,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _shake.currentState?.shake();
     }
   }
-
-  void _soon(String what) =>
-      showJavaraSnack(context, 'Sign Up dengan $what akan segera tersedia.');
 
   @override
   Widget build(BuildContext context) {
@@ -154,34 +151,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             onPressed: _submit,
           ),
         ),
-        const SizedBox(height: 18),
-        const StaggerIn(index: 4, child: OrDivider()),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         StaggerIn(
-          index: 5,
-          child: Row(
-            children: [
-              Expanded(
-                child: SocialButton(
-                  icon: const GoogleGlyph(),
-                  semanticLabel: 'Sign Up dengan Google',
-                  onPressed: _loading ? null : () => _soon('Google'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SocialButton(
-                  icon: const Icon(Icons.apple, size: 24, color: JColors.ink),
-                  semanticLabel: 'Sign Up dengan Apple',
-                  onPressed: _loading ? null : () => _soon('Apple'),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        StaggerIn(
-          index: 6,
+          index: 4,
           child: Center(
             child: Row(
               mainAxisSize: MainAxisSize.min,
