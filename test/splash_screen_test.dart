@@ -23,8 +23,8 @@ void main() {
       // Verify subtitle text
       expect(find.text('WARISAN BUSANA JAWA TENGAH'), findsOneWidget);
 
-      // Verify skip button exists
-      expect(find.text('Lewati'), findsOneWidget);
+      // Verify skip (Lewati) button is removed
+      expect(find.text('Lewati'), findsNothing);
 
       // Pump a short duration to verify loading step
       await tester.pump(const Duration(milliseconds: 300));

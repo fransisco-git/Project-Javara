@@ -159,52 +159,6 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
 
-              Positioned(
-                top: MediaQuery.of(context).padding.top + 16,
-                right: 20,
-                child: FadeTransition(
-                  opacity: _loaderAnim,
-                  child: InkWell(
-                    onTap: _navigateToNext,
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0x24DFB76C),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: const Color(0x4DDFB76C),
-                          width: 1,
-                        ),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Lewati',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFFFFDF9E),
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          SizedBox(width: 4),
-                          Icon(
-                            Icons.arrow_forward_rounded,
-                            size: 13,
-                            color: Color(0xFFFFDF9E),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
               Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
