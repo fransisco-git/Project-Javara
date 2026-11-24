@@ -117,11 +117,12 @@ Prinsip & Pedoman Utama:
 
   /// Membangun URL Endpoint Google Gemini API
   Uri buildEndpointUrl() {
-    final model = effectiveModel.trim();
+    final rawModel = effectiveModel.trim();
+    final cleanModel = rawModel.replaceFirst(RegExp(r'^/?(models/)?'), '');
     final key = effectiveApiKey.trim();
     return Uri.https(
       'generativelanguage.googleapis.com',
-      '/v1beta/models/$model:generateContent',
+      '/v1beta/models/$cleanModel:generateContent',
       {'key': key},
     );
   }
@@ -244,12 +245,14 @@ Prinsip & Pedoman Utama:
     }
 
     final trimmedQuery = query.trim();
+    final effectiveQueryText =
+        trimmedQuery.isNotEmpty ? trimmedQuery : 'Paugeran Busana Adat';
 
     if (contents.isEmpty) {
       contents.add({
         'role': 'user',
         'parts': [
-          {'text': trimmedQuery}
+          {'text': effectiveQueryText}
         ],
       });
       return contents;
@@ -262,17 +265,20 @@ Prinsip & Pedoman Utama:
         ? (lastParts.first['text'] as String? ?? '')
         : '';
 
-    if (lastContent['role'] == 'user' && lastText == trimmedQuery) {
+    if (lastContent['role'] == 'user' &&
+        (lastText == trimmedQuery || lastText == effectiveQueryText)) {
       return contents;
     }
 
     if (lastContent['role'] == 'user') {
-      lastParts.first['text'] = '$lastText\n\n$trimmedQuery';
+      if (trimmedQuery.isNotEmpty) {
+        lastParts.first['text'] = '$lastText\n\n$trimmedQuery';
+      }
     } else {
       contents.add({
         'role': 'user',
         'parts': [
-          {'text': trimmedQuery}
+          {'text': effectiveQueryText}
         ],
       });
     }

@@ -30,6 +30,35 @@ void main() {
       expect(uri.queryParameters['key'], equals('test-gemini-key'));
     });
 
+    test('Endpoint URL normalizes model names starting with models/ or leading slashes', () {
+      final service1 = AiCulturalAssistantService(
+        apiKey: 'key1',
+        model: 'models/gemini-1.5-pro',
+      );
+      expect(
+        service1.buildEndpointUrl().path,
+        equals('/v1beta/models/gemini-1.5-pro:generateContent'),
+      );
+
+      final service2 = AiCulturalAssistantService(
+        apiKey: 'key2',
+        model: '/models/gemini-pro',
+      );
+      expect(
+        service2.buildEndpointUrl().path,
+        equals('/v1beta/models/gemini-pro:generateContent'),
+      );
+    });
+
+    test('buildGeminiContents handles empty query without emitting empty text part', () {
+      final service = AiCulturalAssistantService(apiKey: 'key');
+      final contents = service.buildGeminiContents(query: '   ');
+      expect(contents, isNotEmpty);
+      expect(contents.first['role'], equals('user'));
+      final parts = contents.first['parts'] as List;
+      expect((parts.first as Map)['text'].toString().isNotEmpty, isTrue);
+    });
+
     test('Live Gemini Pro request structure and response parsing', () async {
       late Uri capturedUri;
       late Map<String, dynamic> capturedBody;
@@ -505,8 +534,14 @@ void main() {
       AiCulturalAssistantService.instance = customService;
 
       await tester.pumpWidget(
-        const MaterialApp(
-          home: AiCulturalAssistantScreen(),
+        MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: const TextScaler.linear(1.3),
+            ),
+            child: child!,
+          ),
+          home: const AiCulturalAssistantScreen(),
         ),
       );
       await tester.pumpAndSettle();
@@ -596,8 +631,14 @@ void main() {
       );
 
       await tester.pumpWidget(
-        const MaterialApp(
-          home: AiCulturalAssistantScreen(),
+        MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: const TextScaler.linear(1.3),
+            ),
+            child: child!,
+          ),
+          home: const AiCulturalAssistantScreen(),
         ),
       );
       await tester.pumpAndSettle();
@@ -639,6 +680,125 @@ void main() {
 
       await tester.pumpAndSettle();
       expect(find.textContaining('Solo Basahan untuk pernikahan adat.'), findsOneWidget);
+    });
+
+    testWidgets('Zero RenderFlex overflow on narrow viewport (320dp width) with action card', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final mockClient = MockClient((request) async {
+        return http.Response(
+          jsonEncode({
+            'candidates': [
+              {
+                'content': {
+                  'parts': [
+                    {
+                      'text':
+                          'Solo Basahan Dodot Ageng merupakan busana pengantin Jawa Surakarta.',
+                    }
+                  ],
+                  'role': 'model',
+                }
+              }
+            ]
+          }),
+          200,
+        );
+      });
+
+      AiCulturalAssistantService.instance = AiCulturalAssistantService(
+        httpClient: mockClient,
+        apiKey: 'test-narrow-key',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: const TextScaler.linear(1.3),
+            ),
+            child: child!,
+          ),
+          home: const AiCulturalAssistantScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Trigger first suggestion chip (pernikahan) which creates an outfit action card
+      final chipTopLeft = tester.getTopLeft(find.byType(ActionChip).first);
+      await tester.tapAt(chipTopLeft + const Offset(50, 10));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Buka Studio 3D'), findsOneWidget);
+      expect(find.text('Coba AI Studio'), findsOneWidget);
+    });
+
+    testWidgets('Zero RenderFlex overflow on narrow viewport (320dp width) with 1.3x text scale', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final mockClient = MockClient((request) async {
+        return http.Response(
+          jsonEncode({
+            'candidates': [
+              {
+                'content': {
+                  'parts': [
+                    {
+                      'text':
+                          'Solo Basahan Dodot Ageng merupakan busana pengantin Jawa Surakarta.',
+                    }
+                  ],
+                  'role': 'model',
+                }
+              }
+            ]
+          }),
+          200,
+        );
+      });
+
+      AiCulturalAssistantService.instance = AiCulturalAssistantService(
+        httpClient: mockClient,
+        apiKey: 'test-narrow-scale-key',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: const TextScaler.linear(1.3),
+            ),
+            child: child!,
+          ),
+          home: const AiCulturalAssistantScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final chipTopLeft = tester.getTopLeft(find.byType(ActionChip).first);
+      await tester.tapAt(chipTopLeft + const Offset(50, 10));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Buka Studio 3D'), findsOneWidget);
+      expect(find.text('Coba AI Studio'), findsOneWidget);
     });
   });
 }
