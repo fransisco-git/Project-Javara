@@ -10,12 +10,24 @@ import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
 import '../home/home_screen.dart';
 
+/// Konstanta path aset latar panorama Candi Borobudur & Merapi fajar.
+const String kWelcomeHeroAsset =
+    'assets/images/borobudur_buddha_merapi_dawn.jpg';
+
+/// Warna aksen emas prada dan cokelat gelap khas layar selamat datang JAVARA
+/// (diturunkan dari token desain dan palet layar yang ada, ~#E0B865 & ~#1A120B).
+const Color _kCtaGold = Color(0xFFDFB76C);
+const Color _kDarkBrown = Color(0xFF140C06);
+const Color _kDarkBrownBg = Color(0xFF100905);
+const Color _kScrimDarkBrown = Color(0xFF140D07);
+
 /// Layar Selamat Datang JAVARA — Heritage Sunrise Borobudur & Budaya Luhur Jawa Tengah.
 ///
 /// Pengalaman pembuka yang tenang, otentik, dan megah:
 /// - Pelataran suci Candi Borobudur dengan Arca Buddha di sisi kiri menghadap fajar Merapi.
 /// - Halimun dan kabut lembah sawah merayap lembut dengan pendaran surya fajar.
-/// - Kartu editorial budaya JAVARA langsung menyambut penjelajah budaya tanpa jeda gerbang.
+/// - Scrim gradasi pekat memastikan keterbacaan tipografi budaya dengan kontras tinggi.
+/// - Hierarki CTA tunggal "Mulai Eksplorasi Budaya →" disertai akses cepat Masuk & Daftar.
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({
     super.key,
@@ -29,13 +41,17 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _ambientController;
+  late final AnimationController _entranceController;
+
+  late final Animation<double> _headlineAnim;
+  late final Animation<double> _subtitleAnim;
+  late final Animation<double> _primaryCtaAnim;
+  late final Animation<double> _secondaryCtaAnim;
+
   AudioPlayer? _ambientPlayer;
   bool _isAudioPlaying = false;
-  bool _isSearchOpen = false;
-  final TextEditingController _searchController = TextEditingController();
-  final FocusNode _searchFocusNode = FocusNode();
   double _pointerX = 0.0;
   double _pointerY = 0.0;
 
@@ -48,6 +64,31 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       vsync: this,
       duration: const Duration(milliseconds: 8000),
     )..repeat();
+
+    // Kontroler animasi masuk bertahap (fade + slide ke atas ~16px)
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 550),
+    );
+
+    _headlineAnim = CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.00, 0.65, curve: Curves.easeOutCubic),
+    );
+    _subtitleAnim = CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.12, 0.77, curve: Curves.easeOutCubic),
+    );
+    _primaryCtaAnim = CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.24, 0.89, curve: Curves.easeOutCubic),
+    );
+    _secondaryCtaAnim = CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.35, 1.00, curve: Curves.easeOutCubic),
+    );
+
+    _entranceController.forward();
 
     _startAmbientFoley();
   }
@@ -92,9 +133,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Pra-muat panorama megah Borobudur Buddha & Merapi
+    // Pra-muat panorama megah Borobudur Buddha & Merapi fajar
     precacheImage(
-      const AssetImage('assets/images/borobudur_buddha_merapi_dawn.jpg'),
+      const AssetImage(kWelcomeHeroAsset),
       context,
     );
   }
@@ -113,9 +154,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   void dispose() {
-    _searchController.dispose();
-    _searchFocusNode.dispose();
     _stopAmbientFoley();
+    _entranceController.dispose();
     _ambientController.dispose();
     super.dispose();
   }
@@ -147,10 +187,35 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
+  Widget _buildStaggeredItem({
+    required Animation<double> animation,
+    required bool disableAnimations,
+    required Widget child,
+  }) {
+    if (disableAnimations) {
+      return child;
+    }
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, c) {
+        final progress = animation.value;
+        return Opacity(
+          opacity: math.max(0.001, progress.clamp(0.0, 1.0)),
+          child: Transform.translate(
+            offset: Offset(0, 16.0 * (1.0 - progress)),
+            child: c,
+          ),
+        );
+      },
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final h = size.height;
+    final disableAnimations = MediaQuery.of(context).disableAnimations;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
@@ -165,10 +230,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           builder: (context, _) {
             final ambientT = _ambientController.value;
 
-            // Panorama tunggal otentik: Pelataran Candi Borobudur dengan Patung Buddha & Fajar Merapi
-            const String panoramaAsset =
-                'assets/images/borobudur_buddha_merapi_dawn.jpg';
-
             return Listener(
               onPointerMove: (e) => _updatePointer(e.localPosition, size),
               child: Stack(
@@ -182,7 +243,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         scale: 1.05,
                         alignment: Alignment.center,
                         child: Image.asset(
-                          panoramaAsset,
+                          kWelcomeHeroAsset,
                           fit: BoxFit.cover,
                           alignment: Alignment.center,
                           errorBuilder: (_, _, _) => const SizedBox.shrink(),
@@ -221,7 +282,28 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ),
                   ),
 
-                  // 5. Bilah Navigasi Atas Bersih & Elegan Sesuai Gambar Referensi JAVARA
+                  // 5. Scrim gradasi pekat bawah: transparan di sekitar 40% tinggi layar menuju cokelat-hitam opak (>=0.92)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: const [0.0, 0.40, 0.65, 1.0],
+                            colors: [
+                              Colors.transparent,
+                              Colors.transparent,
+                              _kScrimDarkBrown.withValues(alpha: 0.85),
+                              _kDarkBrownBg.withValues(alpha: 0.95),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // 6. Bilah Navigasi Atas: Wordmark JAVARA kiri atas & Tombol Audio kanan atas
                   Positioned(
                     top: 0,
                     left: 0,
@@ -232,300 +314,179 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           horizontal: 20,
                           vertical: 12,
                         ),
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 250),
-                          switchInCurve: Curves.easeOutCubic,
-                          switchOutCurve: Curves.easeInCubic,
-                          child: _isSearchOpen
-                              ? Container(
-                                  key: const ValueKey('welcome_search_input'),
-                                  height: 44,
-                                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xE6140E1B),
-                                    borderRadius: BorderRadius.circular(22),
-                                    border: Border.all(
-                                      color: const Color(0x66DFB76C),
-                                      width: 1.0,
-                                    ),
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color: Color(0x44000000),
-                                        blurRadius: 12,
-                                        offset: Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.search_rounded,
-                                        color: Color(0xFFDFB76C),
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: TextField(
-                                          controller: _searchController,
-                                          focusNode: _searchFocusNode,
-                                          autofocus: true,
-                                          textInputAction: TextInputAction.search,
-                                          onSubmitted: (query) {
-                                            if (query.trim().isNotEmpty) {
-                                              _onPrimaryExplore();
-                                            }
-                                          },
-                                          style: JText.serif(14, color: Colors.white),
-                                          cursorColor: const Color(0xFFFFD700),
-                                          decoration: InputDecoration(
-                                            hintText: 'Cari busana, kebaya, beskap, batik...',
-                                            hintStyle: JText.serif(13.5, color: const Color(0xFFA69584)),
-                                            border: InputBorder.none,
-                                            isDense: true,
-                                            contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                                          ),
-                                        ),
-                                      ),
-                                      IconButton(
-                                        tooltip: 'Tutup pencarian',
-                                        icon: const Icon(
-                                          Icons.close_rounded,
-                                          size: 19,
-                                          color: Color(0xFFDFB76C),
-                                        ),
-                                        onPressed: () {
-                                          HapticFeedback.lightImpact();
-                                          _searchController.clear();
-                                          _searchFocusNode.unfocus();
-                                          setState(() => _isSearchOpen = false);
-                                        },
-                                        splashRadius: 20,
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : Row(
-                                  key: const ValueKey('welcome_logo_bar'),
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    // LOGO JAVARA DI ATAS KIRI (Clean, Bold, Spaced Out sesuai Gambar Referensi)
-                                    Flexible(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        alignment: Alignment.centerLeft,
-                                        child: Semantics(
-                                          header: true,
-                                          label: 'Javara Logo',
-                                          child: const Text(
-                                            'J A V A R A',
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w800,
-                                              letterSpacing: 4.8,
-                                              color: Color(0xFFFFFDF8),
-                                              shadows: [
-                                                Shadow(
-                                                  color: Color(0xAA000000),
-                                                  blurRadius: 8,
-                                                  offset: Offset(0, 1.5),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-
-                                    const SizedBox(width: 8),
-
-                                    // TOMBOL AKSI MINIMALIS DI ATAS KANAN SESUAI REFERENSI GAMBAR
-                                    FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      alignment: Alignment.centerRight,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          // 1. Sparkle / AI Features
-                                          _WelcomeHeaderIconButton(
-                                            icon: Icons.auto_awesome_rounded,
-                                            tooltip: 'AI Cultural Assistant',
-                                            onTap: () {
-                                              HapticFeedback.lightImpact();
-                                              _onPrimaryExplore();
-                                            },
-                                          ),
-                                          const SizedBox(width: 6),
-
-                                          // 2. Share / Bagikan Icon
-                                          _WelcomeHeaderIconButton(
-                                            icon: Icons.ios_share_rounded,
-                                            tooltip: 'Bagikan JAVARA',
-                                            onTap: () {
-                                              HapticFeedback.lightImpact();
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    'Tautan JAVARA disalin ke papan klip',
-                                                    style: JText.serif(13, color: const Color(0xFFFAF6EE)),
-                                                  ),
-                                                  backgroundColor: const Color(0xFF2E2019),
-                                                  behavior: SnackBarBehavior.floating,
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                                  duration: const Duration(seconds: 2),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                          const SizedBox(width: 6),
-
-                                          // 3. Search Icon (membuka search bar simpel)
-                                          _WelcomeHeaderIconButton(
-                                            icon: Icons.search_rounded,
-                                            tooltip: 'Cari Busana & Khasanah',
-                                            onTap: () {
-                                              HapticFeedback.lightImpact();
-                                              setState(() => _isSearchOpen = true);
-                                              _searchFocusNode.requestFocus();
-                                            },
-                                          ),
-                                          const SizedBox(width: 6),
-
-                                          // 4. Box / Inventory Koleksi Busana Adat
-                                          _WelcomeHeaderIconButton(
-                                            icon: Icons.inventory_2_outlined,
-                                            tooltip: 'Koleksi Busana Adat',
-                                            onTap: () {
-                                              HapticFeedback.lightImpact();
-                                              _onPrimaryExplore();
-                                            },
-                                          ),
-                                          const SizedBox(width: 6),
-
-                                          // 5. Foley Audio Ambien Toggle
-                                          _WelcomeHeaderIconButton(
-                                            icon: _isAudioPlaying
-                                                ? Icons.graphic_eq_rounded
-                                                : Icons.volume_off_rounded,
-                                            tooltip: _isAudioPlaying ? 'Matikan Suara Ambien' : 'Nyalakan Suara Ambien',
-                                            iconColor: _isAudioPlaying ? const Color(0xFFDFB76C) : const Color(0xFFA69584),
-                                            onTap: _toggleAudio,
-                                          ),
-                                        ],
-                                      ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Wordmark JAVARA kiri atas (teks polos serif, letterSpacing lebar, bayangan tipis)
+                            Semantics(
+                              header: true,
+                              label: 'JAVARA',
+                              child: Text(
+                                'JAVARA',
+                                style: JText.editorial(
+                                  22,
+                                  weight: FontWeight.w700,
+                                  color: const Color(0xFFFFFDF8),
+                                  letterSpacing: 4.8,
+                                ).copyWith(
+                                  shadows: const [
+                                    Shadow(
+                                      color: Color(0x66000000),
+                                      blurRadius: 4,
+                                      offset: Offset(0, 1),
                                     ),
                                   ],
                                 ),
+                              ),
+                            ),
+
+                            // Tombol audio kanan atas (lingkaran 44x44, ikon volume_up / volume_off)
+                            Semantics(
+                              button: true,
+                              label: _isAudioPlaying
+                                  ? 'Suara ambient: aktif'
+                                  : 'Suara ambient: nonaktif',
+                              child: Tooltip(
+                                message: _isAudioPlaying
+                                    ? 'Matikan suara ambient'
+                                    : 'Nyalakan suara ambient',
+                                child: Material(
+                                  color: Colors.transparent,
+                                  shape: const CircleBorder(),
+                                  clipBehavior: Clip.antiAlias,
+                                  child: InkWell(
+                                    customBorder: const CircleBorder(),
+                                    onTap: _toggleAudio,
+                                    child: Ink(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: const Color(0x38000000),
+                                        border: Border.all(
+                                          color: _kCtaGold.withValues(alpha: 0.20),
+                                          width: 0.8,
+                                        ),
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: Color(0x22000000),
+                                            blurRadius: 6,
+                                            offset: Offset(0, 1),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Center(
+                                        child: Icon(
+                                          _isAudioPlaying
+                                              ? Icons.volume_up_rounded
+                                              : Icons.volume_off_rounded,
+                                          size: 22,
+                                          color: _isAudioPlaying
+                                              ? _kCtaGold
+                                              : const Color(0xFFA69584),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
 
-                  // 6. Kartu Editorial Sambutan Budaya (Langsung Muncul Secara Utuh)
+                  // 7. Blok Konten Bawah: Headline, Subtitle, Tombol Utama & Masuk/Daftar
                   Positioned(
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(
-                        20,
-                        h < 700 ? 16 : 28,
-                        20,
-                        math.max(
-                          MediaQuery.of(context).padding.bottom + 6,
-                          20.0,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: math.max(
+                          200.0,
+                          h - (MediaQuery.of(context).padding.top + 76.0),
                         ),
                       ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            const Color(0xFF07040C).withValues(alpha: 0.50),
-                            const Color(0xFF050308).withValues(alpha: 0.92),
-                            const Color(0xFF040206).withValues(alpha: 0.98),
-                          ],
-                          stops: const [0.0, 0.28, 0.65, 1.0],
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(
+                          24,
+                          h < 700 ? 14 : 24,
+                          24,
+                          math.max(
+                            24.0 + MediaQuery.of(context).viewPadding.bottom,
+                            24.0,
+                          ),
                         ),
-                      ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: const [0.0, 0.30, 1.0],
+                            colors: [
+                              Colors.transparent,
+                              _kDarkBrownBg.withValues(alpha: 0.82),
+                              const Color(0xFF0C0704).withValues(alpha: 0.96),
+                            ],
+                          ),
+                        ),
                       child: SafeArea(
                         top: false,
+                        bottom: false,
                         child: SingleChildScrollView(
                           physics: const ClampingScrollPhysics(),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              // Aksara Jawa & Garis Pembatas Halus
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 22,
-                                    height: 0.8,
-                                    color: const Color(0x55DFB76C),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  const Text(
-                                    'ꦗ ꦮ ꦫ',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Color(0xFFDFB76C),
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 6,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Container(
-                                    width: 22,
-                                    height: 0.8,
-                                    color: const Color(0x55DFB76C),
-                                  ),
-                                ],
-                              ),
+                              // Elemen aksara Jawa di atas headline — disembunyikan sesuai arahan (teks kode: 'ꦗ ꦮ ꦫ')
+                              // Row(
+                              //   mainAxisSize: MainAxisSize.min,
+                              //   children: [
+                              //     Container(
+                              //       width: 22,
+                              //       height: 0.8,
+                              //       color: const Color(0x55DFB76C),
+                              //     ),
+                              //     const SizedBox(width: 10),
+                              //     const Text(
+                              //       'ꦗ ꦮ ꦫ',
+                              //       style: TextStyle(
+                              //         fontSize: 14,
+                              //         color: Color(0xFFDFB76C),
+                              //         fontWeight: FontWeight.w700,
+                              //         letterSpacing: 6,
+                              //       ),
+                              //     ),
+                              //     const SizedBox(width: 10),
+                              //     Container(
+                              //       width: 22,
+                              //       height: 0.8,
+                              //       color: const Color(0x55DFB76C),
+                              //     ),
+                              //   ],
+                              // ),
 
-                              const SizedBox(height: 12),
-
-                              // Headline: "Mengenal warisan.\nMemahami makna."
-                              Text(
-                                'Mengenal warisan.\nMemahami makna.',
-                                style: JText.serif(
-                                  26,
-                                  weight: FontWeight.w700,
-                                  color: const Color(0xFFF7EFE4),
-                                ).copyWith(
-                                  height: 1.22,
-                                  letterSpacing: -0.3,
-                                  shadows: const [
-                                    Shadow(
-                                      color: Color(0xAA000000),
-                                      blurRadius: 14,
-                                      offset: Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-
-                              const SizedBox(height: 10),
-
-                              // Deskripsi Khasanah Busana Adat
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
+                              // 1. Headline (Font Serif, 32-34sp atau 28sp jika h < 700, line height 1.15, putih penuh)
+                              _buildStaggeredItem(
+                                animation: _headlineAnim,
+                                disableAnimations: disableAnimations,
                                 child: Text(
-                                  'Jelajahi busana adat Jawa Tengah, filosofi, sejarah, dan nilai budaya yang diwariskan lintas generasi.',
-                                  style: JText.sans(
-                                    13.5,
-                                    color: const Color(0xFFC8BDB2),
-                                    weight: FontWeight.w400,
+                                  'Mengenal warisan.\nMemahami makna.',
+                                  style: JText.serif(
+                                    h < 700 ? 28 : 34,
+                                    weight: FontWeight.w700,
+                                    color: Colors.white,
+                                    height: 1.15,
                                   ).copyWith(
-                                    height: 1.55,
+                                    letterSpacing: -0.3,
                                     shadows: const [
                                       Shadow(
-                                        color: Color(0x99000000),
-                                        blurRadius: 10,
-                                        offset: Offset(0, 1),
+                                        color: Color(0xAA000000),
+                                        blurRadius: 12,
+                                        offset: Offset(0, 2),
                                       ),
                                     ],
                                   ),
@@ -533,47 +494,30 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 ),
                               ),
 
-                              const SizedBox(height: 22),
+                              SizedBox(height: h < 700 ? 8 : 12),
 
-                              // Tombol Utama: "Mulai Eksplorasi Budaya →"
-                              SizedBox(
-                                width: double.infinity,
-                                height: 50,
-                                child: ElevatedButton(
-                                  onPressed: _onPrimaryExplore,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF1E1712),
-                                    foregroundColor: const Color(0xFFF7EFE4),
-                                    elevation: 4,
-                                    shadowColor: const Color(0x44000000),
-                                    side: const BorderSide(
-                                      color: Color(0xFFDFB76C),
-                                      width: 1.2,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Mulai Eksplorasi Budaya',
-                                          style: JText.sans(
-                                            15,
-                                            weight: FontWeight.w700,
-                                            color: const Color(0xFFFFDF9E),
-                                          ).copyWith(
-                                            letterSpacing: 0.3,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        const Icon(
-                                          Icons.arrow_forward_rounded,
-                                          size: 17,
-                                          color: Color(0xFFFFDF9E),
+                              // 2. Subtitle (15sp, w400, putih opacity 0.88, line height 1.5, maks 3 baris)
+                              _buildStaggeredItem(
+                                animation: _subtitleAnim,
+                                disableAnimations: disableAnimations,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  child: Text(
+                                    'Jelajahi busana adat Jawa Tengah, filosofi, sejarah, dan nilai budaya yang diwariskan lintas generasi.',
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: JText.sans(
+                                      15,
+                                      weight: FontWeight.w400,
+                                      color: Colors.white.withValues(alpha: 0.88),
+                                      height: 1.5,
+                                    ).copyWith(
+                                      shadows: const [
+                                        Shadow(
+                                          color: Color(0x99000000),
+                                          blurRadius: 8,
+                                          offset: Offset(0, 1),
                                         ),
                                       ],
                                     ),
@@ -581,64 +525,115 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 ),
                               ),
 
-                              const SizedBox(height: 12),
+                              SizedBox(height: h < 700 ? 14 : 20),
 
-                              // Tombol Masuk ke Akun Anda (Tonal Terang Kontras)
-                              SizedBox(
-                                width: double.infinity,
-                                height: 48,
-                                child: ElevatedButton(
-                                  onPressed: _onLoginAction,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFDFB76C),
-                                    foregroundColor: const Color(0xFF140C06),
-                                    elevation: 2,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                              // 3. Tombol Utama Satu-satunya: "Mulai Eksplorasi Budaya →" (Solid emas, teks cokelat gelap w600, tinggi 56, radius 12)
+                              _buildStaggeredItem(
+                                animation: _primaryCtaAnim,
+                                disableAnimations: disableAnimations,
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  height: 56,
+                                  child: ElevatedButton(
+                                    onPressed: _onPrimaryExplore,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: _kCtaGold,
+                                      foregroundColor: _kDarkBrown,
+                                      elevation: 2,
+                                      shadowColor: const Color(0x33000000),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
                                     ),
-                                  ),
-                                  child: FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Text(
-                                      'Masuk ke Akun Anda',
-                                      style: JText.sans(
-                                        14,
-                                        weight: FontWeight.w700,
-                                        color: const Color(0xFF140C06),
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'Mulai Eksplorasi Budaya',
+                                            style: JText.sans(
+                                              15,
+                                              weight: FontWeight.w600,
+                                              color: _kDarkBrown,
+                                            ).copyWith(
+                                              letterSpacing: 0.3,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Icon(
+                                            Icons.arrow_forward_rounded,
+                                            size: 18,
+                                            color: _kDarkBrown,
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
 
-                              const SizedBox(height: 10),
+                              SizedBox(height: h < 700 ? 4 : 8),
 
-                              // Tombol Daftar Akun Baru (Outlined Halus)
-                              SizedBox(
-                                width: double.infinity,
-                                height: 46,
-                                child: OutlinedButton(
-                                  onPressed: _onSignUpAction,
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: const Color(0xFFD4C8B8),
-                                    side: const BorderSide(
-                                      color: Color(0x44DFB76C),
-                                      width: 0.8,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Text(
-                                      'Daftar Akun Baru',
-                                      style: JText.sans(
-                                        13.5,
-                                        weight: FontWeight.w600,
-                                        color: const Color(0xFFD4C8B8),
+                              // 4. Baris Masuk / Daftar (TextButton Masuk w600 emas & TextButton Daftar putih opacity 0.75 dipisah titik tengah, tap >= 48dp)
+                              _buildStaggeredItem(
+                                animation: _secondaryCtaAnim,
+                                disableAnimations: disableAnimations,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      TextButton(
+                                        onPressed: _onLoginAction,
+                                        style: TextButton.styleFrom(
+                                          minimumSize: const Size(48, 48),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 12,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Masuk',
+                                          style: JText.sans(
+                                            14,
+                                            weight: FontWeight.w600,
+                                            color: _kCtaGold,
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                      const ExcludeSemantics(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 2),
+                                          child: Text(
+                                            '·',
+                                            style: TextStyle(
+                                              color: Color(0x80FFFFFF),
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: _onSignUpAction,
+                                        style: TextButton.styleFrom(
+                                          minimumSize: const Size(48, 48),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 12,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Daftar',
+                                          style: JText.sans(
+                                            14,
+                                            weight: FontWeight.w400,
+                                            color: Colors.white.withValues(alpha: 0.75),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
@@ -647,6 +642,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         ),
                       ),
                     ),
+                  ),
                   ),
                 ],
               ),
@@ -785,58 +781,4 @@ class _ValleyMistPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _ValleyMistPainter old) =>
       old.time != time || old.openProgress != openProgress;
-}
-
-/// Tombol Ikon Minimalis di Header Layar Selamat Datang Sesuai Gambar Referensi
-class _WelcomeHeaderIconButton extends StatelessWidget {
-  const _WelcomeHeaderIconButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onTap,
-    this.iconColor = const Color(0xFFFAF6F0),
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
-  final Color iconColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            width: 36,
-            height: 36,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: const Color(0x33000000),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0x28DFB76C),
-                width: 0.8,
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x22000000),
-                  blurRadius: 6,
-                  offset: Offset(0, 1),
-                ),
-              ],
-            ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 19,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
