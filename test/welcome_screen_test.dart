@@ -163,7 +163,7 @@ void main() {
       expect(prefs.getString('javara_profile_email'), 'tamu.budaya@javara.id');
     });
 
-    testWidgets('Header renders clean sans-serif J A V A R A wordmark without pill', (tester) async {
+    testWidgets('Header renders regal editorial serif JAVARA wordmark without pill', (tester) async {
       tester.view.physicalSize = const Size(390 * 2, 844 * 2);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(() => tester.view.resetPhysicalSize());
@@ -175,12 +175,12 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 200));
 
-      // Verify J A V A R A plain text wordmark
-      final wordmarkFinder = find.text('J A V A R A');
+      // Verify JAVARA plain text serif wordmark
+      final wordmarkFinder = find.text('JAVARA');
       expect(wordmarkFinder, findsOneWidget);
 
       final textWidget = tester.widget<Text>(wordmarkFinder);
-      expect(textWidget.style?.letterSpacing, 4.8);
+      expect(textWidget.style?.letterSpacing, 5.0);
       expect(textWidget.style?.shadows, isNotEmpty);
     });
 

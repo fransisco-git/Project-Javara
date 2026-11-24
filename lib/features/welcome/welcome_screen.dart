@@ -318,7 +318,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Wordmark JAVARA kiri atas (teks polos sans-serif bold & spaced sesuai foto referensi)
+                            // Wordmark JAVARA kiri atas (teks polos editorial serif mewah berbayang lembut)
                             Flexible(
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
@@ -327,18 +327,23 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   header: true,
                                   label: 'JAVARA',
                                   child: Text(
-                                    'J A V A R A',
-                                    style: JText.sans(
-                                      20,
-                                      weight: FontWeight.w800,
+                                    'JAVARA',
+                                    style: JText.editorial(
+                                      24,
+                                      weight: FontWeight.w700,
                                       color: const Color(0xFFFFFDF8),
-                                      letterSpacing: 4.8,
+                                      letterSpacing: 5.0,
                                     ).copyWith(
                                       shadows: const [
                                         Shadow(
-                                          color: Color(0xAA000000),
-                                          blurRadius: 6,
-                                          offset: Offset(0, 1.5),
+                                          color: Color(0x99000000),
+                                          blurRadius: 8,
+                                          offset: Offset(0, 2),
+                                        ),
+                                        Shadow(
+                                          color: Color(0x401A120B),
+                                          blurRadius: 18,
+                                          offset: Offset(0, 4),
                                         ),
                                       ],
                                     ),
