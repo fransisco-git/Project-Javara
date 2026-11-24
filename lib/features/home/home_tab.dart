@@ -755,16 +755,7 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           ),
         ),
 
-        // --- 8. PIN KURATORIAL 3D MENGAMBANG (THREEUI KAGE FLOATING BADGES) ---
-        Positioned.fill(
-          child: _Javara3DFloatingBadges(
-            scrollOffset: _smoothScroll,
-            pointerX: _smoothPointerX,
-            pointerY: _smoothPointerY,
-          ),
-        ),
-
-        // --- 9. KABUT VOLUMETRIK & 32 PARTIKEL KUNANG-KUNANG EMAS ---
+        // --- 8. KABUT VOLUMETRIK & 32 PARTIKEL KUNANG-KUNANG EMAS ---
         Positioned.fill(
           child: IgnorePointer(
             child: CustomPaint(
@@ -1152,115 +1143,6 @@ class _AnjaliMudraEnergyPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _AnjaliMudraEnergyPainter oldDelegate) => true;
 }
-
-/// Pin Kuratorial 3D Mengambang di Sekitar Candi (ThreeUI Kage Floating Badges)
-class _Javara3DFloatingBadges extends StatelessWidget {
-  const _Javara3DFloatingBadges({
-    required this.scrollOffset,
-    required this.pointerX,
-    required this.pointerY,
-  });
-
-  final double scrollOffset;
-  final double pointerX;
-  final double pointerY;
-
-  @override
-  Widget build(BuildContext context) {
-    if (scrollOffset > 380) return const SizedBox.shrink();
-    final fade = (1.0 - (scrollOffset / 320.0)).clamp(0.0, 1.0);
-
-    return Opacity(
-      opacity: fade,
-      child: Stack(
-        children: [
-          Positioned(
-            top: 240 - (scrollOffset * 0.22) + (pointerY * 8),
-            left: 20 + (pointerX * 10),
-            child: const _BadgePill(
-              code: 'VIII',
-              title: 'DINASTI SYAILENDRA',
-              subtitle: 'Abad ke-8 Masehi',
-            ),
-          ),
-          Positioned(
-            top: 290 - (scrollOffset * 0.18) - (pointerY * 6),
-            right: 20 - (pointerX * 10),
-            child: const _BadgePill(
-              code: '2.672',
-              title: 'PANEL RELIEF',
-              subtitle: 'Maharupa Andesit',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BadgePill extends StatelessWidget {
-  const _BadgePill({
-    required this.code,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final String code;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xB8120B1A),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0x55DFB76C), width: 0.8),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33000000),
-            blurRadius: 8,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-            decoration: BoxDecoration(
-              color: JColors.gold.withValues(alpha: 0.25),
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Text(
-              code,
-              style: JText.serif(8.5, weight: FontWeight.w800, color: const Color(0xFFFFDF9E)),
-            ),
-          ),
-          const SizedBox(width: 7),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: JText.serif(8.5, weight: FontWeight.w700, color: Colors.white),
-              ),
-              Text(
-                subtitle,
-                style: JText.serif(7.5, color: const Color(0xFFC4B4A2)),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
 
 /// TOP APP BAR HEADER DENGAN LOGO JAVARA & MINIMALIST ACTION ICONS SESUAI GAMBAR REFERENSI
 class _HomeTopHeader extends StatelessWidget {
