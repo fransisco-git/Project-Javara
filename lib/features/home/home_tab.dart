@@ -8,7 +8,6 @@ import '../../core/theme.dart';
 import '../../core/transitions.dart';
 import '../../data/culture_items.dart';
 import '../../widgets/motion.dart';
-import '../../widgets/photo_box.dart';
 import '../heritage/culture_detail_screen.dart';
 import '../fashion/screens/clothing_detail_screen.dart';
 import '../fashion/screens/javanese_wardrobe_screen.dart';
@@ -19,6 +18,7 @@ import '../fashion/screens/ai_fashion_studio_screen.dart';
 import '../fashion/screens/ai_cultural_assistant_screen.dart';
 import '../fashion/data/javanese_clothing_data.dart';
 import '../fashion/models/javanese_clothing_models.dart';
+import '../../services/saved_garments_service.dart';
 import '../../widgets/skeleton_shimmer.dart';
 import '../../widgets/interactive_feedback.dart';
 
@@ -61,6 +61,7 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
+    SavedGarmentsService.instance.initialize();
     _scrollController.addListener(_onScroll);
     // Mensimulasikan pemuatan data khasanah awal yang mulus dan realistis
     Future.delayed(const Duration(milliseconds: 950), () {
@@ -1781,7 +1782,28 @@ class _SectionHeader extends StatelessWidget {
 
 
 
-/// GRID WARISAN POPULER
+/// Format label kategori dan asal busana (singkat & tidak terpotong)
+String _formatCategoryOrigin(CultureItem item) {
+  final lowerMeta = item.meta.toLowerCase();
+  final lowerCat = item.category.toLowerCase();
+  final lowerId = item.id.toLowerCase();
+  final lowerTitle = item.title.toLowerCase();
+
+  if (lowerMeta.contains('rembang') || lowerMeta.contains('jepara') || lowerId.contains('rembang')) {
+    return 'REMBANG · WANITA';
+  } else if (lowerMeta.contains('wastra') || lowerCat.contains('batik') || lowerMeta.contains('batik') || lowerTitle.contains('batik')) {
+    return 'SURAKARTA · WASTRA';
+  } else if (lowerMeta.contains('pengantin') || lowerTitle.contains('pengantin') || lowerId.contains('pengantin')) {
+    return 'SURAKARTA · PENGANTIN';
+  } else if (lowerMeta.contains('pria') || lowerTitle.contains('beskap') || lowerTitle.contains('surjan')) {
+    return 'SURAKARTA · PRIA';
+  } else if (lowerMeta.contains('wanita') || lowerTitle.contains('kebaya')) {
+    return 'SURAKARTA · WANITA';
+  }
+  return 'SURAKARTA · ADILUHUNG';
+}
+
+/// GRID WARISAN POPULER - Editorial Fashion Lookbook & Arsip Museum
 class _PopularGrid extends StatelessWidget {
   const _PopularGrid({required this.items, required this.onTap});
   final List<CultureItem> items;
@@ -1791,67 +1813,180 @@ class _PopularGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, c) {
-        const gap = 14.0;
-        final w = (c.maxWidth - gap) / 2;
+        const crossAxisSpacing = 14.0;
+        const mainAxisSpacing = 28.0;
+        final w = (c.maxWidth - crossAxisSpacing) / 2;
         return Wrap(
-          spacing: gap,
-          runSpacing: 16,
+          spacing: crossAxisSpacing,
+          runSpacing: mainAxisSpacing,
           children: [
             for (final item in items)
               SizedBox(
                 width: w,
-                child: InteractiveCard(
-                  semanticLabel: item.title,
-                  borderRadius: 18,
-                  padding: const EdgeInsets.all(8),
-                  backgroundColor: const Color(0xCC1A1022),
-                  border: Border.all(color: const Color(0x44DFB76C), width: 0.8),
-                  onTap: () => onTap(item),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AssetPhoto(
-                        file: item.image,
-                        aspectRatio: 1.08,
-                        radius: 12.0,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        item.title,
-                        style: JText.serif(
-                          13.5,
-                          weight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        item.meta,
-                        style: JText.serif(
-                          11,
-                          color: const Color(0xFFB3A394),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Pelajari Tradisi →',
-                        style: JText.serif(
-                          12,
-                          weight: FontWeight.w700,
-                          color: const Color(0xFFDFB76C),
-                        ),
-                      ),
-                    ],
-                  ),
+                child: _EditorialCultureCard(
+                  item: item,
+                  onTap: onTap,
                 ),
               ),
           ],
         );
       },
+    );
+  }
+}
+
+/// KARTU EDITORIAL BUSANA ADAT - Arsip Museum Keraton Jawa Tengah
+class _EditorialCultureCard extends StatelessWidget {
+  const _EditorialCultureCard({
+    required this.item,
+    required this.onTap,
+  });
+
+  final CultureItem item;
+  final ValueChanged<CultureItem> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isBatikOrTextile = item.image.contains('batik') ||
+        item.category.toLowerCase().contains('batik') ||
+        item.title.toLowerCase().contains('batik');
+
+    return InteractiveScale(
+      pressedScale: 0.98,
+      semanticLabel: item.title,
+      onTap: () => onTap(item),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. Bingkai Foto Potret (AspectRatio 3 / 4)
+          AspectRatio(
+            aspectRatio: 3 / 4,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(
+                  color: const Color(0x2EC5A467),
+                  width: 0.6,
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4.4),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Base Image
+                    Image.asset(
+                      'assets/images/${item.image}',
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                      filterQuality: FilterQuality.medium,
+                      frameBuilder: (_, child, frame, sync) => AnimatedOpacity(
+                        opacity: (sync || frame != null) ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 250),
+                        child: child,
+                      ),
+                      errorBuilder: (_, _, _) => Container(
+                        color: const Color(0xFF181512),
+                        child: const Center(
+                          child: Icon(
+                            Icons.image_outlined,
+                            color: Color(0x44B89B67),
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Subtle warm tint overlay untuk wastra/batik datar yang lebih terang
+                    if (isBatikOrTextile)
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Color(0x1814100C),
+                        ),
+                      ),
+
+                    // Gradasi vignette tipis di 20% bagian atas dan bawah
+                    const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0x4D0D0C0B),
+                            Colors.transparent,
+                            Colors.transparent,
+                            Color(0x4D0D0C0B),
+                          ],
+                          stops: [0.0, 0.2, 0.8, 1.0],
+                        ),
+                      ),
+                    ),
+
+                    // Minimalist bookmark icon di pojok kanan atas foto
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: ValueListenableBuilder<Set<String>>(
+                        valueListenable: SavedGarmentsService.instance.savedItemIdsNotifier,
+                        builder: (context, savedIds, _) {
+                          final isSaved = savedIds.contains(item.id);
+                          return GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              SavedGarmentsService.instance.toggleSave(item.id);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: Icon(
+                                isSaved
+                                    ? Icons.bookmark_rounded
+                                    : Icons.bookmark_outline_rounded,
+                                color: const Color(0xFFEFEAE0),
+                                size: 19,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // 2. Tipografi & Teks Langsung di Atas Kanvas (Borderless Footer)
+          const SizedBox(height: 10),
+          Text(
+            _formatCategoryOrigin(item),
+            style: JText.sans(
+              10,
+              weight: FontWeight.w400,
+              color: const Color(0xFFB89B67),
+            ).copyWith(letterSpacing: 1.3),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 5),
+          Container(
+            width: 18,
+            height: 1,
+            color: const Color(0x66C5A467),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            item.title,
+            style: JText.serif(
+              15,
+              weight: FontWeight.w500,
+              color: const Color(0xFFF2ECE1),
+            ).copyWith(height: 1.25),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }
