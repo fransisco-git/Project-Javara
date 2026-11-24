@@ -225,8 +225,8 @@ class _HomeTabState extends State<HomeTab> {
                               children: [
                       // --- MODE TAMPILAN UTAMA (EDITORIAL BERANDA) ---
                       if (_q.isEmpty) ...[
-                        // Panggung visual terbuka agar tangan Buddha tertutup di tengah & Candi Borobudur tampak megah
-                        const SizedBox(height: 120),
+                        // Panggung visual tertata rapi di atas dengan ruang lega di tengah
+                        const SizedBox(height: 28),
                         // 1. Hero Editorial ("Kebaya Kartini Solo Sutra")
                         StaggerIn(
                           index: 1,
@@ -238,14 +238,14 @@ class _HomeTabState extends State<HomeTab> {
                             },
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
                         // 2. 4 Kategori Utama
                         StaggerIn(
                           index: 2,
                           child: _Categories(onTap: _onCategoryTapped),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 52),
 
                         // 3. Grid "Warisan Populer" (Dinaikkan agar koleksi busana langsung terlihat)
                         if (popular.isNotEmpty) ...[
