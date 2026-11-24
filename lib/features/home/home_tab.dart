@@ -192,6 +192,14 @@ class _HomeTabState extends State<HomeTab> {
         label.contains('Wastra')) {
       Navigator.of(context)
           .push(fadeSlideRoute(const BatikMotifGalleryScreen()));
+    } else if (label.contains('Aksesoris') || label.contains('Ricikan')) {
+      Navigator.of(context).push(
+        fadeSlideRoute(
+          const ClothingCatalogScreen(
+            initialCategory: ClothingCategory.accessories,
+          ),
+        ),
+      );
     } else {
       Navigator.of(context).push(fadeSlideRoute(const ClothingCatalogScreen()));
     }
@@ -1830,28 +1838,28 @@ class _Categories extends StatelessWidget {
 
   static const _items = [
     (
-      icon: Icons.workspace_premium_rounded,
-      title: 'Ageng Keraton',
-      subtitle: 'Keprabon',
-      actionKey: 'Keraton',
-    ),
-    (
       icon: Icons.accessibility_new_rounded,
-      title: 'Busana Kakung',
+      title: 'Busana Pria',
       subtitle: 'Pria Adat',
       actionKey: 'Pria',
     ),
     (
       icon: Icons.spa_rounded,
-      title: 'Busana Putri',
+      title: 'Busana Wanita',
       subtitle: 'Kebaya & Rias',
       actionKey: 'Wanita',
     ),
     (
       icon: Icons.texture_rounded,
-      title: 'Batik & Wastra',
+      title: 'Batik',
       subtitle: 'Motif Pakem',
       actionKey: 'Batik',
+    ),
+    (
+      icon: Icons.military_tech_rounded,
+      title: 'Aksesoris',
+      subtitle: 'Ricikan Adat',
+      actionKey: 'Aksesoris',
     ),
   ];
 

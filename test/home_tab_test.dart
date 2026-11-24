@@ -250,4 +250,33 @@ void main() {
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getBool('abdi_coach_seen'), isTrue);
   });
+
+  testWidgets('HomeTab renders updated categories: Busana Pria, Busana Wanita, Batik, Aksesoris', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(360 * 2, 800 * 2);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: HomeTab(onOpenTab: (_) {}),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 1200));
+
+    // Verify 4 category titles are rendered
+    expect(find.text('Busana Pria'), findsOneWidget);
+    expect(find.text('Busana Wanita'), findsOneWidget);
+    expect(find.text('Batik'), findsOneWidget);
+    expect(find.text('Aksesoris'), findsOneWidget);
+
+    // Verify respective subtitles
+    expect(find.text('Pria Adat'), findsOneWidget);
+    expect(find.text('Kebaya & Rias'), findsOneWidget);
+    expect(find.text('Motif Pakem'), findsOneWidget);
+    expect(find.text('Ricikan Adat'), findsOneWidget);
+  });
 }
