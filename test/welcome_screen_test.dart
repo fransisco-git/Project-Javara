@@ -89,7 +89,7 @@ void main() {
       }
     });
 
-    testWidgets('Audio toggle button is 44x44, has tooltip, semantics, and toggles cleanly', (tester) async {
+    testWidgets('Top header icons (search, inventory, audio) and logo are not rendered for serene aesthetic', (tester) async {
       tester.view.physicalSize = const Size(390 * 2, 844 * 2);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(() => tester.view.resetPhysicalSize());
@@ -99,42 +99,14 @@ void main() {
           home: WelcomeScreen(),
         ),
       );
-      await tester.pump(const Duration(milliseconds: 300));
-
-      // Look for audio toggle button Ink / rendered size (44x44)
-      final audioInkFinder = find.byWidgetPredicate(
-        (widget) =>
-            widget is Ink &&
-            widget.width == 44 &&
-            widget.height == 44,
-      );
-      expect(audioInkFinder, findsOneWidget);
-
-      final audioInkWellFinder = find.byWidgetPredicate(
-        (widget) =>
-            widget is InkWell &&
-            widget.customBorder is CircleBorder,
-      );
-      expect(audioInkWellFinder, findsOneWidget);
-      expect(tester.getSize(audioInkWellFinder), const Size(44, 44));
-
-      // Verify semantics label
-      final semanticsFinder = find.byWidgetPredicate(
-        (widget) => widget is Semantics && widget.properties.label?.contains('Suara ambient') == true,
-      );
-      expect(semanticsFinder, findsOneWidget);
-
-      // Verify tooltip
-      final tooltipFinder = find.byWidgetPredicate(
-        (widget) => widget is Tooltip && widget.message?.contains('suara ambient') == true,
-      );
-      expect(tooltipFinder, findsOneWidget);
-
-      // Tap audio button
-      await tester.tap(semanticsFinder);
       await tester.pump(const Duration(milliseconds: 200));
 
-      expect(find.byType(WelcomeScreen), findsOneWidget);
+      // Header is kept clean and serene without top wordmark or action icons
+      expect(find.text('J A V A R A'), findsNothing);
+      expect(find.byIcon(Icons.search_rounded), findsNothing);
+      expect(find.byIcon(Icons.inventory_2_outlined), findsNothing);
+      expect(find.byIcon(Icons.volume_up_rounded), findsNothing);
+      expect(find.byIcon(Icons.volume_off_rounded), findsNothing);
     });
 
     testWidgets('Tapping Mulai Eksplorasi Budaya signs in as guest automatically', (tester) async {
@@ -161,32 +133,6 @@ void main() {
       expect(prefs.getBool('javara_is_guest'), isTrue);
       expect(prefs.getString('javara_profile_name'), 'Tamu JAVARA');
       expect(prefs.getString('javara_profile_email'), 'tamu.budaya@javara.id');
-    });
-
-    testWidgets('Header renders reference J A V A R A wordmark with search and box icons', (tester) async {
-      tester.view.physicalSize = const Size(390 * 2, 844 * 2);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() => tester.view.resetPhysicalSize());
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: WelcomeScreen(),
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 200));
-
-      // Verify J A V A R A reference wordmark
-      final wordmarkFinder = find.text('J A V A R A');
-      expect(wordmarkFinder, findsOneWidget);
-
-      final textWidget = tester.widget<Text>(wordmarkFinder);
-      expect(textWidget.style?.letterSpacing, 4.8);
-      expect(textWidget.style?.shadows, isNotEmpty);
-
-      // Verify action icons from reference photo
-      expect(find.byIcon(Icons.search_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.inventory_2_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.volume_off_rounded), findsOneWidget);
     });
 
     testWidgets('Tapping Masuk navigates to LoginScreen and Daftar navigates to SignUpScreen', (tester) async {

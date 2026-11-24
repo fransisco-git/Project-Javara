@@ -51,10 +51,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   late final Animation<double> _secondaryCtaAnim;
 
   AudioPlayer? _ambientPlayer;
-  bool _isAudioPlaying = false;
-  bool _isSearchOpen = false;
-  final TextEditingController _searchController = TextEditingController();
-  final FocusNode _searchFocusNode = FocusNode();
   double _pointerX = 0.0;
   double _pointerY = 0.0;
 
@@ -104,25 +100,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       );
       await _ambientPlayer?.setVolume(0.70);
       await _ambientPlayer?.resume();
-      if (mounted) {
-        setState(() => _isAudioPlaying = true);
-      }
     } catch (_) {
       // Graceful fallback jika audio service sedang tidak aktif atau di mode test
     }
-  }
-
-  void _toggleAudio() async {
-    try {
-      HapticFeedback.lightImpact();
-      if (_isAudioPlaying) {
-        await _ambientPlayer?.pause();
-        if (mounted) setState(() => _isAudioPlaying = false);
-      } else {
-        await _ambientPlayer?.resume();
-        if (mounted) setState(() => _isAudioPlaying = true);
-      }
-    } catch (_) {}
   }
 
   void _stopAmbientFoley() {
@@ -157,8 +137,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   void dispose() {
-    _searchController.dispose();
-    _searchFocusNode.dispose();
     _stopAmbientFoley();
     _entranceController.dispose();
     _ambientController.dispose();
@@ -308,199 +286,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ),
                   ),
 
-                  // 6. Bilah Navigasi Atas: Wordmark JAVARA kiri atas & Tombol Audio kanan atas
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        child: _isSearchOpen
-                            ? Container(
-                                height: 44,
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xB3100905),
-                                  borderRadius: BorderRadius.circular(22),
-                                  border: Border.all(
-                                    color: _kCtaGold.withValues(alpha: 0.35),
-                                    width: 0.8,
-                                  ),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Color(0x33000000),
-                                      blurRadius: 10,
-                                      offset: Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.search_rounded,
-                                      color: _kCtaGold,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: TextField(
-                                        controller: _searchController,
-                                        focusNode: _searchFocusNode,
-                                        style: const TextStyle(
-                                          color: Color(0xFFFAF6EE),
-                                          fontSize: 14,
-                                        ),
-                                        decoration: const InputDecoration(
-                                          hintText: 'Cari busana, kebaya, beskap, motif...',
-                                          hintStyle: TextStyle(
-                                            color: Color(0x99FAF6EE),
-                                            fontSize: 13,
-                                          ),
-                                          border: InputBorder.none,
-                                          isDense: true,
-                                        ),
-                                        textInputAction: TextInputAction.search,
-                                        onSubmitted: (_) {
-                                          _onPrimaryExplore();
-                                        },
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.close_rounded,
-                                        color: Color(0xFFFAF6EE),
-                                        size: 18,
-                                      ),
-                                      splashRadius: 20,
-                                      onPressed: () {
-                                        setState(() {
-                                          _isSearchOpen = false;
-                                          _searchController.clear();
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  // Wordmark JAVARA kiri atas persis gambar referensi (Clean, Bold, Spaced Out)
-                                  Flexible(
-                                    child: FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      alignment: Alignment.centerLeft,
-                                      child: Semantics(
-                                        header: true,
-                                        label: 'JAVARA',
-                                        child: const Text(
-                                          'J A V A R A',
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w800,
-                                            color: Color(0xFFFFFDF8),
-                                            letterSpacing: 4.8,
-                                            shadows: [
-                                              Shadow(
-                                                color: Color(0xAA000000),
-                                                blurRadius: 8,
-                                                offset: Offset(0, 1.5),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-
-                                  const SizedBox(width: 8),
-
-                                  // Tombol aksi kanan atas persis gambar referensi
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      // 1. Search Icon
-                                      _WelcomeHeaderIconButton(
-                                        icon: Icons.search_rounded,
-                                        tooltip: 'Cari Busana & Khasanah',
-                                        onTap: () {
-                                          HapticFeedback.lightImpact();
-                                          setState(() => _isSearchOpen = true);
-                                          _searchFocusNode.requestFocus();
-                                        },
-                                      ),
-                                      const SizedBox(width: 6),
-
-                                      // 2. Box / Inventory Koleksi dengan Red Notification Dot
-                                      _WelcomeHeaderIconButton(
-                                        iconWidget: Stack(
-                                          clipBehavior: Clip.none,
-                                          alignment: Alignment.center,
-                                          children: [
-                                            const Icon(
-                                              Icons.inventory_2_outlined,
-                                              color: Color(0xFFFAF6F0),
-                                              size: 20,
-                                            ),
-                                            Positioned(
-                                              left: -3,
-                                              top: 6,
-                                              child: Container(
-                                                width: 6,
-                                                height: 6,
-                                                decoration: const BoxDecoration(
-                                                  color: Color(0xFFE53935),
-                                                  shape: BoxShape.circle,
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Color(0x66E53935),
-                                                      blurRadius: 4,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        tooltip: 'Koleksi Busana Adat',
-                                        onTap: () {
-                                          HapticFeedback.lightImpact();
-                                          _onPrimaryExplore();
-                                        },
-                                      ),
-                                      const SizedBox(width: 6),
-
-                                      // 3. Tombol audio ambient (lingkaran 44x44, foley)
-                                      _WelcomeHeaderIconButton(
-                                        useInk: true,
-                                        icon: _isAudioPlaying
-                                            ? Icons.volume_up_rounded
-                                            : Icons.volume_off_rounded,
-                                        iconColor: _isAudioPlaying
-                                            ? _kCtaGold
-                                            : const Color(0xFFFAF6F0),
-                                        tooltip: _isAudioPlaying
-                                            ? 'Matikan suara ambient'
-                                            : 'Nyalakan suara ambient',
-                                        semanticsLabel: _isAudioPlaying
-                                            ? 'Suara ambient: aktif'
-                                            : 'Suara ambient: nonaktif',
-                                        onTap: _toggleAudio,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
-                  ),
-
-                  // 7. Blok Konten Bawah: Headline, Subtitle, Tombol Utama & Masuk/Daftar
+                  // 6. Blok Konten Bawah: Headline, Subtitle, Tombol Utama & Masuk/Daftar
                   Positioned(
                     left: 0,
                     right: 0,
@@ -883,84 +669,4 @@ class _ValleyMistPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _ValleyMistPainter old) =>
       old.time != time || old.openProgress != openProgress;
-}
-
-/// Tombol Ikon Minimalis di Header Layar Selamat Datang Sesuai Gambar Referensi
-class _WelcomeHeaderIconButton extends StatelessWidget {
-  const _WelcomeHeaderIconButton({
-    this.icon,
-    this.iconWidget,
-    required this.tooltip,
-    required this.onTap,
-    this.iconColor = const Color(0xFFFAF6F0),
-    this.semanticsLabel,
-    this.useInk = false,
-  });
-
-  final IconData? icon;
-  final Widget? iconWidget;
-  final String tooltip;
-  final VoidCallback onTap;
-  final Color iconColor;
-  final String? semanticsLabel;
-  final bool useInk;
-
-  @override
-  Widget build(BuildContext context) {
-    final boxDecoration = BoxDecoration(
-      color: const Color(0x38000000),
-      shape: BoxShape.circle,
-      border: Border.all(
-        color: _kCtaGold.withValues(alpha: 0.20),
-        width: 0.8,
-      ),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x22000000),
-          blurRadius: 6,
-          offset: Offset(0, 1),
-        ),
-      ],
-    );
-
-    final content = Center(
-      child: iconWidget ??
-          Icon(
-            icon,
-            color: iconColor,
-            size: 20,
-          ),
-    );
-
-    return Semantics(
-      button: true,
-      label: semanticsLabel ?? tooltip,
-      child: Tooltip(
-        message: tooltip,
-        child: Material(
-          color: Colors.transparent,
-          shape: const CircleBorder(),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            customBorder: useInk ? const CircleBorder() : null,
-            borderRadius: useInk ? null : BorderRadius.circular(22),
-            onTap: onTap,
-            child: useInk
-                ? Ink(
-                    width: 44,
-                    height: 44,
-                    decoration: boxDecoration,
-                    child: content,
-                  )
-                : Container(
-                    width: 44,
-                    height: 44,
-                    decoration: boxDecoration,
-                    child: content,
-                  ),
-          ),
-        ),
-      ),
-    );
-  }
 }
