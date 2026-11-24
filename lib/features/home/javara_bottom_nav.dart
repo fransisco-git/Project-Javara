@@ -84,7 +84,7 @@ class JavaraBottomNav extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(36.0),
           child: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
+            filter: ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(36.0),

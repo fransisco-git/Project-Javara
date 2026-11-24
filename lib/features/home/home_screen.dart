@@ -94,10 +94,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          bottomNavigationBar: JavaraBottomNav(
-            index: _index,
-            items: _items,
-            onChanged: (i) => setState(() => _index = i),
+          bottomNavigationBar: RepaintBoundary(
+            child: JavaraBottomNav(
+              index: _index,
+              items: _items,
+              onChanged: (i) => setState(() => _index = i),
+            ),
           ),
         ),
       ),

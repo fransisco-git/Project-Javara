@@ -47,10 +47,20 @@ class _HomeTabState extends State<HomeTab> {
   final _scrollController = ScrollController();
   final _pointerNotifier = ValueNotifier<Offset>(Offset.zero);
   final _searchFocusNode = FocusNode();
+  final _isScrolledNotifier = ValueNotifier<bool>(false);
   String _q = '';
   bool _isLoading = true;
   bool _isSearchOpen = false;
-  double _scrollOffset = 0.0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Pra-decode & cache tekstur visual utama ke VRAM agar mulus tanpa stutter
+    precacheImage(const AssetImage('assets/images/buddha_hand_left.png'), context);
+    precacheImage(const AssetImage('assets/images/buddha_hand_right.png'), context);
+    precacheImage(const AssetImage('assets/images/candi_3d_cinema.jpg'), context);
+    precacheImage(const AssetImage('assets/images/candi_3d_cutout.png'), context);
+  }
 
   @override
   void initState() {
@@ -64,8 +74,9 @@ class _HomeTabState extends State<HomeTab> {
 
   void _onScroll() {
     final offset = _scrollController.hasClients ? _scrollController.offset : 0.0;
-    if ((offset - _scrollOffset).abs() > 3.0 && mounted) {
-      setState(() => _scrollOffset = offset);
+    final isScrolled = offset > 10.0;
+    if (isScrolled != _isScrolledNotifier.value) {
+      _isScrolledNotifier.value = isScrolled;
     }
   }
 
@@ -74,6 +85,7 @@ class _HomeTabState extends State<HomeTab> {
     _scrollController.removeListener(_onScroll);
     _search.dispose();
     _searchFocusNode.dispose();
+    _isScrolledNotifier.dispose();
     _scrollController.dispose();
     _pointerNotifier.dispose();
     super.dispose();
@@ -145,15 +157,18 @@ class _HomeTabState extends State<HomeTab> {
         child: Stack(
           children: [
             Positioned.fill(
-              child: _Javara3DTempleBackground(
-                scrollController: _scrollController,
-                pointerNotifier: _pointerNotifier,
+              child: RepaintBoundary(
+                child: _Javara3DTempleBackground(
+                  scrollController: _scrollController,
+                  pointerNotifier: _pointerNotifier,
+                ),
               ),
             ),
 
             Positioned.fill(
-              child: Align(
-                alignment: Alignment.topCenter,
+              child: RepaintBoundary(
+                child: Align(
+                  alignment: Alignment.topCenter,
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 540),
                   child: AnimatedSwitcher(
@@ -379,62 +394,62 @@ class _HomeTabState extends State<HomeTab> {
             ),
           ),
         ),
+      ),
 
         // --- TOP APP BAR HEADER: LOGO JAVARA & MINIMALIST ACTION ICONS ---
         Positioned(
           top: 0,
           left: 0,
           right: 0,
-          child: ClipRect(
-            child: BackdropFilter(
-              filter: ui.ImageFilter.blur(
-                sigmaX: _scrollOffset > 10 ? 16.0 : 0.0,
-                sigmaY: _scrollOffset > 10 ? 16.0 : 0.0,
-              ),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: EdgeInsets.fromLTRB(20, topPadding + 8, 20, 10),
-                decoration: BoxDecoration(
-                  color: _scrollOffset > 10
-                      ? const Color(0xD907040B)
-                      : Colors.transparent,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: _scrollOffset > 10
-                          ? const Color(0x22DFB76C)
-                          : Colors.transparent,
-                      width: 0.8,
+          child: RepaintBoundary(
+            child: ValueListenableBuilder<bool>(
+              valueListenable: _isScrolledNotifier,
+              builder: (context, isScrolled, child) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: EdgeInsets.fromLTRB(20, topPadding + 8, 20, 10),
+                  decoration: BoxDecoration(
+                    color: isScrolled
+                        ? const Color(0xE60D0914)
+                        : Colors.transparent,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: isScrolled
+                            ? const Color(0x22DFB76C)
+                            : Colors.transparent,
+                        width: 0.8,
+                      ),
                     ),
                   ),
-                ),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 540),
-                    child: _HomeTopHeader(
-                      isSearchOpen: _isSearchOpen,
-                      controller: _search,
-                      focusNode: _searchFocusNode,
-                      onOpenSearch: () {
-                        HapticFeedback.lightImpact();
-                        setState(() => _isSearchOpen = true);
-                        _searchFocusNode.requestFocus();
-                      },
-                      onCloseSearch: () {
-                        HapticFeedback.lightImpact();
-                        _search.clear();
-                        _searchFocusNode.unfocus();
-                        setState(() {
-                          _q = '';
-                          _isSearchOpen = false;
-                        });
-                      },
-                      onSearchChanged: (v) {
-                        setState(() => _q = v.trim().toLowerCase());
-                      },
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 540),
+                      child: _HomeTopHeader(
+                        isSearchOpen: _isSearchOpen,
+                        controller: _search,
+                        focusNode: _searchFocusNode,
+                        onOpenSearch: () {
+                          HapticFeedback.lightImpact();
+                          setState(() => _isSearchOpen = true);
+                          _searchFocusNode.requestFocus();
+                        },
+                        onCloseSearch: () {
+                          HapticFeedback.lightImpact();
+                          _search.clear();
+                          _searchFocusNode.unfocus();
+                          setState(() {
+                            _q = '';
+                            _isSearchOpen = false;
+                          });
+                        },
+                        onSearchChanged: (v) {
+                          setState(() => _q = v.trim().toLowerCase());
+                        },
+                      ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         ),
@@ -464,27 +479,24 @@ class _JavaraGlassPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            color: const Color(0xE8140E1B),
-            borderRadius: BorderRadius.circular(radius),
-            border: Border.all(
-              color: const Color(0x38DFB76C),
-              width: 1.0,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x33000000),
-                blurRadius: 6,
-                offset: Offset(0, 2),
-              ),
-            ],
+      child: Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: const Color(0xEE140E1B),
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(
+            color: const Color(0x38DFB76C),
+            width: 1.0,
           ),
-          child: child,
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x33000000),
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
+        child: child,
       ),
     );
   }
@@ -692,25 +704,27 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           left: -w * 0.12,
           right: -w * 0.12,
           bottom: -70,
-          child: Transform(
-            transform: templeMatrix,
-            alignment: Alignment.center,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(
-                  'assets/images/candi_3d_cinema.jpg',
-                  fit: BoxFit.cover,
-                  filterQuality: FilterQuality.high,
-                  excludeFromSemantics: true,
-                ),
-                Image.asset(
-                  'assets/images/candi_3d_cutout.png',
-                  fit: BoxFit.cover,
-                  filterQuality: FilterQuality.high,
-                  excludeFromSemantics: true,
-                ),
-              ],
+          child: RepaintBoundary(
+            child: Transform(
+              transform: templeMatrix,
+              alignment: Alignment.center,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(
+                    'assets/images/candi_3d_cinema.jpg',
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.medium,
+                    excludeFromSemantics: true,
+                  ),
+                  Image.asset(
+                    'assets/images/candi_3d_cutout.png',
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.medium,
+                    excludeFromSemantics: true,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -737,17 +751,19 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           left: leftTargetX,
           width: leftHandWidth,
           height: handHeight,
-          child: IgnorePointer(
-            child: Opacity(
-              opacity: handsOpacity,
-              child: Transform(
-                transform: leftHandMatrix,
-                alignment: Alignment.center,
-                child: Image.asset(
-                  'assets/images/buddha_hand_left.png',
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.high,
-                  excludeFromSemantics: true,
+          child: RepaintBoundary(
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: handsOpacity,
+                child: Transform(
+                  transform: leftHandMatrix,
+                  alignment: Alignment.center,
+                  child: Image.asset(
+                    'assets/images/buddha_hand_left.png',
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.medium,
+                    excludeFromSemantics: true,
+                  ),
                 ),
               ),
             ),
@@ -760,17 +776,19 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           left: rightTargetX,
           width: rightHandWidth,
           height: handHeight,
-          child: IgnorePointer(
-            child: Opacity(
-              opacity: handsOpacity,
-              child: Transform(
-                transform: rightHandMatrix,
-                alignment: Alignment.center,
-                child: Image.asset(
-                  'assets/images/buddha_hand_right.png',
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.high,
-                  excludeFromSemantics: true,
+          child: RepaintBoundary(
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: handsOpacity,
+                child: Transform(
+                  transform: rightHandMatrix,
+                  alignment: Alignment.center,
+                  child: Image.asset(
+                    'assets/images/buddha_hand_right.png',
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.medium,
+                    excludeFromSemantics: true,
+                  ),
                 ),
               ),
             ),
@@ -1384,13 +1402,13 @@ class _HomeTopHeader extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
-                          letterSpacing: 4.8,
+                          letterSpacing: 2.4,
                           color: Color(0xFFFFFDF8),
                           shadows: [
                             Shadow(
-                              color: Color(0xAA000000),
-                              blurRadius: 8,
-                              offset: Offset(0, 1.5),
+                              color: Color(0x99000000),
+                              blurRadius: 6,
+                              offset: Offset(0, 1),
                             ),
                           ],
                         ),
@@ -1400,7 +1418,7 @@ class _HomeTopHeader extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
 
-                // TOMBOL AKSI MINIMALIS DI ATAS KANAN (Search & Lemari Koleksi Adat)
+                // TOMBOL AKSI MINIMALIS DI ATAS KANAN (Search & Lemari Koleksi Adat sesuai Gambar Referensi)
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerRight,
@@ -1413,36 +1431,32 @@ class _HomeTopHeader extends StatelessWidget {
                         tooltip: 'Cari Busana & Khasanah',
                         onTap: onOpenSearch,
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 10),
 
                       // 2. Tombol Lemari / Koleksi Busana dengan Titik Merah (Ikon Box/Drawer sesuai Gambar Referensi)
                       _TopHeaderIconButton(
-                        iconWidget: Stack(
-                          clipBehavior: Clip.none,
-                          alignment: Alignment.center,
+                        iconWidget: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
+                            Container(
+                              width: 5.5,
+                              height: 5.5,
+                              margin: const EdgeInsets.only(right: 3.5),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFE53935),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color(0x66E53935),
+                                    blurRadius: 3,
+                                  ),
+                                ],
+                              ),
+                            ),
                             const Icon(
                               Icons.inventory_2_outlined,
                               color: Color(0xFFFAF6F0),
-                              size: 19,
-                            ),
-                            Positioned(
-                              left: -3,
-                              top: 6,
-                              child: Container(
-                                width: 6,
-                                height: 6,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFE53935),
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Color(0x66E53935),
-                                      blurRadius: 4,
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              size: 21,
                             ),
                           ],
                         ),
@@ -1463,7 +1477,7 @@ class _HomeTopHeader extends StatelessWidget {
   }
 }
 
-/// Tombol Ikon Bundar Minimalis di Header Atas Beranda
+/// Tombol Ikon Bundar Minimalis di Header Atas Beranda (Sesuai Referensi Gambar Minimalis)
 class _TopHeaderIconButton extends StatelessWidget {
   const _TopHeaderIconButton({
     this.icon,
@@ -1483,33 +1497,17 @@ class _TopHeaderIconButton extends StatelessWidget {
       message: tooltip,
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
+        child: InkResponse(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(22),
-          child: Container(
-            width: 38,
-            height: 38,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: const Color(0x33000000),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0x28DFB76C),
-                width: 0.8,
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x22000000),
-                  blurRadius: 6,
-                  offset: Offset(0, 1),
-                ),
-              ],
-            ),
+          radius: 20,
+          containedInkWell: false,
+          child: Padding(
+            padding: const EdgeInsets.all(6),
             child: iconWidget ??
                 Icon(
                   icon,
                   color: const Color(0xFFFAF6F0),
-                  size: 19,
+                  size: 21,
                 ),
           ),
         ),
