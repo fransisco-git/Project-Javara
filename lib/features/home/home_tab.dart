@@ -485,7 +485,7 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
     final ptr = widget.pointerNotifier.value;
 
     _smoothScroll =
-        ui.lerpDouble(_smoothScroll, targetScroll, 0.075) ?? targetScroll;
+        ui.lerpDouble(_smoothScroll, targetScroll, 0.12) ?? targetScroll;
     _smoothPointerX = ui.lerpDouble(_smoothPointerX, ptr.dx, 0.055) ?? ptr.dx;
     _smoothPointerY = ui.lerpDouble(_smoothPointerY, ptr.dy, 0.055) ?? ptr.dy;
 
@@ -506,7 +506,7 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
     // KINEMATIKA GERAK TANGAN MUDRA BUDDHA (DARI TERTUTUP MENJADI TERBUKA SAAT DI-SCROLL)
     // 0.0 (Scroll = 0) : Kedua tangan TERTUTUP menyatu rapat di tengah (Anjali Mudra / Sembah Suci)
     // 1.0 (Scroll > 0) : Kedua tangan TERBUKA menyibak ke pojok kiri & kanan menyingkap Candi Borobudur
-    final openProgress = (_smoothScroll / 260.0).clamp(0.0, 1.0);
+    final openProgress = (_smoothScroll / 240.0).clamp(0.0, 1.0);
     final openCurve = Curves.easeOutCubic.transform(openProgress);
 
     // Dimensi dan proporsi tangan fotorealistik diperbesar sesuai preferensi user
@@ -519,9 +519,10 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
     final leftClosedX = centerX - leftHandWidth + 3.0;
     final rightClosedX = centerX - 3.0;
 
-    // Posisi Terbuka di pojokan (Corner Placement):
-    final leftOpenX = -leftHandWidth * 0.46;
-    final rightOpenX = w - (rightHandWidth * 0.54);
+    // Posisi Terbuka di pojokan (Menyibak ke kiri & kanan secara dramatis):
+    final openDistance = (w * 0.36).clamp(120.0, 180.0);
+    final leftOpenX = leftClosedX - openDistance;
+    final rightOpenX = rightClosedX + openDistance;
 
     // Interpolasi dari TERTUTUP -> TERBUKA seiring scroll
     final leftTargetX = ui.lerpDouble(leftClosedX, leftOpenX, openCurve)! +
@@ -530,7 +531,7 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
         (_smoothPointerX * 8.0);
 
     // Parallax posisi vertikal tangan:
-    final handsY = ui.lerpDouble(115.0, 160.0, openCurve)! -
+    final handsY = ui.lerpDouble(115.0, 155.0, openCurve)! -
         (_smoothScroll * 0.16) +
         (_smoothPointerY * 12.0);
 
@@ -538,16 +539,16 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
     // Saat tertutup (0.0): tegak menghadap satu sama lain menyatu (sembah suci)
     // Saat terbuka (1.0): berotasi menyibak ke luar secara 3D
     final leftHandYaw =
-        ui.lerpDouble(0.015, -0.50, openCurve)! + (_smoothPointerX * 0.05);
+        ui.lerpDouble(0.0, -0.42, openCurve)! + (_smoothPointerX * 0.05);
     final leftHandPitch = (_smoothPointerY * -0.05) + (scrollRatio * 0.04);
     final leftHandRoll =
-        ui.lerpDouble(0.0, -0.18, openCurve)! + (_smoothPointerX * 0.02);
+        ui.lerpDouble(0.0, -0.16, openCurve)! + (_smoothPointerX * 0.02);
 
     final rightHandYaw =
-        ui.lerpDouble(-0.015, 0.50, openCurve)! + (_smoothPointerX * 0.05);
+        ui.lerpDouble(0.0, 0.42, openCurve)! + (_smoothPointerX * 0.05);
     final rightHandPitch = (_smoothPointerY * -0.05) + (scrollRatio * 0.04);
     final rightHandRoll =
-        ui.lerpDouble(0.0, 0.18, openCurve)! + (_smoothPointerX * 0.02);
+        ui.lerpDouble(0.0, 0.16, openCurve)! + (_smoothPointerX * 0.02);
 
     final leftHandMatrix = Matrix4.identity()
       ..setEntry(3, 2, 0.0016)
@@ -690,7 +691,7 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
               opacity: handsOpacity,
               child: Transform(
                 transform: leftHandMatrix,
-                alignment: Alignment.centerRight,
+                alignment: Alignment.center,
                 child: Image.asset(
                   'assets/images/buddha_hand_left.png',
                   fit: BoxFit.contain,
@@ -713,7 +714,7 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
               opacity: handsOpacity,
               child: Transform(
                 transform: rightHandMatrix,
-                alignment: Alignment.centerLeft,
+                alignment: Alignment.center,
                 child: Image.asset(
                   'assets/images/buddha_hand_right.png',
                   fit: BoxFit.contain,
