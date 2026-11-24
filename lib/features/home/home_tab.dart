@@ -60,6 +60,9 @@ class _HomeTabState extends State<HomeTab> {
     precacheImage(const AssetImage('assets/images/buddha_hand_right.png'), context);
     precacheImage(const AssetImage('assets/images/candi_3d_cinema.jpg'), context);
     precacheImage(const AssetImage('assets/images/candi_3d_cutout.png'), context);
+    precacheImage(const AssetImage('assets/images/model_kebaya_kartini_solo.jpg'), context);
+    precacheImage(const AssetImage('assets/images/model_jawi_jangkep_solo.jpg'), context);
+    precacheImage(const AssetImage('assets/images/model_solo_basahan_bride.jpg'), context);
   }
 
   @override
@@ -111,19 +114,19 @@ class _HomeTabState extends State<HomeTab> {
           const ClothingCatalogScreen(initialRegion: TraditionRegion.surakarta),
         ),
       );
-    } else if (label.contains('Pria')) {
+    } else if (label.contains('Pria') || label.contains('Kakung')) {
       Navigator.of(context).push(
         fadeSlideRoute(
           const ClothingCatalogScreen(initialGender: GenderTarget.pria),
         ),
       );
-    } else if (label.contains('Wanita')) {
+    } else if (label.contains('Wanita') || label.contains('Putri')) {
       Navigator.of(context).push(
         fadeSlideRoute(
           const ClothingCatalogScreen(initialGender: GenderTarget.wanita),
         ),
       );
-    } else if (label.contains('Batik') || label.contains('Jarik')) {
+    } else if (label.contains('Batik') || label.contains('Jarik') || label.contains('Wastra')) {
       Navigator.of(context).push(
         fadeSlideRoute(const BatikMotifGalleryScreen()),
       );
@@ -1518,124 +1521,317 @@ class _TopHeaderIconButton extends StatelessWidget {
 
 
 
-/// HERO CARD BUSANA ADAT JAWA TENGAH
-class _HeroCard extends StatelessWidget {
+/// MODEL ITEM HERO ADIBUSANA JAVARA
+class _HeroAdibusanaItem {
+  const _HeroAdibusanaItem({
+    required this.tag,
+    required this.javaneseScript,
+    required this.title,
+    required this.subtitle,
+    required this.imagePath,
+    required this.buttonLabel,
+    required this.routeBuilder,
+  });
+
+  final String tag;
+  final String javaneseScript;
+  final String title;
+  final String subtitle;
+  final String imagePath;
+  final String buttonLabel;
+  final Widget Function() routeBuilder;
+}
+
+/// HERO SHOWCASE ADIBUSANA AGENG KERATON JAWA TENGAH
+/// Menggantikan hero lama dengan pameran busana adat adiluhung beresolusi tinggi,
+/// tipografi editorial mewah, dan narasi filosofis otentik tanpa elemen semu.
+class _HeroCard extends StatefulWidget {
   const _HeroCard({required this.onStart});
   final VoidCallback onStart;
 
   @override
+  State<_HeroCard> createState() => _HeroCardState();
+}
+
+class _HeroCardState extends State<_HeroCard> {
+  late final PageController _pageController;
+  int _currentPage = 0;
+
+  static final List<_HeroAdibusanaItem> _items = [
+    _HeroAdibusanaItem(
+      tag: 'ADIBUSANA NINGRAT PUTRI',
+      javaneseScript: 'ꦏꦼꦧꦪꦏꦂꦠꦶꦤꦶ',
+      title: 'Kebaya Kartini Solo Sutra',
+      subtitle: 'Keanggunan putri bangsawan berhias peniti renteng kencana dan jarik Parang Kusumo.',
+      imagePath: 'assets/images/model_kebaya_kartini_solo.jpg',
+      buttonLabel: 'Koleksi Busana Putri',
+      routeBuilder: () => const ClothingCatalogScreen(initialGender: GenderTarget.wanita),
+    ),
+    _HeroAdibusanaItem(
+      tag: 'ADIBUSANA AGENG KSATRIA',
+      javaneseScript: 'ꦗꦮꦶꦗꦁꦏꦼꦥ꧀',
+      title: 'Jawi Jangkep Keprabon',
+      subtitle: 'Busana resmi ksatria Keraton Surakarta Hadiningrat berhias beskap sikepan & keris ladrang.',
+      imagePath: 'assets/images/model_jawi_jangkep_solo.jpg',
+      buttonLabel: 'Koleksi Busana Pria',
+      routeBuilder: () => const ClothingCatalogScreen(initialGender: GenderTarget.pria),
+    ),
+    _HeroAdibusanaItem(
+      tag: 'MAHAKARYA PENGANTIN',
+      javaneseScript: 'ꦱꦺꦴꦭꦺꦴꦧꦱꦲꦤ꧀',
+      title: 'Solo Basahan Kampuhan',
+      subtitle: 'Tata rias pengantin ageng tertua keraton berbalut dodot kampuh prada emas & melati ronce.',
+      imagePath: 'assets/images/model_solo_basahan_bride.jpg',
+      buttonLabel: 'Jelajahi Busana Adat',
+      routeBuilder: () => const JelajahiBusanaScreen(),
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return InteractiveCard(
-      onTap: onStart,
-      borderRadius: 22,
-      padding: EdgeInsets.zero,
-      semanticLabel: 'Koleksi Busana Adat Jawa Tengah',
-      border: Border.all(color: const Color(0x77DFB76C), width: 1.2),
+    return Container(
+      height: 228,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: const Color(0x66DFB76C),
+          width: 1.1,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x55000000),
+            blurRadius: 16,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(22),
-        child: SizedBox(
-          height: 205,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              const AssetPhoto(file: 'busana_showcase_preview.jpg', radius: 0.0),
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomLeft,
-                    end: Alignment.topRight,
-                    colors: [
-                      Color(0xF00A0710),
-                      Color(0xB30A0710),
-                      Color(0x300A0710),
-                    ],
-                    stops: [0.0, 0.60, 1.0],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(18),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.bottomLeft,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3.5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0x44DFB76C),
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: const Color(0xFFDFB76C),
-                            width: 0.8,
-                          ),
-                        ),
-                        child: Text(
-                          'WARISAN ADAT · JAWA TENGAH',
-                          style: JText.serif(
-                            9,
-                            weight: FontWeight.w700,
-                            color: const Color(0xFFFFDF9E),
-                          ).copyWith(letterSpacing: 0.9),
+        child: Stack(
+          children: [
+            // PageView Slider
+            PageView.builder(
+              controller: _pageController,
+              itemCount: _items.length,
+              onPageChanged: (index) {
+                setState(() => _currentPage = index);
+              },
+              itemBuilder: (context, index) {
+                final item = _items[index];
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Foto Busana Adat Beresolusi Tinggi
+                    Image.asset(
+                      item.imagePath,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.centerRight,
+                    ),
+
+                    // Gradasi Bayangan Sinematik Obsidian (Memastikan Keterbacaan Teks Sempurna)
+                    const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Color(0xF50A0710),
+                            Color(0xD90A0710),
+                            Color(0x800A0710),
+                            Color(0x150A0710),
+                          ],
+                          stops: [0.0, 0.45, 0.72, 1.0],
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Busana Luhur Keraton\n& Busana Adat Rakyat',
-                        style: JText.serif(
-                          22,
-                          color: Colors.white,
-                          height: 1.15,
-                          weight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      InteractiveScale(
-                        onTap: onStart,
-                        pressedScale: 0.93,
-                        child: Material(
-                          color: const Color(0xFFDFB76C),
-                          borderRadius: BorderRadius.circular(8),
-                          clipBehavior: Clip.antiAlias,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 9,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Jelajahi Busana',
-                                  style: JText.serif(
-                                    13,
-                                    weight: FontWeight.w700,
-                                    color: const Color(0xFF150F1E),
+                    ),
+
+                    // Konten Teks Editorial & Tombol Aksi
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.bottomLeft,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 320),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Badge Pilar Budaya & Aksara Jawa
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 4,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0x38DFB76C),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: const Color(0x88DFB76C),
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.auto_awesome,
+                                          size: 11,
+                                          color: Color(0xFFFFDF9E),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          item.tag,
+                                          style: JText.sans(
+                                            8.5,
+                                            weight: FontWeight.w800,
+                                            color: const Color(0xFFFFDF9E),
+                                          ).copyWith(letterSpacing: 0.9),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Text(
+                                    item.javaneseScript,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Color(0xBFDFB76C),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              // Judul Koleksi Busana Adat
+                              Text(
+                                item.title,
+                                style: JText.editorial(
+                                  21,
+                                  weight: FontWeight.w700,
+                                  color: const Color(0xFFFFFDF8),
+                                  height: 1.15,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+
+                              const SizedBox(height: 5),
+
+                              // Deskripsi Filosofis Singkat
+                              Text(
+                                item.subtitle,
+                                style: JText.sans(
+                                  11,
+                                  color: const Color(0xFFD6C8B8),
+                                  height: 1.35,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              // Tombol Eksplorasi Solid Emas Kencana
+                              InteractiveScale(
+                                onTap: () {
+                                  HapticFeedback.lightImpact();
+                                  Navigator.of(context).push(
+                                    fadeSlideRoute(item.routeBuilder()),
+                                  );
+                                },
+                                pressedScale: 0.94,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8.5),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFFE4C590), Color(0xFFC79B3A)],
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Color(0x33000000),
+                                        blurRadius: 6,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Flexible(
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(
+                                            item.buttonLabel,
+                                            style: JText.sans(
+                                              11.5,
+                                              weight: FontWeight.w700,
+                                              color: const Color(0xFF14100D),
+                                            ),
+                                            maxLines: 1,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      const Icon(
+                                        Icons.arrow_forward_rounded,
+                                        size: 13,
+                                        color: Color(0xFF14100D),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                const Icon(
-                                  Icons.arrow_forward_rounded,
-                                  size: 15,
-                                  color: Color(0xFF150F1E),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    ],
+                    ),
+                  ],
+                );
+              },
+            ),
+
+            // Indikator Titik Carousel di Pojok Kanan Bawah
+            Positioned(
+              bottom: 12,
+              right: 14,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(
+                  _items.length,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: _currentPage == index ? 16 : 5,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: _currentPage == index
+                          ? const Color(0xFFE4C590)
+                          : const Color(0x66DFB76C),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1644,16 +1840,36 @@ class _HeroCard extends StatelessWidget {
 
 
 
-/// KATEGORI BUDAYA DENGAN TOMBOL FLOATING OBSIDIAN GLASS
+/// KATEGORI PILAR ADIBUSANA JAWA TENGAH
 class _Categories extends StatelessWidget {
   const _Categories({required this.onTap});
   final ValueChanged<String> onTap;
 
   static const _items = [
-    (Icons.stars_rounded, 'Busana Keraton'),
-    (Icons.checkroom_rounded, 'Busana Pria'),
-    (Icons.face_3_rounded, 'Busana Wanita'),
-    (Icons.layers_rounded, 'Batik & Jarik'),
+    (
+      icon: Icons.workspace_premium_rounded,
+      title: 'Ageng Keraton',
+      subtitle: 'Keprabon',
+      actionKey: 'Keraton',
+    ),
+    (
+      icon: Icons.accessibility_new_rounded,
+      title: 'Busana Kakung',
+      subtitle: 'Pria Adat',
+      actionKey: 'Pria',
+    ),
+    (
+      icon: Icons.spa_rounded,
+      title: 'Busana Putri',
+      subtitle: 'Kebaya & Rias',
+      actionKey: 'Wanita',
+    ),
+    (
+      icon: Icons.texture_rounded,
+      title: 'Batik & Wastra',
+      subtitle: 'Motif Pakem',
+      actionKey: 'Batik',
+    ),
   ];
 
   @override
@@ -1661,12 +1877,12 @@ class _Categories extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        for (final (icon, label) in _items)
+        for (final item in _items)
           Expanded(
             child: InteractiveScale(
-              pressedScale: 0.90,
-              semanticLabel: 'Kategori $label',
-              onTap: () => onTap(label),
+              pressedScale: 0.92,
+              semanticLabel: 'Kategori ${item.title}',
+              onTap: () => onTap(item.actionKey),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -1677,27 +1893,54 @@ class _Categories extends StatelessWidget {
                       width: 52,
                       height: 52,
                       alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18),
+                        gradient: const RadialGradient(
+                          center: Alignment.topLeft,
+                          radius: 1.2,
+                          colors: [
+                            Color(0x35DFB76C),
+                            Color(0x05DFB76C),
+                          ],
+                        ),
+                      ),
                       child: Icon(
-                        icon,
+                        item.icon,
                         size: 24,
                         color: const Color(0xFFDFB76C),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 7),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2),
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text(
-                        label,
-                        style: JText.serif(
-                          11.5,
-                          weight: FontWeight.w600,
-                          color: const Color(0xFFFFF0D0),
-                        ),
-                        maxLines: 1,
-                        textAlign: TextAlign.center,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            item.title,
+                            style: JText.serif(
+                              11.5,
+                              weight: FontWeight.w700,
+                              color: const Color(0xFFFFF0D0),
+                            ),
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 1.5),
+                          Text(
+                            item.subtitle,
+                            style: JText.sans(
+                              9,
+                              weight: FontWeight.w500,
+                              color: const Color(0xFFAFA08F),
+                            ),
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                   ),
