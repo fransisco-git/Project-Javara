@@ -26,8 +26,8 @@ void main() {
     final searchIconFinder = find.byIcon(Icons.search_rounded);
     expect(searchIconFinder, findsAtLeastNWidgets(1));
 
-    // Verify Box / Wardrobe collection icon is present
-    expect(find.byIcon(Icons.inventory_2_outlined), findsOneWidget);
+    // Verify Box / Wardrobe collection icon is removed (clean app bar)
+    expect(find.byIcon(Icons.inventory_2_outlined), findsNothing);
 
     // Tap search button to open search bar
     await tester.tap(searchIconFinder.first);

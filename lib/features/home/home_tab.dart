@@ -9,17 +9,12 @@ import '../../core/transitions.dart';
 import '../../data/culture_items.dart';
 import '../../widgets/motion.dart';
 import '../../widgets/photo_box.dart';
-import '../heritage/aksara_jawa_screen.dart';
 import '../heritage/culture_detail_screen.dart';
-import '../heritage/culture_passport_screen.dart';
-import '../heritage/hidden_heritage_screen.dart';
-import '../heritage/time_travel_screen.dart';
+import '../fashion/screens/clothing_detail_screen.dart';
 import '../fashion/screens/javanese_wardrobe_screen.dart';
 import '../fashion/screens/jelajahi_busana_screen.dart';
 import '../fashion/screens/clothing_catalog_screen.dart';
 import '../fashion/screens/batik_motif_gallery_screen.dart';
-import '../fashion/screens/javanese_fashion_map_screen.dart';
-import '../fashion/screens/sinau_busana_screen.dart';
 import '../fashion/screens/ai_fashion_studio_screen.dart';
 import '../fashion/screens/ai_cultural_assistant_screen.dart';
 import '../fashion/data/javanese_clothing_data.dart';
@@ -227,10 +222,11 @@ class _HomeTabState extends State<HomeTab> {
                               keyboardDismissBehavior:
                                   ScrollViewKeyboardDismissBehavior.onDrag,
                               children: [
-                      // --- HERO CARD FITUR UTAMA ---
+                      // --- MODE TAMPILAN UTAMA (EDITORIAL BERANDA) ---
                       if (_q.isEmpty) ...[
                         // Panggung visual terbuka agar tangan Buddha tertutup di tengah & Candi Borobudur tampak megah
                         const SizedBox(height: 120),
+                        // 1. Hero Editorial ("Kebaya Kartini Solo Sutra")
                         StaggerIn(
                           index: 1,
                           child: _HeroCard(
@@ -242,26 +238,42 @@ class _HomeTabState extends State<HomeTab> {
                           ),
                         ),
                         const SizedBox(height: 20),
+
+                        // 2. 4 Kategori Utama
                         StaggerIn(
-                          index: 3,
+                          index: 2,
                           child: _Categories(onTap: _onCategoryTapped),
                         ),
-                        const SizedBox(height: 20),
-                        // --- BANNER UTAMA: MUSEUM BUSANA TRADISIONAL JAWA 3D ---
-                        StaggerIn(
-                          index: 4,
-                          child: _HomeFashion3DBanner(
-                            onOpenWardrobe: () => Navigator.of(context)
-                                .push(fadeSlideRoute(const JavaneseWardrobeScreen())),
-                            onOpenOutfits: () => Navigator.of(context)
-                                .push(fadeSlideRoute(const JelajahiBusanaScreen())),
+                        const SizedBox(height: 24),
+
+                        // 3. Grid "Warisan Populer" (Dinaikkan agar koleksi busana langsung terlihat)
+                        if (popular.isNotEmpty) ...[
+                          _SectionHeader(
+                            title: 'Warisan Populer',
+                            onSeeAll: () => widget.onOpenTab(1),
                           ),
-                        ),
-                        const SizedBox(height: 14),
-                        // --- BANNER DUAL AI FASHION STUDIO & ASISTEN BUDAYA ---
+                          const SizedBox(height: 14),
+                          _PopularGrid(
+                            items: popular,
+                            onTap: (item) => Navigator.of(context).push(
+                              fadeSlideRoute(
+                                CultureDetailScreen(
+                                  item: item,
+                                  onOpenMap: () => widget.onOpenTab(1),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+
+                        // 4. Section Terpadu "Studio & Asisten" (Studio 3D, AI Fashion Studio, Abdi Pakar)
                         StaggerIn(
-                          index: 5,
-                          child: _HomeAiFashionFeaturesBanner(
+                          index: 3,
+                          child: _HomeStudioAndAiSection(
+                            onOpenWardrobe: () => Navigator.of(context).push(
+                              fadeSlideRoute(const JavaneseWardrobeScreen()),
+                            ),
                             onOpenAiStudio: () => Navigator.of(context).push(
                               fadeSlideRoute(const AiFashionStudioScreen()),
                             ),
@@ -270,81 +282,55 @@ class _HomeTabState extends State<HomeTab> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 22),
-                        // --- RIBBON EKSPLORASI KHASANAH JAWA UTAMA ---
-                        StaggerIn(
-                          index: 6,
-                          child: _FeatureDiscoveryRibbon(
-                            onTimeTravel: () => Navigator.of(context)
-                                .push(fadeSlideRoute(const TimeTravelScreen())),
-                            onPassport: () => Navigator.of(context).push(
-                              fadeSlideRoute(const CulturePassportScreen()),
-                            ),
-                            onHiddenHeritage: () => Navigator.of(context).push(
-                              fadeSlideRoute(const HiddenHeritageScreen()),
-                            ),
-                            onAksaraJawa: () => Navigator.of(context)
-                                .push(fadeSlideRoute(const AksaraJawaScreen())),
-                            onBusana3D: () => Navigator.of(context)
-                                .push(fadeSlideRoute(const JavaneseWardrobeScreen())),
-                            onJelajahiBusana: () => Navigator.of(context)
-                                .push(fadeSlideRoute(const JelajahiBusanaScreen())),
-                            onPetaBusana: () => Navigator.of(context)
-                                .push(fadeSlideRoute(const JavaneseFashionMapScreen())),
-                            onGaleriBatik: () => Navigator.of(context)
-                                .push(fadeSlideRoute(const BatikMotifGalleryScreen())),
-                            onSinauBusana: () => Navigator.of(context)
-                                .push(fadeSlideRoute(const SinauBusanaScreen())),
-                          ),
-                        ),
-                        const SizedBox(height: 22),
+                        const SizedBox(height: 24),
 
-                        // --- BUSANA PILIHAN HARI INI (FEATURED OUTFIT OF THE DAY) ---
+                        // 5. Sorotan Kurasi "Busana Pilihan Hari Ini"
                         StaggerIn(
-                          index: 7,
+                          index: 4,
                           child: _FeaturedOutfitOfTheDayCard(
-                            onOpenWardrobe: () => Navigator.of(context)
-                                .push(fadeSlideRoute(const JavaneseWardrobeScreen())),
-                            onOpenExplore: () => Navigator.of(context)
-                                .push(fadeSlideRoute(const JelajahiBusanaScreen())),
+                            onOpenExplore: () => Navigator.of(context).push(
+                              fadeSlideRoute(const JelajahiBusanaScreen()),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 26),
                       ],
 
-                      if (empty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 40),
-                          child: Center(
-                            child: Text(
-                              'Tidak ada hasil untuk "${_search.text.trim()}"',
-                              style: JText.serif(
-                                14,
-                                color: const Color(0xFFB3A394),
+                      // --- MODE HASIL PENCARIAN ---
+                      if (_q.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        if (empty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 40),
+                            child: Center(
+                              child: Text(
+                                'Tidak ada hasil untuk "${_search.text.trim()}"',
+                                style: JText.serif(
+                                  14,
+                                  color: const Color(0xFFB3A394),
+                                ),
+                              ),
+                            ),
+                          )
+                        else ...[
+                          _SectionHeader(
+                            title: 'Hasil Pencarian (${popular.length})',
+                            onSeeAll: () => widget.onOpenTab(1),
+                          ),
+                          const SizedBox(height: 14),
+                          _PopularGrid(
+                            items: popular,
+                            onTap: (item) => Navigator.of(context).push(
+                              fadeSlideRoute(
+                                CultureDetailScreen(
+                                  item: item,
+                                  onOpenMap: () => widget.onOpenTab(1),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-
-                      // --- DAFTAR PILIHAN POPULER ---
-                      if (popular.isNotEmpty) ...[
-                        _SectionHeader(
-                          title: 'Warisan Populer',
-                          onSeeAll: () => widget.onOpenTab(1),
-                        ),
-                        const SizedBox(height: 14),
-                        _PopularGrid(
-                          items: popular,
-                          onTap: (item) => Navigator.of(context).push(
-                            fadeSlideRoute(
-                              CultureDetailScreen(
-                                item: item,
-                                onOpenMap: () => widget.onOpenTab(1),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
+                        ],
                       ],
                     ],
                   ),
@@ -1260,58 +1246,11 @@ class _HomeTopHeader extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
 
-                // TOMBOL AKSI MINIMALIS DI ATAS KANAN (Search & Lemari Koleksi Adat sesuai Gambar Referensi)
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // 1. Tombol Search Simpel (Membuka Search Input secara Mulus)
-                      _TopHeaderIconButton(
-                        icon: Icons.search_rounded,
-                        tooltip: 'Cari Busana & Khasanah',
-                        onTap: onOpenSearch,
-                      ),
-                      const SizedBox(width: 10),
-
-                      // 2. Tombol Lemari / Koleksi Busana dengan Titik Merah (Ikon Box/Drawer sesuai Gambar Referensi)
-                      _TopHeaderIconButton(
-                        iconWidget: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 5.5,
-                              height: 5.5,
-                              margin: const EdgeInsets.only(right: 3.5),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFE53935),
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Color(0x66E53935),
-                                    blurRadius: 3,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(
-                              Icons.inventory_2_outlined,
-                              color: Color(0xFFFAF6F0),
-                              size: 21,
-                            ),
-                          ],
-                        ),
-                        tooltip: 'Koleksi Busana Adat',
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          Navigator.of(context).push(
-                            fadeSlideRoute(const JavaneseWardrobeScreen()),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+                // TOMBOL AKSI MINIMALIS DI ATAS KANAN (Hanya Search agar header terasa bersih & lega)
+                _TopHeaderIconButton(
+                  icon: Icons.search_rounded,
+                  tooltip: 'Cari Busana & Khasanah',
+                  onTap: onOpenSearch,
                 ),
               ],
             ),
@@ -1794,432 +1733,6 @@ class _Categories extends StatelessWidget {
 
 
 
-/// RIBBON EKSPLORASI KHASANAH JAWA (ORIGINAL MASTER FEATURES)
-class _FeatureDiscoveryRibbon extends StatelessWidget {
-  const _FeatureDiscoveryRibbon({
-    required this.onTimeTravel,
-    required this.onPassport,
-    required this.onHiddenHeritage,
-    required this.onAksaraJawa,
-    required this.onBusana3D,
-    required this.onJelajahiBusana,
-    required this.onPetaBusana,
-    required this.onGaleriBatik,
-    required this.onSinauBusana,
-  });
-
-  final VoidCallback onTimeTravel;
-  final VoidCallback onPassport;
-  final VoidCallback onHiddenHeritage;
-  final VoidCallback onAksaraJawa;
-  final VoidCallback onBusana3D;
-  final VoidCallback onJelajahiBusana;
-  final VoidCallback onPetaBusana;
-  final VoidCallback onGaleriBatik;
-  final VoidCallback onSinauBusana;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Wrap(
-          alignment: WrapAlignment.spaceBetween,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 8,
-          runSpacing: 4,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.auto_awesome,
-                  size: 14,
-                  color: Color(0xFFFFCC66),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'PILAR KHASANAH NUSANTARA',
-                  style: JText.serif(
-                    11,
-                    weight: FontWeight.w700,
-                    color: const Color(0xFFFFDF9E),
-                  ).copyWith(letterSpacing: 1.2),
-                ),
-              ],
-            ),
-            Text(
-              '9 Eksplorasi Unik',
-              style: JText.serif(11, color: const Color(0xFFC7B7A6)),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          child: Row(
-            children: [
-              _RibbonCard(
-                title: 'Katalog Busana',
-                subtitle: 'Anatomi & Ricikan',
-                icon: Icons.menu_book_rounded,
-                badge: 'KATALOG',
-                onTap: () => Navigator.of(context).push(
-                  fadeSlideRoute(const ClothingCatalogScreen()),
-                ),
-              ),
-              const SizedBox(width: 10),
-              _RibbonCard(
-                title: 'Busana 3D',
-                subtitle: 'Studio Wardrobe',
-                icon: Icons.checkroom_rounded,
-                badge: '3D FASHION',
-                onTap: onBusana3D,
-              ),
-              const SizedBox(width: 10),
-              _RibbonCard(
-                title: 'Jelajahi Busana',
-                subtitle: 'Setelan Adat',
-                icon: Icons.auto_awesome_rounded,
-                badge: 'KURASI',
-                onTap: onJelajahiBusana,
-              ),
-              const SizedBox(width: 10),
-              _RibbonCard(
-                title: 'Peta Busana',
-                subtitle: 'Persebaran Daerah',
-                icon: Icons.map_rounded,
-                badge: 'GEOGRAFIS',
-                onTap: onPetaBusana,
-              ),
-              const SizedBox(width: 10),
-              _RibbonCard(
-                title: 'Galeri Wastra',
-                subtitle: 'Batik & Motif',
-                icon: Icons.layers_rounded,
-                badge: 'TEKSTIL',
-                onTap: onGaleriBatik,
-              ),
-              const SizedBox(width: 10),
-              _RibbonCard(
-                title: 'Panduan Gaya',
-                subtitle: 'Anatomi & Filosofi',
-                icon: Icons.menu_book_rounded,
-                badge: 'LOOKBOOK',
-                onTap: onSinauBusana,
-              ),
-              const SizedBox(width: 10),
-              _RibbonCard(
-                title: 'Garis Waktu',
-                subtitle: 'Abad 6 s.d. Kini',
-                icon: Icons.history_edu_rounded,
-                badge: 'SEJARAH',
-                onTap: onTimeTravel,
-              ),
-              const SizedBox(width: 10),
-              _RibbonCard(
-                title: 'Paspor Budaya',
-                subtitle: '35 Cap Wilayah',
-                icon: Icons.badge_outlined,
-                badge: 'PASPOR',
-                onTap: onPassport,
-              ),
-              const SizedBox(width: 10),
-              _RibbonCard(
-                title: 'Aksara Jawa',
-                subtitle: 'Sanggar Hanacaraka',
-                icon: Icons.edit_note_rounded,
-                badge: 'AKSARA',
-                onTap: onAksaraJawa,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-
-
-class _RibbonCard extends StatelessWidget {
-  const _RibbonCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.badge,
-    required this.onTap,
-  });
-
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final String badge;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InteractiveCard(
-      onTap: onTap,
-      borderRadius: 16,
-      backgroundColor: const Color(0xCC1A1022),
-      border: Border.all(color: const Color(0x66DFB76C), width: 0.8),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      semanticLabel: title,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: const Color(0x33DFB76C),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: const Color(0xFFFFDF9E), size: 20),
-          ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    title,
-                    style: JText.serif(
-                      12.5,
-                      weight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 1,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0x44DFB76C),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      badge,
-                      style: JText.serif(
-                        7.5,
-                        weight: FontWeight.w800,
-                        color: const Color(0xFFFFDF9E),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: JText.serif(10.5, color: const Color(0xFFC7B7A6)),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-
-/// Banner Museum Busana Tradisional Jawa 3D Interaktif (Utama)
-class _HomeFashion3DBanner extends StatelessWidget {
-  const _HomeFashion3DBanner({
-    required this.onOpenWardrobe,
-    required this.onOpenOutfits,
-  });
-
-  final VoidCallback onOpenWardrobe;
-  final VoidCallback onOpenOutfits;
-
-  @override
-  Widget build(BuildContext context) {
-    return InteractiveCard(
-      onTap: onOpenWardrobe,
-      borderRadius: 20,
-      padding: const EdgeInsets.all(16),
-      semanticLabel: 'Buka Studio Busana Tradisional Jawa 3D',
-      backgroundColor: const Color(0xFF1E1712),
-      border: Border.all(
-        color: const Color(0x77E4C590),
-        width: 1.3,
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              // Ikon Busana 3D
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: const Color(0xFF3B271A),
-                  border: Border.all(
-                    color: const Color(0xFFE4C590),
-                    width: 1.2,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.checkroom_rounded,
-                  color: Color(0xFFE4C590),
-                  size: 26,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 7,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0x33E4C590),
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(
-                              color: const Color(0x66E4C590),
-                              width: 0.8,
-                            ),
-                          ),
-                          child: const Text(
-                            'STUDIO WARDROBE 3D',
-                            style: TextStyle(
-                              fontSize: 8.5,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFFE4C590),
-                              letterSpacing: 0.7,
-                            ),
-                          ),
-                        ),
-                        const Text(
-                          'ꦩꦸꦱꦶꦪꦸꦩ꧀ꦧꦸꦱꦤꦗꦮ',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFFE4C590),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Museum Busana Tradisional Jawa',
-                      style: JText.serif(
-                        14.5,
-                        weight: FontWeight.w700,
-                        color: const Color(0xFFFAF6F0),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const Text(
-                      'Model Peraga Realistis & Rel Gantungan Settigation 360°',
-                      style: TextStyle(
-                        fontSize: 10.5,
-                        color: Color(0xFFA8998A),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE4C590),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  alignment: Alignment.center,
-                  child: const FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.view_in_ar_rounded, size: 14, color: Color(0xFF14100D)),
-                          SizedBox(width: 6),
-                          Text(
-                            'Buka Studio 3D',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF14100D),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              InteractiveScale(
-                onTap: onOpenOutfits,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF261C14),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0x55E4C590), width: 0.9),
-                  ),
-                  child: const FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.auto_awesome_rounded, size: 13, color: Color(0xFFE4C590)),
-                        SizedBox(width: 4),
-                        Text(
-                          'Jelajahi Set',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFFFAF6F0),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-
-
-
-
-
 /// SECTION HEADER JAVARA
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({required this.title, required this.onSeeAll});
@@ -2345,26 +1858,188 @@ class _PopularGrid extends StatelessWidget {
 
 
 
-/// Card Busana Pilihan Hari Ini (Featured Outfit of the Day)
-class _FeaturedOutfitOfTheDayCard extends StatelessWidget {
-  const _FeaturedOutfitOfTheDayCard({
+/// Section Terpadu: Studio & Asisten
+/// Menggabungkan Studio Wardrobe 3D, AI Fashion Studio, dan Abdi Pakar Busana
+/// dalam satu tampilan horizontal scrollable ramping yang tenang (#181614, border white 8%).
+class _HomeStudioAndAiSection extends StatelessWidget {
+  const _HomeStudioAndAiSection({
     required this.onOpenWardrobe,
-    required this.onOpenExplore,
+    required this.onOpenAiStudio,
+    required this.onOpenAiAssistant,
   });
 
   final VoidCallback onOpenWardrobe;
-  final VoidCallback onOpenExplore;
+  final VoidCallback onOpenAiStudio;
+  final VoidCallback onOpenAiAssistant;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = [
+      (
+        title: 'Studio Wardrobe 3D',
+        subtitle: 'Eksplorasi busana 360°',
+        icon: Icons.checkroom_rounded,
+        onTap: onOpenWardrobe,
+      ),
+      (
+        title: 'AI Fashion Studio',
+        subtitle: 'Peraga busana virtual',
+        icon: Icons.auto_awesome_rounded,
+        onTap: onOpenAiStudio,
+      ),
+      (
+        title: 'Abdi Pakar Busana',
+        subtitle: 'Konsultasi filosofi & pakem',
+        icon: Icons.psychology_rounded,
+        onTap: onOpenAiAssistant,
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Studio & Asisten',
+              style: JText.editorial(
+                18,
+                weight: FontWeight.w700,
+                color: const Color(0xFFFAF6F0),
+              ),
+            ),
+            Text(
+              'Inovasi Budaya',
+              style: JText.sans(
+                11,
+                color: const Color(0xFF8E8276),
+                weight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 72,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            itemCount: items.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return InteractiveScale(
+                pressedScale: 0.96,
+                semanticLabel: item.title,
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  item.onTap();
+                },
+                child: Container(
+                  width: 220,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF181614),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0x14FFFFFF),
+                      width: 1.0,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x33000000),
+                        blurRadius: 8,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: const Color(0x1AE4C590),
+                          borderRadius: BorderRadius.circular(11),
+                        ),
+                        child: Icon(
+                          item.icon,
+                          size: 21,
+                          color: const Color(0xFFE4C590),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              item.title,
+                              style: JText.serif(
+                                13,
+                                weight: FontWeight.w700,
+                                color: const Color(0xFFFAF6F0),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              item.subtitle,
+                              style: JText.sans(
+                                10.5,
+                                color: const Color(0xFF9E9286),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Card Busana Pilihan Hari Ini (Featured Outfit of the Day)
+/// Disajikan dengan layout editorial tenang, bebas tombol mencolok yang berebut fokus.
+class _FeaturedOutfitOfTheDayCard extends StatelessWidget {
+  const _FeaturedOutfitOfTheDayCard({
+    this.onOpenExplore,
+  });
+
+  final VoidCallback? onOpenExplore;
 
   @override
   Widget build(BuildContext context) {
     final outfit = JavaneseClothingData.curatedOutfits.first;
 
+    void navigateToDetail() {
+      HapticFeedback.lightImpact();
+      final item = JavaneseClothingData.clothingItems.firstWhere(
+        (it) => it.id == outfit.upperBodyId,
+        orElse: () => JavaneseClothingData.clothingItems.first,
+      );
+      Navigator.of(context).push(
+        fadeSlideRoute(ClothingDetailScreen(item: item)),
+      );
+    }
+
     return InteractiveCard(
-      onTap: onOpenWardrobe,
-      borderRadius: 22,
+      onTap: navigateToDetail,
+      borderRadius: 20,
       padding: EdgeInsets.zero,
-      backgroundColor: const Color(0xFF1E1712),
-      border: Border.all(color: const Color(0x66E4C590), width: 1.2),
+      backgroundColor: const Color(0xFF181614),
+      border: Border.all(color: const Color(0x14FFFFFF), width: 1.0),
       semanticLabel: 'Busana Pilihan Hari Ini - ${outfit.title}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2381,9 +2056,9 @@ class _FeaturedOutfitOfTheDayCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: const Color(0x33E4C590),
+                    color: const Color(0x1AE4C590),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: const Color(0x66E4C590), width: 0.8),
+                    border: Border.all(color: const Color(0x33E4C590), width: 0.8),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
@@ -2394,7 +2069,7 @@ class _FeaturedOutfitOfTheDayCard extends StatelessWidget {
                         'BUSANA PILIHAN HARI INI',
                         style: TextStyle(
                           fontSize: 9,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: Color(0xFFE4C590),
                           letterSpacing: 0.5,
                         ),
@@ -2461,50 +2136,64 @@ class _FeaturedOutfitOfTheDayCard extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                // Action Buttons
+                // Tombol Sekunder / Ghost Button: Lihat Detail Busana →
                 Row(
                   children: [
                     Expanded(
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE4C590),
-                          foregroundColor: const Color(0xFF14100D),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFFAF6F0),
+                          backgroundColor: const Color(0x0FFFFFFF),
+                          side: const BorderSide(color: Color(0x22FFFFFF), width: 1),
+                          padding: const EdgeInsets.symmetric(vertical: 11),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        icon: const Icon(Icons.view_in_ar_rounded, size: 16),
-                        label: const Text(
-                          'Coba di Studio 3D',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
+                        onPressed: navigateToDetail,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Lihat Detail Busana',
+                              style: JText.sans(
+                                12,
+                                weight: FontWeight.w600,
+                                color: const Color(0xFFFAF6F0),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 14,
+                              color: Color(0xFFE4C590),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (onOpenExplore != null) ...[
+                      const SizedBox(width: 10),
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFB09F8F),
+                          side: const BorderSide(color: Color(0x14FFFFFF), width: 1),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: onOpenWardrobe,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFFE4C590),
-                        side: const BorderSide(color: Color(0x66E4C590), width: 1),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                        onPressed: onOpenExplore,
+                        child: Text(
+                          'Koleksi Lain',
+                          style: JText.sans(
+                            12,
+                            weight: FontWeight.w600,
+                            color: const Color(0xFFB09F8F),
+                          ),
                         ),
                       ),
-                      onPressed: onOpenExplore,
-                      child: const Text(
-                        'Koleksi Lain',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
+                    ],
                   ],
                 ),
               ],
@@ -2543,170 +2232,4 @@ class _RicikanTag extends StatelessWidget {
   }
 }
 
-/// Banner Fitur Flagship AI Busana Budaya Jawa: AI Try-On Studio & AI Abdi Pakar Busana
-class _HomeAiFashionFeaturesBanner extends StatelessWidget {
-  const _HomeAiFashionFeaturesBanner({
-    required this.onOpenAiStudio,
-    required this.onOpenAiAssistant,
-  });
 
-  final VoidCallback onOpenAiStudio;
-  final VoidCallback onOpenAiAssistant;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: InteractiveCard(
-            onTap: onOpenAiStudio,
-            borderRadius: 16,
-            padding: const EdgeInsets.all(12),
-            backgroundColor: const Color(0xFF1E1712),
-            border: Border.all(
-              color: const Color(0x66DFB76C),
-              width: 1.0,
-            ),
-            semanticLabel: 'Buka AI Studio Virtual Try-On',
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: const Color(0x33DFB76C),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0x88DFB76C), width: 0.8),
-                      ),
-                      child: const Icon(
-                        Icons.auto_awesome_rounded,
-                        size: 16,
-                        color: Color(0xFFFFDF9E),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0x22DFB76C),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Text(
-                        'AI TRY-ON',
-                        style: TextStyle(
-                          fontSize: 7.5,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFFFFDF9E),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'AI Fashion Studio',
-                  style: JText.serif(
-                    13,
-                    weight: FontWeight.w800,
-                    color: Colors.white,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Peraga fotorealistik busana adat',
-                  style: JText.serif(
-                    10,
-                    color: const Color(0xFFC7B7A6),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: InteractiveCard(
-            onTap: onOpenAiAssistant,
-            borderRadius: 16,
-            padding: const EdgeInsets.all(12),
-            backgroundColor: const Color(0xFF1E1712),
-            border: Border.all(
-              color: const Color(0x66DFB76C),
-              width: 1.0,
-            ),
-            semanticLabel: 'Buka AI Abdi Pakar Busana',
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: const Color(0x33DFB76C),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0x88DFB76C), width: 0.8),
-                      ),
-                      child: const Icon(
-                        Icons.psychology_rounded,
-                        size: 16,
-                        color: Color(0xFFFFDF9E),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0x22DFB76C),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Text(
-                        'AI ASISTEN',
-                        style: TextStyle(
-                          fontSize: 7.5,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFFFFDF9E),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Abdi Pakar Busana',
-                  style: JText.serif(
-                    13,
-                    weight: FontWeight.w800,
-                    color: Colors.white,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Konsultasi filosofi & pakem',
-                  style: JText.serif(
-                    10,
-                    color: const Color(0xFFC7B7A6),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
