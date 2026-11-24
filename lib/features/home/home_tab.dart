@@ -17,7 +17,6 @@ import '../heritage/time_travel_screen.dart';
 import '../fashion/screens/javanese_wardrobe_screen.dart';
 import '../fashion/screens/jelajahi_busana_screen.dart';
 import '../fashion/screens/clothing_catalog_screen.dart';
-import '../fashion/screens/clothing_detail_screen.dart';
 import '../fashion/screens/batik_motif_gallery_screen.dart';
 import '../fashion/screens/javanese_fashion_map_screen.dart';
 import '../fashion/screens/sinau_busana_screen.dart';
@@ -307,19 +306,6 @@ class _HomeTabState extends State<HomeTab> {
                             onOpenWardrobe: () => Navigator.of(context)
                                 .push(fadeSlideRoute(const JavaneseWardrobeScreen())),
                             onOpenExplore: () => Navigator.of(context)
-                                .push(fadeSlideRoute(const JelajahiBusanaScreen())),
-                          ),
-                        ),
-                        const SizedBox(height: 22),
-
-                        // --- RAGAM BUSANA ADAT UNGGULAN JAWA TENGAH CAROUSEL ---
-                        StaggerIn(
-                          index: 8,
-                          child: _FeaturedGarmentsCarousel(
-                            onSelectItem: (item) => Navigator.of(context).push(
-                              fadeSlideRoute(ClothingDetailScreen(item: item)),
-                            ),
-                            onSeeAll: () => Navigator.of(context)
                                 .push(fadeSlideRoute(const JelajahiBusanaScreen())),
                           ),
                         ),
@@ -2673,153 +2659,6 @@ class _RicikanTag extends StatelessWidget {
     );
   }
 }
-
-
-
-/// Carousel Ragam Busana Unggulan Jawa Tengah
-class _FeaturedGarmentsCarousel extends StatelessWidget {
-  const _FeaturedGarmentsCarousel({
-    required this.onSelectItem,
-    required this.onSeeAll,
-  });
-
-  final ValueChanged<ClothingItem> onSelectItem;
-  final VoidCallback onSeeAll;
-
-  @override
-  Widget build(BuildContext context) {
-    final items = [
-      ...JavaneseClothingData.upperBodyItems.take(3),
-      ...JavaneseClothingData.headwearItems.take(2),
-      ...JavaneseClothingData.lowerBodyItems.take(2),
-      ...JavaneseClothingData.accessoryItems.take(2),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Khasanah Busana Unggulan',
-                    style: JText.serif(
-                      17,
-                      weight: FontWeight.w800,
-                      color: const Color(0xFFFAF6F0),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    'Rasukan, bebet, dan ricikan Jawa Tengah',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFFA69383),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            TextButton(
-              onPressed: onSeeAll,
-              child: const Text(
-                'Lihat Semua',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFFE4C590),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 165,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: items.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return InteractiveCard(
-                borderRadius: 16,
-                padding: const EdgeInsets.all(12),
-                backgroundColor: const Color(0xFF1F1813),
-                border: Border.all(
-                  color: const Color(0x33E4C590),
-                  width: 0.8,
-                ),
-                semanticLabel: item.name,
-                onTap: () => onSelectItem(item),
-                child: SizedBox(
-                  width: 135,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(7),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2C2219),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          item.category.icon,
-                          size: 18,
-                          color: const Color(0xFFE4C590),
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        item.javaneseScript,
-                        style: const TextStyle(
-                          fontSize: 9.5,
-                          color: Color(0xFFDFC08E),
-                        ),
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        item.name,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFFFAF6F0),
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        item.region.title.split('(').first.trim(),
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: Color(0xFF9E8D7F),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 
 /// Banner Fitur Flagship AI Busana Budaya Jawa: AI Try-On Studio & AI Abdi Pakar Busana
 class _HomeAiFashionFeaturesBanner extends StatelessWidget {
