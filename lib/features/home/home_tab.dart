@@ -507,7 +507,7 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
     final ptr = widget.pointerNotifier.value;
 
     _smoothScroll =
-        ui.lerpDouble(_smoothScroll, targetScroll, 0.12) ?? targetScroll;
+        ui.lerpDouble(_smoothScroll, targetScroll, 0.065) ?? targetScroll;
     _smoothPointerX = ui.lerpDouble(_smoothPointerX, ptr.dx, 0.055) ?? ptr.dx;
     _smoothPointerY = ui.lerpDouble(_smoothPointerY, ptr.dy, 0.055) ?? ptr.dy;
 
@@ -528,8 +528,9 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
     // KINEMATIKA GERAK TANGAN MUDRA BUDDHA (DARI TERTUTUP MENJADI TERBUKA SAAT DI-SCROLL)
     // 0.0 (Scroll = 0) : Kedua tangan TERTUTUP menyatu rapat di tengah (Anjali Mudra / Sembah Suci)
     // 1.0 (Scroll > 0) : Kedua tangan TERBUKA menyibak ke pojok kiri & kanan menyingkap Candi Borobudur
-    final openProgress = (_smoothScroll / 240.0).clamp(0.0, 1.0);
-    final openCurve = Curves.easeOutCubic.transform(openProgress);
+    // Jarak rentang diperpanjang ke 520px & kurva easeInOutCubic agar buka-tutup tenang & tidak cepat menutup
+    final openProgress = (_smoothScroll / 520.0).clamp(0.0, 1.0);
+    final openCurve = Curves.easeInOutCubic.transform(openProgress);
 
     // Dimensi dan proporsi tangan fotorealistik diperbesar sesuai preferensi user
     final handHeight = (w * 0.98).clamp(360.0, 480.0);
@@ -554,7 +555,7 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
 
     // Parallax posisi vertikal tangan:
     final handsY = ui.lerpDouble(115.0, 155.0, openCurve)! -
-        (_smoothScroll * 0.16) +
+        (_smoothScroll * 0.12) +
         (_smoothPointerY * 12.0);
 
     // Rotasi 3D spasial telapak tangan:
@@ -585,7 +586,7 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
       ..rotateZ(rightHandRoll);
 
     final handsOpacity =
-        (1.0 - ((_smoothScroll - 500.0) / 450.0)).clamp(0.40, 1.0);
+        (1.0 - ((_smoothScroll - 600.0) / 450.0)).clamp(0.35, 1.0);
 
     // DOLLY ZOOM SINEMATIK CANDI:
     final ambientBreath = math.sin(_elapsedTime * 1.3) * 0.012;
