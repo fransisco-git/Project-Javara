@@ -46,8 +46,10 @@ class _HomeTabState extends State<HomeTab> {
   final _search = TextEditingController();
   final _scrollController = ScrollController();
   final _pointerNotifier = ValueNotifier<Offset>(Offset.zero);
+  final _searchFocusNode = FocusNode();
   String _q = '';
   bool _isLoading = true;
+  bool _isSearchOpen = false;
   double _scrollOffset = 0.0;
 
   @override
@@ -71,6 +73,7 @@ class _HomeTabState extends State<HomeTab> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _search.dispose();
+    _searchFocusNode.dispose();
     _scrollController.dispose();
     _pointerNotifier.dispose();
     super.dispose();
@@ -204,25 +207,14 @@ class _HomeTabState extends State<HomeTab> {
                             child: ListView(
                               controller: _scrollController,
                               physics: const BouncingScrollPhysics(),
-                              padding: EdgeInsets.fromLTRB(20, topPadding + 16, 20, 110),
+                              padding: EdgeInsets.fromLTRB(20, topPadding + 62, 20, 110),
                               keyboardDismissBehavior:
                                   ScrollViewKeyboardDismissBehavior.onDrag,
                               children: [
-                      // --- SEARCH BAR OBSIDIAN GLASS ---
-                      StaggerIn(
-                        index: 0,
-                        child: _SearchBar(
-                          controller: _search,
-                          onChanged: (v) =>
-                              setState(() => _q = v.trim().toLowerCase()),
-                        ),
-                      ),
-                      const SizedBox(height: 18),
-
                       // --- HERO CARD FITUR UTAMA ---
                       if (_q.isEmpty) ...[
                         // Panggung visual terbuka agar tangan Buddha tertutup di tengah & Candi Borobudur tampak megah
-                        const SizedBox(height: 140),
+                        const SizedBox(height: 120),
                         StaggerIn(
                           index: 1,
                           child: _HeroCard(
@@ -381,6 +373,65 @@ class _HomeTabState extends State<HomeTab> {
                         ],
                       ],
                     ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        // --- TOP APP BAR HEADER: LOGO JAVARA & MINIMALIST ACTION ICONS ---
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: ClipRect(
+            child: BackdropFilter(
+              filter: ui.ImageFilter.blur(
+                sigmaX: _scrollOffset > 10 ? 16.0 : 0.0,
+                sigmaY: _scrollOffset > 10 ? 16.0 : 0.0,
+              ),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: EdgeInsets.fromLTRB(20, topPadding + 8, 20, 10),
+                decoration: BoxDecoration(
+                  color: _scrollOffset > 10
+                      ? const Color(0xD907040B)
+                      : Colors.transparent,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: _scrollOffset > 10
+                          ? const Color(0x22DFB76C)
+                          : Colors.transparent,
+                      width: 0.8,
+                    ),
+                  ),
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 540),
+                    child: _HomeTopHeader(
+                      isSearchOpen: _isSearchOpen,
+                      controller: _search,
+                      focusNode: _searchFocusNode,
+                      onOpenSearch: () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _isSearchOpen = true);
+                        _searchFocusNode.requestFocus();
+                      },
+                      onCloseSearch: () {
+                        HapticFeedback.lightImpact();
+                        _search.clear();
+                        _searchFocusNode.unfocus();
+                        setState(() {
+                          _q = '';
+                          _isSearchOpen = false;
+                        });
+                      },
+                      onSearchChanged: (v) {
+                        setState(() => _q = v.trim().toLowerCase());
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -1233,50 +1284,234 @@ class _BadgePill extends StatelessWidget {
 
 
 
-/// SEARCH BAR OBSIDIAN GLASS
-class _SearchBar extends StatelessWidget {
-  const _SearchBar({required this.controller, required this.onChanged});
+/// TOP APP BAR HEADER DENGAN LOGO JAVARA & MINIMALIST ACTION ICONS SESUAI GAMBAR REFERENSI
+class _HomeTopHeader extends StatelessWidget {
+  const _HomeTopHeader({
+    required this.isSearchOpen,
+    required this.controller,
+    required this.focusNode,
+    required this.onOpenSearch,
+    required this.onCloseSearch,
+    required this.onSearchChanged,
+  });
+
+  final bool isSearchOpen;
   final TextEditingController controller;
-  final ValueChanged<String> onChanged;
+  final FocusNode focusNode;
+  final VoidCallback onOpenSearch;
+  final VoidCallback onCloseSearch;
+  final ValueChanged<String> onSearchChanged;
 
   @override
   Widget build(BuildContext context) {
-    return _JavaraGlassPanel(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-      radius: 16,
-      child: TextField(
-        controller: controller,
-        onChanged: onChanged,
-        textInputAction: TextInputAction.search,
-        style: JText.serif(14, color: Colors.white),
-        cursorColor: const Color(0xFFFFD700),
-        decoration: InputDecoration(
-          hintText: 'Cari busana, kebaya, beskap, batik, jarik...',
-          hintStyle: JText.serif(14, color: const Color(0xFFA69584)),
-          prefixIcon: const Icon(
-            Icons.search_rounded,
-            color: Color(0xFFDFB76C),
-            size: 22,
-          ),
-          suffixIcon: ValueListenableBuilder<TextEditingValue>(
-            valueListenable: controller,
-            builder: (_, v, _) => v.text.isEmpty
-                ? const SizedBox.shrink()
-                : IconButton(
-                    tooltip: 'Hapus pencarian',
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 250),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      child: isSearchOpen
+          ? Container(
+              key: const ValueKey('header_search_input'),
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xE6140E1B),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: const Color(0x66DFB76C),
+                  width: 1.0,
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x44000000),
+                    blurRadius: 12,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.search_rounded,
+                    color: Color(0xFFDFB76C),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      autofocus: true,
+                      onChanged: onSearchChanged,
+                      textInputAction: TextInputAction.search,
+                      style: JText.serif(14, color: Colors.white),
+                      cursorColor: const Color(0xFFFFD700),
+                      decoration: InputDecoration(
+                        hintText: 'Cari busana, kebaya, beskap, batik, jarik...',
+                        hintStyle: JText.serif(13.5, color: const Color(0xFFA69584)),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Tutup pencarian',
                     icon: const Icon(
                       Icons.close_rounded,
-                      size: 20,
-                      color: Color(0xFFA69584),
+                      size: 19,
+                      color: Color(0xFFDFB76C),
                     ),
-                    onPressed: () {
-                      controller.clear();
-                      onChanged('');
-                    },
+                    onPressed: onCloseSearch,
+                    splashRadius: 20,
                   ),
+                ],
+              ),
+            )
+          : Row(
+              key: const ValueKey('header_logo_bar'),
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // LOGO JAVARA DI ATAS KIRI (Clean, Bold, Modern Tracking sesuai Gambar Referensi)
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Semantics(
+                      header: true,
+                      label: 'Javara Logo',
+                      child: const Text(
+                        'J A V A R A',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 4.8,
+                          color: Color(0xFFFFFDF8),
+                          shadows: [
+                            Shadow(
+                              color: Color(0xAA000000),
+                              blurRadius: 8,
+                              offset: Offset(0, 1.5),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // TOMBOL AKSI MINIMALIS DI ATAS KANAN (Search & Lemari Koleksi Adat)
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 1. Tombol Search Simpel (Membuka Search Input secara Mulus)
+                      _TopHeaderIconButton(
+                        icon: Icons.search_rounded,
+                        tooltip: 'Cari Busana & Khasanah',
+                        onTap: onOpenSearch,
+                      ),
+                      const SizedBox(width: 6),
+
+                      // 2. Tombol Lemari / Koleksi Busana dengan Titik Merah (Ikon Box/Drawer sesuai Gambar Referensi)
+                      _TopHeaderIconButton(
+                        iconWidget: Stack(
+                          clipBehavior: Clip.none,
+                          alignment: Alignment.center,
+                          children: [
+                            const Icon(
+                              Icons.inventory_2_outlined,
+                              color: Color(0xFFFAF6F0),
+                              size: 19,
+                            ),
+                            Positioned(
+                              left: -3,
+                              top: 6,
+                              child: Container(
+                                width: 6,
+                                height: 6,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFE53935),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Color(0x66E53935),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        tooltip: 'Koleksi Busana Adat',
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.of(context).push(
+                            fadeSlideRoute(const JavaneseWardrobeScreen()),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+/// Tombol Ikon Bundar Minimalis di Header Atas Beranda
+class _TopHeaderIconButton extends StatelessWidget {
+  const _TopHeaderIconButton({
+    this.icon,
+    this.iconWidget,
+    required this.tooltip,
+    required this.onTap,
+  }) : assert(icon != null || iconWidget != null);
+
+  final IconData? icon;
+  final Widget? iconWidget;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(22),
+          child: Container(
+            width: 38,
+            height: 38,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: const Color(0x33000000),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0x28DFB76C),
+                width: 0.8,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x22000000),
+                  blurRadius: 6,
+                  offset: Offset(0, 1),
+                ),
+              ],
+            ),
+            child: iconWidget ??
+                Icon(
+                  icon,
+                  color: const Color(0xFFFAF6F0),
+                  size: 19,
+                ),
           ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
         ),
       ),
     );
