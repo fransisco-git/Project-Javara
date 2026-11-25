@@ -200,10 +200,9 @@ void main() {
     expect(find.byIcon(Icons.bookmark_rounded), findsAtLeastNWidgets(1));
   });
 
-  testWidgets('HomeTab features Abdi Pakar icon button in app bar and one-time coach mark', (
+  testWidgets('HomeTab omits AI chatbot button while keeping AI Fashion Studio and Studio Wardrobe 3D', (
     WidgetTester tester,
   ) async {
-    SharedPreferences.setMockInitialValues({});
     tester.view.physicalSize = const Size(360 * 2, 800 * 2);
     tester.view.devicePixelRatio = 2.0;
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -217,38 +216,26 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 1200));
 
-    // Verify Abdi Pakar icon button is present in app bar
-    final abdiIconFinder = find.byIcon(Icons.auto_awesome_outlined);
-    expect(abdiIconFinder, findsAtLeastNWidgets(1));
-
-    // Verify Semantics / Tooltip for Abdi Pakar
-    expect(find.byTooltip('Tanya Abdi Pakar'), findsOneWidget);
-
-    // Verify size & touch target of Abdi Pakar button
-    final iconWidget = tester.widget<Icon>(abdiIconFinder.first);
-    expect(iconWidget.size, 24);
-
-    final buttonFinder = find.ancestor(
-      of: abdiIconFinder.first,
-      matching: find.byType(ConstrainedBox),
-    );
-    final constrainedBox = tester.widget<ConstrainedBox>(buttonFinder.first);
-    expect(constrainedBox.constraints.minWidth, 48);
-    expect(constrainedBox.constraints.minHeight, 48);
-
-    // Verify Coach mark appears on first launch
-    expect(find.text('Tanya Abdi Pakar soal busana adat'), findsOneWidget);
-
-    // Tap to dismiss coach mark
-    await tester.tap(find.text('Tanya Abdi Pakar soal busana adat'));
-    await tester.pump(const Duration(milliseconds: 300));
-
-    // Verify coach mark is dismissed
+    // Verify AI chatbot button and coach mark in top right are removed
+    expect(find.byIcon(Icons.auto_awesome_outlined), findsNothing);
+    expect(find.byTooltip('Tanya Abdi Pakar'), findsNothing);
     expect(find.text('Tanya Abdi Pakar soal busana adat'), findsNothing);
 
-    // Verify abdi_coach_seen is stored in SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    expect(prefs.getBool('abdi_coach_seen'), isTrue);
+    // Scroll down to Studio Busana section below Warisan Populer
+    await tester.scrollUntilVisible(
+      find.text('Studio Busana'),
+      400,
+      scrollable: find.descendant(
+        of: find.byType(ListView).first,
+        matching: find.byType(Scrollable),
+      ).first,
+    );
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // Verify Studio Wardrobe 3D and AI Fashion Studio remain available
+    expect(find.text('Studio Busana'), findsOneWidget);
+    expect(find.text('Studio Wardrobe 3D'), findsOneWidget);
+    expect(find.text('AI Fashion Studio'), findsOneWidget);
   });
 
   testWidgets('HomeTab renders updated categories: Busana Pria, Busana Wanita, Batik, Aksesoris', (

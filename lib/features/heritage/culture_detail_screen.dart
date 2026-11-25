@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme.dart';
-import '../../core/transitions.dart';
 import '../../data/culture_items.dart';
 import '../../widgets/photo_box.dart';
-import '../fashion/screens/ai_cultural_assistant_screen.dart';
 import 'cultural_order_sheet.dart';
 
 /// Halaman Detail Warisan Budaya Editorial Mendalam JAVARA.
@@ -514,45 +512,6 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
         Text(
           item.description,
           style: JText.serif(14, height: 1.6, color: const Color(0xFF4A382A)),
-        ),
-        const SizedBox(height: 12),
-        InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () {
-            HapticFeedback.lightImpact();
-            Navigator.of(context).push(
-              fadeSlideRoute(
-                AiCulturalAssistantScreen(
-                  initialQuery:
-                      'Tanya filosofi dan tatakrama busana ${item.title}',
-                ),
-              ),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.auto_awesome_outlined,
-                  size: 16,
-                  color: Color(0xFF9E782F),
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    'Tanya Abdi Pakar tentang busana ini →',
-                    style: JText.sans(
-                      13,
-                      weight: FontWeight.w600,
-                      color: const Color(0xFF9E782F),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ),
         const SizedBox(height: 20),
         if (item.history.isNotEmpty) ...[

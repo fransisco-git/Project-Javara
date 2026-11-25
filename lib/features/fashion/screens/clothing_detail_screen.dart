@@ -7,7 +7,6 @@ import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
 import 'javara_studio_screen.dart';
 import 'javanese_wardrobe_screen.dart';
-import 'ai_cultural_assistant_screen.dart';
 
 /// Screen 03 — Detail Pakaian (Halaman Ensiklopedia Busana Adat Jawa Tengah)
 class ClothingDetailScreen extends StatefulWidget {
@@ -353,51 +352,6 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                     icon: Icons.auto_awesome_rounded,
                     content: item.philosophicalMeaning,
                     accent: true,
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // TAUTAN ABDI PAKAR BUSANA
-                  InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.of(context).push(
-                        fadeSlideRoute(
-                          AiCulturalAssistantScreen(
-                            initialQuery:
-                                'Tanya pakem dan filosofi busana ${widget.item.name}',
-                          ),
-                        ),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 6,
-                        horizontal: 2,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.auto_awesome_outlined,
-                            size: 16,
-                            color: Color(0xFFDFB76C),
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              'Tanya Abdi Pakar tentang busana ini →',
-                              style: JText.sans(
-                                13,
-                                weight: FontWeight.w600,
-                                color: const Color(0xFFDFB76C),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
 
                   const SizedBox(height: 16),

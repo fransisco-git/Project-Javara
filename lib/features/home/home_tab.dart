@@ -1,10 +1,8 @@
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme.dart';
 import '../../core/transitions.dart';
@@ -17,7 +15,6 @@ import '../fashion/screens/jelajahi_busana_screen.dart';
 import '../fashion/screens/clothing_catalog_screen.dart';
 import '../fashion/screens/batik_motif_gallery_screen.dart';
 import '../fashion/screens/ai_fashion_studio_screen.dart';
-import '../fashion/screens/ai_cultural_assistant_screen.dart';
 import '../fashion/data/javanese_clothing_data.dart';
 import '../fashion/models/javanese_clothing_models.dart';
 import '../../services/saved_garments_service.dart';
@@ -46,9 +43,6 @@ class _HomeTabState extends State<HomeTab> {
   String _q = '';
   bool _isLoading = true;
   bool _isSearchOpen = false;
-  bool _showAbdiCoachMark = false;
-  double _coachMarkOpacity = 0.0;
-  Timer? _coachMarkTimer;
 
   @override
   void didChangeDependencies() {
@@ -89,48 +83,10 @@ class _HomeTabState extends State<HomeTab> {
     super.initState();
     SavedGarmentsService.instance.initialize();
     _scrollController.addListener(_onScroll);
-    _checkAbdiCoachMark();
     // Mensimulasikan pemuatan data khasanah awal yang mulus dan realistis
     Future.delayed(const Duration(milliseconds: 950), () {
       if (mounted) setState(() => _isLoading = false);
     });
-  }
-
-  Future<void> _checkAbdiCoachMark() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final seen = prefs.getBool('abdi_coach_seen') ?? false;
-      if (!seen && mounted) {
-        await prefs.setBool('abdi_coach_seen', true);
-        setState(() {
-          _showAbdiCoachMark = true;
-          _coachMarkOpacity = 1.0;
-        });
-        _coachMarkTimer = Timer(const Duration(seconds: 4), () {
-          _dismissCoachMark();
-        });
-      }
-    } catch (_) {}
-  }
-
-  void _dismissCoachMark() {
-    _coachMarkTimer?.cancel();
-    _coachMarkTimer = null;
-    if (!_showAbdiCoachMark || !mounted) return;
-    setState(() => _coachMarkOpacity = 0.0);
-    Future.delayed(const Duration(milliseconds: 200), () {
-      if (mounted) {
-        setState(() => _showAbdiCoachMark = false);
-      }
-    });
-  }
-
-  void _openAbdiPakar() {
-    _dismissCoachMark();
-    HapticFeedback.lightImpact();
-    Navigator.of(context).push(
-      fadeSlideRoute(const AiCulturalAssistantScreen()),
-    );
   }
 
   void _onScroll() {
@@ -145,7 +101,6 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   void dispose() {
-    _coachMarkTimer?.cancel();
     _scrollController.removeListener(_onScroll);
     _search.dispose();
     _searchFocusNode.dispose();
@@ -485,7 +440,6 @@ class _HomeTabState extends State<HomeTab> {
                             onSearchChanged: (v) {
                               setState(() => _q = v.trim().toLowerCase());
                             },
-                            onOpenAbdiPakar: _openAbdiPakar,
                           ),
                         ),
                       ),
@@ -494,61 +448,6 @@ class _HomeTabState extends State<HomeTab> {
                 ),
               ),
             ),
-
-            // COACH MARK SATU KALI: TANYA ABDI PAKAR SOAL BUSANA ADAT
-            if (_showAbdiCoachMark)
-              Positioned(
-                top: topPadding + 56,
-                right: 20,
-                child: AnimatedOpacity(
-                  opacity: _coachMarkOpacity,
-                  duration: const Duration(milliseconds: 200),
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: _dismissCoachMark,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1E1712),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: const Color(0x66DFB76C),
-                          width: 0.8,
-                        ),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x66000000),
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.auto_awesome_outlined,
-                            size: 14,
-                            color: Color(0xFFDFB76C),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Tanya Abdi Pakar soal busana adat',
-                            style: JText.sans(
-                              11.5,
-                              weight: FontWeight.w500,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
           ],
         ),
       ),
@@ -1327,7 +1226,6 @@ class _HomeTopHeader extends StatelessWidget {
     required this.onOpenSearch,
     required this.onCloseSearch,
     required this.onSearchChanged,
-    required this.onOpenAbdiPakar,
   });
 
   final bool isSearchOpen;
@@ -1336,7 +1234,6 @@ class _HomeTopHeader extends StatelessWidget {
   final VoidCallback onOpenSearch;
   final VoidCallback onCloseSearch;
   final ValueChanged<String> onSearchChanged;
-  final VoidCallback onOpenAbdiPakar;
 
   @override
   Widget build(BuildContext context) {
@@ -1439,22 +1336,11 @@ class _HomeTopHeader extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
 
-                // TOMBOL AKSI MINIMALIS DI ATAS KANAN (Search & Abdi Pakar)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _TopHeaderIconButton(
-                      icon: Icons.search_rounded,
-                      tooltip: 'Cari Busana & Khasanah',
-                      onTap: onOpenSearch,
-                    ),
-                    const SizedBox(width: 8),
-                    _TopHeaderIconButton(
-                      icon: Icons.auto_awesome_outlined,
-                      tooltip: 'Tanya Abdi Pakar',
-                      onTap: onOpenAbdiPakar,
-                    ),
-                  ],
+                // TOMBOL AKSI MINIMALIS DI ATAS KANAN (Search)
+                _TopHeaderIconButton(
+                  icon: Icons.search_rounded,
+                  tooltip: 'Cari Busana & Khasanah',
+                  onTap: onOpenSearch,
                 ),
               ],
             ),

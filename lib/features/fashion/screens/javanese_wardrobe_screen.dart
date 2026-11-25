@@ -10,7 +10,6 @@ import '../widgets/realistic_fashion_model_stage.dart';
 import '../widgets/settigation_clothes_closet.dart';
 import '../widgets/threejs_wardrobe_webview.dart';
 import 'ai_fashion_studio_screen.dart';
-import 'ai_cultural_assistant_screen.dart';
 import 'jelajahi_busana_screen.dart';
 import 'my_heritage_collection_screen.dart';
 import 'sinau_busana_screen.dart';
@@ -749,16 +748,6 @@ class _JavaneseWardrobeScreenState extends State<JavaneseWardrobeScreen>
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const AiFashionStudioScreen()),
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-          _buildQuickPill(
-            icon: Icons.psychology_rounded,
-            label: 'AI Pakar Busana',
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const AiCulturalAssistantScreen()),
               );
             },
           ),
