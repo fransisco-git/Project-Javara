@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+import '../../../core/theme.dart';
+
 /// Jenis ikon tematik khas Jawa Tengah untuk kategori Beranda JAVARA.
 enum JavaraCategoryIconType {
   busana,
@@ -8,31 +10,28 @@ enum JavaraCategoryIconType {
   batik,
 }
 
-/// Ikon vektor khusus bertema warisan budaya Jawa Tengah untuk kartu kategori Beranda.
+/// Ikon vektor monoline minimalis bertema warisan Jawa Tengah (grid 24×24, stroke 1.5).
+/// Dirancang bersih tanpa fill keruh, tanpa gradien, dan tanpa ornamen berlebih.
 class JavaraCategoryThemeIcon extends StatelessWidget {
   const JavaraCategoryThemeIcon({
     super.key,
     required this.type,
-    this.size = 28,
-    this.color = const Color(0xFFDFB76C),
-    this.highlightColor = const Color(0xFFFFF0D0),
+    this.size = 26,
+    this.color = JColors.accentGold,
   });
 
   final JavaraCategoryIconType type;
   final double size;
   final Color color;
-  final Color highlightColor;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
+    return SizedBox.square(
+      dimension: size,
       child: CustomPaint(
         painter: _JavaraCategoryIconPainter(
           type: type,
           color: color,
-          highlightColor: highlightColor,
         ),
       ),
     );
@@ -43,191 +42,110 @@ class _JavaraCategoryIconPainter extends CustomPainter {
   const _JavaraCategoryIconPainter({
     required this.type,
     required this.color,
-    required this.highlightColor,
   });
 
   final JavaraCategoryIconType type;
   final Color color;
-  final Color highlightColor;
+
+  Paint _stroke(double s) => Paint()
+    ..color = color
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.5 * s
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.round;
 
   @override
   void paint(Canvas canvas, Size size) {
+    final s = size.width / 24.0;
     switch (type) {
       case JavaraCategoryIconType.busana:
-        _paintBusana(canvas, size);
+        _paintBusana(canvas, s);
       case JavaraCategoryIconType.aksesoris:
-        _paintAksesoris(canvas, size);
+        _paintAksesoris(canvas, s);
       case JavaraCategoryIconType.batik:
-        _paintBatik(canvas, size);
+        _paintBatik(canvas, s);
     }
   }
 
-  /// Siluet Beskap / Kebaya Keraton dengan kerah tegak, belahan asimetris, dan kancing emas.
-  void _paintBusana(Canvas canvas, Size s) {
-    final w = s.width;
-    final h = s.height;
+  /// Busana: Siluet kerah tegak & lipatan asimetris Beskap/Kebaya Keraton.
+  void _paintBusana(Canvas canvas, double s) {
+    final paint = _stroke(s);
 
-    final fillPaint = Paint()
-      ..color = color.withValues(alpha: 0.16)
-      ..style = PaintingStyle.fill;
+    // 1. Kerah tegak Mandarin + bahu dan siluet tubuh ramping
+    final silhouette = Path()
+      ..moveTo(9.2 * s, 4.2 * s)
+      ..lineTo(9.2 * s, 6.2 * s)
+      ..lineTo(4.2 * s, 8.6 * s)
+      ..lineTo(6.2 * s, 12.6 * s)
+      ..lineTo(7.8 * s, 11.8 * s)
+      ..lineTo(7.4 * s, 19.6 * s)
+      ..quadraticBezierTo(12.0 * s, 20.6 * s, 16.6 * s, 19.6 * s)
+      ..lineTo(16.2 * s, 11.8 * s)
+      ..lineTo(17.8 * s, 12.6 * s)
+      ..lineTo(19.8 * s, 8.6 * s)
+      ..lineTo(14.8 * s, 6.2 * s)
+      ..lineTo(14.8 * s, 4.2 * s);
 
-    final strokePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.65
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    // Garis atas kerah tegak
+    final collarTop = Path()
+      ..moveTo(9.2 * s, 4.2 * s)
+      ..quadraticBezierTo(12.0 * s, 5.4 * s, 14.8 * s, 4.2 * s);
 
-    final accentDot = Paint()
-      ..color = highlightColor
-      ..style = PaintingStyle.fill;
-
-    // Kerah tegak Keraton (Mandarin collar)
-    final collar = Path()
-      ..moveTo(w * 0.38, h * 0.14)
-      ..quadraticBezierTo(w * 0.50, h * 0.21, w * 0.62, h * 0.14)
-      ..lineTo(w * 0.60, h * 0.24)
-      ..quadraticBezierTo(w * 0.50, h * 0.29, w * 0.40, h * 0.24)
-      ..close();
-
-    // Badan Beskap / Kebaya dengan lengan tradisional dan kelim melengkung
-    final body = Path()
-      ..moveTo(w * 0.40, h * 0.24)
-      ..lineTo(w * 0.18, h * 0.31)
-      ..lineTo(w * 0.10, h * 0.60)
-      ..lineTo(w * 0.22, h * 0.63)
-      ..lineTo(w * 0.28, h * 0.44)
-      ..lineTo(w * 0.26, h * 0.85)
-      ..quadraticBezierTo(w * 0.50, h * 0.90, w * 0.74, h * 0.85)
-      ..lineTo(w * 0.72, h * 0.44)
-      ..lineTo(w * 0.78, h * 0.63)
-      ..lineTo(w * 0.90, h * 0.60)
-      ..lineTo(w * 0.82, h * 0.31)
-      ..lineTo(w * 0.60, h * 0.24);
-
-    canvas.drawPath(body, fillPaint);
-    canvas.drawPath(collar, fillPaint);
-    canvas.drawPath(body, strokePaint);
-    canvas.drawPath(collar, strokePaint);
-
-    // Lipatan sikepan / kutubaru asimetris di dada
+    // 2. Lipatan asimetris sikepan / beskap menyilang dari kerah kanan ke bawah
     final lapel = Path()
-      ..moveTo(w * 0.46, h * 0.26)
-      ..quadraticBezierTo(w * 0.56, h * 0.44, w * 0.53, h * 0.84);
-    canvas.drawPath(lapel, strokePaint);
+      ..moveTo(14.5 * s, 6.3 * s)
+      ..quadraticBezierTo(11.6 * s, 9.6 * s, 11.2 * s, 19.8 * s);
 
-    // Tiga kancing mas tradisional
-    canvas.drawCircle(Offset(w * 0.52, h * 0.40), 1.35, accentDot);
-    canvas.drawCircle(Offset(w * 0.535, h * 0.53), 1.35, accentDot);
-    canvas.drawCircle(Offset(w * 0.53, h * 0.66), 1.35, accentDot);
+    // 3. Aksen kancing/bros tunggal tegas di dada
+    canvas.drawPath(silhouette, paint);
+    canvas.drawPath(collarTop, paint);
+    canvas.drawPath(lapel, paint);
+    canvas.drawLine(
+      Offset(12.6 * s, 10.6 * s),
+      Offset(14.0 * s, 10.6 * s),
+      paint,
+    );
   }
 
-  /// Siluet Keris Pusaka Jawa dengan ukiran hulu, warangka ladrang, dan bilah berluk.
-  void _paintAksesoris(Canvas canvas, Size s) {
-    final w = s.width;
-    final h = s.height;
-
-    final fillPaint = Paint()
-      ..color = color.withValues(alpha: 0.18)
-      ..style = PaintingStyle.fill;
-
-    final strokePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.65
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final highlightPaint = Paint()
-      ..color = highlightColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
-      ..strokeCap = StrokeCap.round;
+  /// Aksesoris: Siluet diagonal Keris Ladrang minimalis (hulu, warangka, bilah berluk).
+  void _paintAksesoris(Canvas canvas, double s) {
+    final paint = _stroke(s);
 
     canvas.save();
-    canvas.translate(w * 0.50, h * 0.50);
-    canvas.rotate(math.pi / 6); // Kemiringan anggun 30°
-    canvas.translate(-w * 0.50, -h * 0.50);
+    canvas.translate(12.0 * s, 12.0 * s);
+    canvas.rotate(math.pi / 4); // Diagonal 45° yang tegas dan seimbang
+    canvas.translate(-12.0 * s, -12.0 * s);
 
-    // Ukiran (hulu keris) melengkung di atas
+    // 1. Hulu (ukiran) melengkung ringkas di atas
     final hilt = Path()
-      ..moveTo(w * 0.47, h * 0.28)
-      ..cubicTo(w * 0.43, h * 0.18, w * 0.48, h * 0.10, w * 0.56, h * 0.12)
-      ..cubicTo(w * 0.59, h * 0.15, w * 0.55, h * 0.22, w * 0.53, h * 0.28)
-      ..close();
+      ..moveTo(12.0 * s, 8.2 * s)
+      ..lineTo(12.0 * s, 5.2 * s)
+      ..quadraticBezierTo(12.0 * s, 3.2 * s, 14.4 * s, 3.6 * s);
 
-    // Warangka Ladrang (gandar atas berbentuk perahu khas Surakarta)
+    // 2. Warangka Ladrang (perahu melengkung elegan)
     final warangka = Path()
-      ..moveTo(w * 0.26, h * 0.28)
-      ..quadraticBezierTo(w * 0.50, h * 0.34, w * 0.74, h * 0.26)
-      ..quadraticBezierTo(w * 0.76, h * 0.33, w * 0.68, h * 0.37)
-      ..quadraticBezierTo(w * 0.50, h * 0.41, w * 0.31, h * 0.36)
-      ..quadraticBezierTo(w * 0.25, h * 0.33, w * 0.26, h * 0.28)
-      ..close();
+      ..moveTo(7.4 * s, 7.6 * s)
+      ..quadraticBezierTo(12.0 * s, 9.8 * s, 16.6 * s, 7.6 * s);
 
-    // Bilah Keris berluk anggun menuju ujung bawah
+    // 3. Bilah Keris berluk halus meruncing ke ujung bawah
     final blade = Path()
-      ..moveTo(w * 0.45, h * 0.38)
-      ..cubicTo(w * 0.41, h * 0.49, w * 0.56, h * 0.55, w * 0.46, h * 0.67)
-      ..cubicTo(w * 0.43, h * 0.75, w * 0.52, h * 0.81, w * 0.49, h * 0.90)
-      ..cubicTo(w * 0.56, h * 0.80, w * 0.49, h * 0.73, w * 0.54, h * 0.64)
-      ..cubicTo(w * 0.61, h * 0.53, w * 0.49, h * 0.47, w * 0.55, h * 0.38)
-      ..close();
+      ..moveTo(12.0 * s, 8.8 * s)
+      ..cubicTo(10.0 * s, 11.2 * s, 14.0 * s, 13.4 * s, 11.4 * s, 16.2 * s)
+      ..quadraticBezierTo(10.8 * s, 17.8 * s, 12.0 * s, 20.6 * s);
 
-    canvas.drawPath(hilt, fillPaint);
-    canvas.drawPath(warangka, fillPaint);
-    canvas.drawPath(blade, fillPaint);
-
-    canvas.drawPath(hilt, strokePaint);
-    canvas.drawPath(warangka, strokePaint);
-    canvas.drawPath(blade, strokePaint);
-
-    // Mendak (cincin permata antara hulu dan warangka)
-    canvas.drawLine(
-      Offset(w * 0.45, h * 0.28),
-      Offset(w * 0.55, h * 0.28),
-      highlightPaint,
-    );
+    canvas.drawPath(hilt, paint);
+    canvas.drawPath(warangka, paint);
+    canvas.drawPath(blade, paint);
 
     canvas.restore();
   }
 
-  /// Motif Batik Kawung Pakem 4-kelopak simetris dengan isen-isen cecek dan inti mandala.
-  void _paintBatik(Canvas canvas, Size s) {
-    final center = Offset(s.width * 0.5, s.height * 0.5);
-    final radius = s.width * 0.38;
+  /// Batik: Motif geometris Kawung pakem 4-kelopak simetris murni.
+  void _paintBatik(Canvas canvas, double s) {
+    final paint = _stroke(s);
+    final center = Offset(12.0 * s, 12.0 * s);
 
-    final fillPaint = Paint()
-      ..color = color.withValues(alpha: 0.16)
-      ..style = PaintingStyle.fill;
-
-    final strokePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.6
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final dotPaint = Paint()
-      ..color = highlightColor
-      ..style = PaintingStyle.fill;
-
-    // Bingkai belah ketupat halus (garis pakem parang/kawung)
-    final frame = Path()
-      ..moveTo(center.dx, center.dy - radius * 1.04)
-      ..lineTo(center.dx + radius * 1.04, center.dy)
-      ..lineTo(center.dx, center.dy + radius * 1.04)
-      ..lineTo(center.dx - radius * 1.04, center.dy)
-      ..close();
-    canvas.drawPath(
-      frame,
-      Paint()
-        ..color = color.withValues(alpha: 0.32)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0,
-    );
-
-    // 4 Kelopak Kawung simetris pada sudut diagonal (45°, 135°, 225°, 315°)
+    // 4 kelopak Kawung simetris pada sumbu diagonal (45°, 135°, 225°, 315°)
     for (int i = 0; i < 4; i++) {
       final angle = (math.pi / 4) + (i * math.pi / 2);
       canvas.save();
@@ -235,29 +153,27 @@ class _JavaraCategoryIconPainter extends CustomPainter {
       canvas.rotate(angle);
 
       final petal = Path()
-        ..moveTo(0, 0)
-        ..quadraticBezierTo(radius * 0.56, -radius * 0.34, radius * 0.96, 0)
-        ..quadraticBezierTo(radius * 0.56, radius * 0.34, 0, 0)
+        ..moveTo(1.8 * s, 0)
+        ..quadraticBezierTo(5.6 * s, -3.2 * s, 9.4 * s, 0)
+        ..quadraticBezierTo(5.6 * s, 3.2 * s, 1.8 * s, 0)
         ..close();
 
-      canvas.drawPath(petal, fillPaint);
-      canvas.drawPath(petal, strokePaint);
-
-      // Cecek (dua titik isen-isen tradisional di ujung kelopak)
-      canvas.drawCircle(Offset(radius * 0.62, 0), 1.25, dotPaint);
+      canvas.drawPath(petal, paint);
       canvas.restore();
     }
 
-    // Inti pusat Kawung
-    canvas.drawCircle(center, 2.7, fillPaint);
-    canvas.drawCircle(center, 2.7, strokePaint);
-    canvas.drawCircle(center, 1.15, dotPaint);
+    // Inti belah ketupat kecil di tengah sebagai pengikat motif
+    final core = Path()
+      ..moveTo(12.0 * s, 10.2 * s)
+      ..lineTo(13.8 * s, 12.0 * s)
+      ..lineTo(12.0 * s, 13.8 * s)
+      ..lineTo(10.2 * s, 12.0 * s)
+      ..close();
+    canvas.drawPath(core, paint);
   }
 
   @override
   bool shouldRepaint(covariant _JavaraCategoryIconPainter oldDelegate) {
-    return oldDelegate.type != type ||
-        oldDelegate.color != color ||
-        oldDelegate.highlightColor != highlightColor;
+    return oldDelegate.type != type || oldDelegate.color != color;
   }
 }

@@ -477,43 +477,6 @@ class _HomeTabState extends State<HomeTab> {
   }
 }
 
-/// PANEL GLASSMORPHISM OBSIDIAN JAVARA
-/// Panel kaca gelap tembus pandang dengan kilauan border emas halus.
-class _JavaraGlassPanel extends StatelessWidget {
-  const _JavaraGlassPanel({
-    required this.child,
-    this.padding = const EdgeInsets.all(16),
-    this.radius = 16,
-  });
-
-  final Widget child;
-  final EdgeInsetsGeometry padding;
-  final double radius;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: Container(
-        padding: padding,
-        decoration: BoxDecoration(
-          color: const Color(0xEE140E1B),
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.all(color: const Color(0x38DFB76C), width: 1.0),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x33000000),
-              blurRadius: 6,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: child,
-      ),
-    );
-  }
-}
-
 class _Javara3DTempleBackground extends StatefulWidget {
   const _Javara3DTempleBackground({
     required this.scrollController,
@@ -1509,27 +1472,23 @@ class _Categories extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _JavaraGlassPanel(
-                      padding: EdgeInsets.zero,
-                      radius: 18,
-                      child: Container(
-                        width: 52,
-                        height: 52,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(18),
-                          gradient: const RadialGradient(
-                            center: Alignment.topLeft,
-                            radius: 1.2,
-                            colors: [Color(0x35DFB76C), Color(0x05DFB76C)],
-                          ),
+                    Container(
+                      width: 50,
+                      height: 50,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: const Color(0xCC18130F),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: const Color(0x28DFB76C),
+                          width: 0.9,
                         ),
-                        child: ExcludeSemantics(
-                          child: JavaraCategoryThemeIcon(
-                            key: ValueKey('category_icon_${item.actionKey.toLowerCase()}'),
-                            type: item.iconType,
-                            size: 28,
-                          ),
+                      ),
+                      child: ExcludeSemantics(
+                        child: JavaraCategoryThemeIcon(
+                          key: ValueKey('category_icon_${item.actionKey.toLowerCase()}'),
+                          type: item.iconType,
+                          size: 26,
                         ),
                       ),
                     ),
