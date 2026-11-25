@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen>
   static const List<String> _loadingSteps = [
     'Menyelaraskan Khasanah Busana Adat Jawa...',
     'Memuat Koleksi Busana & Ragam Kebaya...',
-    'Menyiapkan Studio Wardrobe & Padu Padan...',
+    'Menyiapkan Panduan Acara & Katalog Busana...',
     'Koleksi Busana Adat Siap Dijelajahi',
   ];
 

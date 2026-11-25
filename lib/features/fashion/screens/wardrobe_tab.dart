@@ -5,7 +5,6 @@ import '../../../core/theme.dart';
 import '../../../services/saved_garments_service.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
-import 'cermin_busana_screen.dart';
 
 /// Layar Utama Tab Wardrobe JAVARA — Unified Personal Styling & Saved Wardrobe.
 ///
@@ -385,28 +384,6 @@ class _WardrobeTabState extends State<WardrobeTab> {
                           ),
                         ],
                       ),
-                    ),
-                    // Shortcut ke Cermin Busana (Kamera Live)
-                    IconButton(
-                      tooltip: 'Cermin Busana (Kamera Live)',
-                      icon: const Icon(
-                        Icons.camera_alt_outlined,
-                        color: JColors.antiqueGold,
-                        size: 22,
-                      ),
-                      onPressed: () {
-                        HapticFeedback.selectionClick();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => CerminBusanaScreen(
-                              initialState: CerminState.liveCamera,
-                              enableCameraAutoStart: true,
-                              onSwitchToCatalogTab: widget.onOpenCatalog,
-                            ),
-                          ),
-                        );
-                      },
                     ),
                   ],
                 ),

@@ -6,7 +6,6 @@ import '../../../core/transitions.dart';
 import '../../../services/saved_garments_service.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
-import 'javara_studio_screen.dart';
 
 /// Screen 03 — Detail Pakaian (Halaman Ensiklopedia Busana Adat Jawa Tengah)
 class ClothingDetailScreen extends StatefulWidget {
@@ -348,11 +347,13 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                               color: Color(0xFFC7B7A6),
                             ),
                             const SizedBox(width: 4),
-                            Text(
-                              item.region.title,
-                              style: const TextStyle(
-                                color: Color(0xFFC7B7A6),
-                                fontSize: 11,
+                            Flexible(
+                              child: Text(
+                                item.region.title,
+                                style: const TextStyle(
+                                  color: Color(0xFFC7B7A6),
+                                  fontSize: 11,
+                                ),
                               ),
                             ),
                           ],
@@ -399,11 +400,6 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                   ),
 
                   const SizedBox(height: 20),
-
-                  // TOMBOL VIRTUAL TRY-ON (AI STUDIO)
-                  _buildVirtualTryOnButton(context, item),
-
-                  const SizedBox(height: 24),
 
                   // KOTAK KONTEKS SOSIAL & TATA BUSANA
                   _buildSectionCard(
@@ -475,12 +471,14 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                               color: Color(0xFFDFC08E),
                             ),
                             SizedBox(width: 8),
-                            Text(
-                              'Sumber & Rujukan Sejarah',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFFFAF6F0),
+                            Expanded(
+                              child: Text(
+                                'Sumber & Rujukan Sejarah',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFFFAF6F0),
+                                ),
                               ),
                             ),
                           ],
@@ -548,104 +546,33 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
               borderRadius: BorderRadius.circular(14),
             ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Cari Tempat Membeli',
-                style: JText.serif(
-                  14.5,
-                  weight: FontWeight.w700,
-                  color: const Color(0xFFFFDF9E),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Cari Tempat Membeli',
+                  style: JText.serif(
+                    14.5,
+                    weight: FontWeight.w700,
+                    color: const Color(0xFFFFDF9E),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 6),
-              const Icon(
-                Icons.north_east,
-                color: Color(0xFFFFDF9E),
-                size: 16,
-              ),
-            ],
+                const SizedBox(width: 6),
+                const Icon(
+                  Icons.north_east,
+                  color: Color(0xFFFFDF9E),
+                  size: 16,
+                ),
+              ],
+            ),
           ),
         ),
       ),
     ),
   );
 }
-
-  Widget _buildVirtualTryOnButton(BuildContext context, ClothingItem item) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF2E2219),
-            Color(0xFF19130F),
-          ],
-        ),
-        border: Border.all(
-          color: const Color(0x99DFB76C),
-          width: 1.2,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x35000000),
-            blurRadius: 8,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            HapticFeedback.mediumImpact();
-            Navigator.of(context).push(
-              fadeSlideRoute(
-                JavaraStudioScreen(initialGarment: item),
-              ),
-            );
-          },
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.auto_awesome_rounded,
-                    color: Color(0xFFFFDF9E),
-                    size: 20,
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    'Coba Virtual Try-On (AI Studio)',
-                    style: TextStyle(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFFFFDF9E),
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Color(0xFFFFDF9E),
-                    size: 13,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildSectionCard({
     required String title,
@@ -760,7 +687,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
         ),
         const SizedBox(height: 14),
         SizedBox(
-          height: 140,
+          height: 164,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -825,6 +752,8 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                           fontSize: 10,
                           color: Color(0xFF8E7D6F),
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -862,12 +791,14 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                 color: Color(0xFFDFC08E),
               ),
               const SizedBox(width: 8),
-              Text(
-                'Palet Warna Tradisi & Makna Alam',
-                style: JText.serif(
-                  13,
-                  weight: FontWeight.w700,
-                  color: const Color(0xFFFAF6F0),
+              Expanded(
+                child: Text(
+                  'Palet Warna Tradisi & Makna Alam',
+                  style: JText.serif(
+                    13,
+                    weight: FontWeight.w700,
+                    color: const Color(0xFFFAF6F0),
+                  ),
                 ),
               ),
             ],

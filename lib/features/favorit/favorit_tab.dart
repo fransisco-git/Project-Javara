@@ -169,7 +169,7 @@ class _FavoritTabState extends State<FavoritTab> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Koleksi Pusaka 3D Saya',
+                                'Koleksi Pusaka Saya',
                                 style: JText.serif(
                                   13,
                                   weight: FontWeight.w700,
@@ -177,7 +177,7 @@ class _FavoritTabState extends State<FavoritTab> {
                                 ),
                               ),
                               const Text(
-                                'Setelan busana adat tersimpan & siap pakai di Studio 3D',
+                                'Setelan busana adat tersimpan di koleksi pribadi',
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: Color(0xFFC7B7A6),
