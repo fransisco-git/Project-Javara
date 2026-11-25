@@ -8,7 +8,7 @@ import 'cultural_order_sheet.dart';
 
 /// Halaman Detail Warisan Budaya Editorial Mendalam JAVARA.
 /// Menampilkan sejarah otentik, filosofi adiluhung, sorotan keistimewaan,
-/// panduan lokasi, pemutar narasi audio, dan tombol aksi terintegrasi.
+/// panduan lokasi, dan tombol aksi terintegrasi.
 class CultureDetailScreen extends StatefulWidget {
   const CultureDetailScreen({super.key, required this.item, this.onOpenMap});
 
@@ -23,7 +23,6 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   bool _isBookmarked = false;
-  bool _isPlayingNarration = false;
 
   @override
   void initState() {
@@ -49,38 +48,6 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
           style: JText.serif(13, color: Colors.white),
         ),
         backgroundColor: const Color(0xFF2E2019),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _toggleAudioNarration() {
-    HapticFeedback.lightImpact();
-    setState(() => _isPlayingNarration = !_isPlayingNarration);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              _isPlayingNarration
-                  ? Icons.volume_up_rounded
-                  : Icons.volume_off_rounded,
-              color: JColors.gold,
-              size: 18,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                _isPlayingNarration
-                    ? 'Memutar audio narasi & gamelan pengiring ${widget.item.title}...'
-                    : 'Audio narasi dihentikan.',
-                style: JText.serif(13, color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: const Color(0xFF1E1528),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
       ),
@@ -250,84 +217,6 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // --- PEMUTAR AUDIO NARASI GESTUR SUARA JAWA ---
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF241829),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: const Color(0x66DFB76C),
-                              width: 0.8,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              GestureDetector(
-                                onTap: _toggleAudioNarration,
-                                child: Container(
-                                  width: 42,
-                                  height: 42,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFDFB76C),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    _isPlayingNarration
-                                        ? Icons.pause_rounded
-                                        : Icons.play_arrow_rounded,
-                                    color: const Color(0xFF241829),
-                                    size: 26,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Narasi Suara Jawa & Gamelan',
-                                      style: JText.serif(
-                                        13,
-                                        weight: FontWeight.w700,
-                                        color: const Color(0xFFFFDF9E),
-                                      ),
-                                    ),
-                                    Text(
-                                      _isPlayingNarration
-                                          ? 'Sedang memutar lantunan kisah...'
-                                          : 'Dengarkan pembacaan naskah budaya',
-                                      style: JText.serif(
-                                        11.5,
-                                        color: const Color(0xFFC7B7A6),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (_isPlayingNarration)
-                                Row(
-                                  children: List.generate(4, (i) {
-                                    return Container(
-                                      margin: const EdgeInsets.only(left: 3),
-                                      width: 3,
-                                      height: 12.0 + (i % 2 == 0 ? 8 : -4),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFFFD700),
-                                        borderRadius: BorderRadius.circular(2),
-                                      ),
-                                    );
-                                  }),
-                                ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
 
                         // --- TAB BAR EDITORIAL ---
                         Container(
