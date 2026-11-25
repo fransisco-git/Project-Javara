@@ -41,11 +41,11 @@ void main() {
     expect(find.text('Edit Profil'), findsOneWidget);
     expect(find.text('Alamat Kirim'), findsOneWidget);
 
-    // 2. Verify Fashion Activity Section
-    expect(find.text('Aktivitas Busana Saya'), findsOneWidget);
-    expect(find.text('Pesanan & Sewa Saya'), findsOneWidget);
-    expect(find.text('Wishlist & Koleksi Tersimpan'), findsOneWidget);
-    expect(find.text('Riwayat Try-On & Padu Padan'), findsOneWidget);
+    // 2. Verify Aktivitas Busana Saya section is removed
+    expect(find.text('Aktivitas Busana Saya'), findsNothing);
+    expect(find.text('Pesanan & Sewa Saya'), findsNothing);
+    expect(find.text('Wishlist & Koleksi Tersimpan'), findsNothing);
+    expect(find.text('Riwayat Try-On & Padu Padan'), findsNothing);
 
     // 3. Verify My Size Section
     expect(find.text('Ukuran Busana Saya (My Size)'), findsOneWidget);
