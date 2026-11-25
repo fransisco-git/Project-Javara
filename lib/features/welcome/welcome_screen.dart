@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -47,8 +46,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   late final Animation<double> _primaryCtaAnim;
   late final Animation<double> _secondaryCtaAnim;
 
-  AudioPlayer? _ambientPlayer;
-
   @override
   void initState() {
     super.initState();
@@ -77,29 +74,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
 
     _entranceController.forward();
-
-    _startAmbientFoley();
-  }
-
-  void _startAmbientFoley() async {
-    try {
-      _ambientPlayer = AudioPlayer();
-      await _ambientPlayer?.setSource(
-        AssetSource('audio/candi_bentar_ambient_10s.wav'),
-      );
-      await _ambientPlayer?.setVolume(0.70);
-      await _ambientPlayer?.resume();
-    } catch (_) {
-      // Graceful fallback jika audio service sedang tidak aktif atau di mode test
-    }
-  }
-
-  void _stopAmbientFoley() {
-    try {
-      _ambientPlayer?.stop();
-      _ambientPlayer?.dispose();
-      _ambientPlayer = null;
-    } catch (_) {}
   }
 
   @override
@@ -114,13 +88,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   void dispose() {
-    _stopAmbientFoley();
     _entranceController.dispose();
     super.dispose();
   }
 
   Future<void> _onPrimaryExplore() async {
-    _stopAmbientFoley();
     HapticFeedback.selectionClick();
     // Otomatis masuk menggunakan Akun Tamu (Guest User)
     await AuthService.instance.signInAsGuest();
@@ -131,7 +103,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   }
 
   void _onLoginAction() {
-    _stopAmbientFoley();
     HapticFeedback.lightImpact();
     Navigator.of(context).push(
       fadeSlideRoute(const LoginScreen()),
@@ -139,7 +110,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   }
 
   void _onSignUpAction() {
-    _stopAmbientFoley();
     HapticFeedback.lightImpact();
     Navigator.of(context).push(
       fadeSlideRoute(const SignUpScreen()),
