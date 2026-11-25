@@ -20,16 +20,18 @@ class NavItemData {
   final Widget Function(BuildContext context, bool isSelected)? iconBuilder;
 }
 
-/// Bar Navigasi Bawah Datar Selebar Layar khas JAVARA.
+/// Floating Frosted Glass Capsule Bottom Navigation Bar khas JAVARA.
 ///
 /// Karakteristik Desain:
-/// 1. Full-Width Flat Bar: Menempel di tepi bawah tanpa margin & tanpa radius,
-///    latar hitam 92% dengan `BackdropFilter` blur, dan garis atas 1 px abu gelap.
-/// 2. Struktur Identik di Semua Tab: 4 slot selebar sama, masing-masing berisi
-///    ikon 24×24 dalam `SizedBox`, jarak tetap 4 px, lalu label huruf kapital.
-/// 3. State Aktif & Nonaktif Minimalis: Aktif menggunakan ikon terisi + label putih,
-///    nonaktif menggunakan ikon outline + label abu, tanpa titik indikator.
-/// 4. Hormati SafeArea bawah dan 100% bebas RenderFlex overflow.
+/// 1. Frosted Obsidian Glassmorphism: Latar gelap beropasitas tinggi dengan
+///    `BackdropFilter` blur sigma 18 dan border emas sangat tipis agar label
+///    tetap terbaca jelas di atas foto terang.
+/// 2. Struktur Identik di Semua Tab: Setiap tab memiliki ikon tetap 24×24 dalam
+///    `SizedBox`, jarak tetap 4 px, dan label teks dengan baseline sejajar.
+/// 3. Warna Aksen Seragam: State aktif memakai krem emas `#FED897` pada ikon
+///    terisi maupun label (tanpa titik indikator bawah).
+/// 4. 100% Bebas RenderFlex Overflow: Terproteksi `FittedBox` dan `Flexible`
+///    untuk layar 300px hingga skala teks 2.0x.
 class JavaraBottomNav extends StatelessWidget {
   const JavaraBottomNav({
     super.key,
@@ -42,39 +44,66 @@ class JavaraBottomNav extends StatelessWidget {
   final ValueChanged<int> onChanged;
   final List<NavItemData> items;
 
-  static const double barHeight = 60.0;
-  static const Color activeColor = Colors.white;
-  static const Color inactiveColor = Color(0xFF8E8E93);
-  static const Color surfaceColor = Colors.black;
-  static const Color topBorderColor = Color(0xFF262626);
+  static const double barHeight = 64.0;
+  static const double bottomMargin = 8.0;
+  static const Color activeColor = Color(0xFFFED897);
+  static const Color inactiveColor = Color(0xFFB8B0A6);
+  static const Color surfaceColor = Color(0xFF16110D);
 
   /// Padding bawah standar untuk konten scrollable agar item terakhir
-  /// tidak tertutup bottom navbar.
+  /// tidak tertutup pil navbar mengambang.
   static double contentBottomPadding(
     BuildContext context, {
     double extra = 20.0,
   }) {
-    return MediaQuery.paddingOf(context).bottom + barHeight + extra;
+    return MediaQuery.paddingOf(context).bottom +
+        barHeight +
+        bottomMargin +
+        extra;
   }
 
   @override
   Widget build(BuildContext context) {
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 16.0, sigmaY: 16.0),
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: surfaceColor.withValues(alpha: 0.92),
-            border: const Border(
-              top: BorderSide(color: topBorderColor, width: 1.0),
+    return SafeArea(
+      top: false,
+      bottom: true,
+      child: Container(
+        height: barHeight,
+        margin: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: bottomMargin,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(36.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.48),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
             ),
-          ),
-          child: SafeArea(
-            top: false,
-            bottom: true,
-            child: SizedBox(
-              height: barHeight,
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(36.0),
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(36.0),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFF1B1511).withValues(alpha: 0.94),
+                    const Color(0xFF120E0B).withValues(alpha: 0.92),
+                  ],
+                ),
+                border: Border.all(
+                  color: const Color(0x18DFB76C),
+                  width: 0.6,
+                ),
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -130,7 +159,7 @@ class _InteractiveNavItem extends StatelessWidget {
         onTapDown: (_) => HapticFeedback.lightImpact(),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
@@ -176,12 +205,12 @@ class _InteractiveNavItem extends StatelessWidget {
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeOut,
                     style: JText.sans(
-                      10.5,
-                      weight: FontWeight.w500,
+                      11.0,
+                      weight: isSelected ? FontWeight.w600 : FontWeight.w500,
                       color: isSelected ? activeColor : inactiveColor,
-                      letterSpacing: 1.0,
+                      letterSpacing: 0.1,
                     ),
-                    child: Text(item.label.toUpperCase(), maxLines: 1),
+                    child: Text(item.label, maxLines: 1),
                   ),
                 ),
               ),

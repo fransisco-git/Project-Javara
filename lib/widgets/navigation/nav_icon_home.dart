@@ -7,9 +7,9 @@ class NavIconHome extends StatelessWidget {
     super.key,
     required this.isActive,
     this.size = 24.0,
-    this.inactiveColor = const Color(0xFF8E8E93),
-    this.activeColor = Colors.white,
-    this.cutoutColor = Colors.black,
+    this.inactiveColor = const Color(0xFFB8B0A6),
+    this.activeColor = const Color(0xFFFED897),
+    this.cutoutColor = const Color(0xFF16110D),
   });
 
   final bool isActive;
