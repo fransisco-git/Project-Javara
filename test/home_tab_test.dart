@@ -183,7 +183,7 @@ void main() {
 
       // Verify garment titles are rendered
       expect(find.text('Beskap Jawi Jangkep'), findsOneWidget);
-      expect(find.text('Solo Basahan Pengantin'), findsOneWidget);
+      expect(find.text('Solo Basahan'), findsOneWidget);
       expect(find.text('Batik Tulis Parang Barong'), findsOneWidget);
       expect(find.text('Kebaya Kartini Jawa Tengah'), findsOneWidget);
 
@@ -421,7 +421,7 @@ void main() {
       expect(
         resolveCulturalMapsQuery(
           itemId: 'busana_pengantin_solo_basahan',
-          title: 'Solo Basahan Pengantin',
+          title: 'Solo Basahan',
           location: 'Sentra Busana Adat Laweyan, Surakarta',
           region: 'Kota Surakarta',
         ),
