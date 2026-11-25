@@ -10,16 +10,7 @@ class BatikMotifGalleryScreen extends StatefulWidget {
 }
 
 class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
-  final TransformationController _transformationController =
-      TransformationController();
   int _selectedMotifIndex = 0;
-  double _zoomScale = 1.0;
-
-  @override
-  void dispose() {
-    _transformationController.dispose();
-    super.dispose();
-  }
 
   // Extended Database Motif Batik & Wastra Adat Jawa Tengah
   final List<_ExtendedBatikData> _motifs = [
@@ -187,14 +178,14 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
         variant: HeritageBackgroundVariant.wardrobe,
         child: Column(
           children: [
-            // 1. KANVAS INTERAKTIF MOTIF (ZOOMABLE)
+          // 1. PRATINJAU FOTO KAIN BATIK ASLI (UTUH TANPA CROP & ZOOM)
           Expanded(
             flex: 5,
             child: Container(
               margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                color: const Color(0xFF1A1511),
+                color: const Color(0xFF14100D),
                 border: Border.all(
                   color: activeMotif.accentColor.withValues(alpha: 0.5),
                   width: 1.2,
@@ -208,70 +199,14 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Stack(
-                  children: [
-                    // Foto Kain Batik Asli (Zoomable 0.8x–4.0x)
-                    Positioned.fill(
-                      child: InteractiveViewer(
-                        transformationController: _transformationController,
-                        minScale: 0.8,
-                        maxScale: 4.0,
-                        onInteractionUpdate: (_) {
-                          final scale = _transformationController.value
-                              .getMaxScaleOnAxis();
-                          if ((scale - _zoomScale).abs() > 0.01) {
-                            setState(() => _zoomScale = scale);
-                          }
-                        },
-                        child: Image.asset(
-                          activeMotif.imagePath,
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                          filterQuality: FilterQuality.high,
-                        ),
-                      ),
-                    ),
-
-                    // Kontrol Petunjuk Zoom
-                    Positioned(
-                      bottom: 12,
-                      right: 14,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xCC14100D),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: const Color(0x44E4C590),
-                            width: 0.6,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.pinch_rounded,
-                              size: 13,
-                              color: Color(0xFFDFC08E),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Cubit & Geser untuk Memperbesar (${_zoomScale.toStringAsFixed(1)}x)',
-                              style: const TextStyle(
-                                fontSize: 9.5,
-                                color: Color(0xFFDFC08E),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                borderRadius: BorderRadius.circular(15),
+                child: SizedBox.expand(
+                  child: Image.asset(
+                    activeMotif.imagePath,
+                    fit: BoxFit.contain,
+                    alignment: Alignment.center,
+                    filterQuality: FilterQuality.high,
+                  ),
                 ),
               ),
             ),
@@ -294,10 +229,8 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
                 return InkWell(
                   borderRadius: BorderRadius.circular(14),
                   onTap: () {
-                    _transformationController.value = Matrix4.identity();
                     setState(() {
                       _selectedMotifIndex = index;
-                      _zoomScale = 1.0;
                     });
                   },
                   child: Container(
@@ -321,6 +254,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
+                            color: const Color(0xFF14100D),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: isSelected
@@ -333,7 +267,8 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
                             borderRadius: BorderRadius.circular(9),
                             child: Image.asset(
                               motif.imagePath,
-                              fit: BoxFit.cover,
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.high,
                             ),
                           ),
                         ),
