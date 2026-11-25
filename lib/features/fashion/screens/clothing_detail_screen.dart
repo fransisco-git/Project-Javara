@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../core/purchase_search_helper.dart';
 import '../../../core/theme.dart';
 import '../../../core/transitions.dart';
 import '../../../services/saved_garments_service.dart';
@@ -475,12 +476,90 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                   // BUSANA TERKAIT & KESELARASAN SEJARAH
                   _buildCompatibleGarmentsSection(context, item),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 28),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    ),
+    bottomNavigationBar: Container(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        MediaQuery.of(context).padding.bottom + 12,
+      ),
+      decoration: const BoxDecoration(
+        color: Color(0xFF14100D),
+        border: Border(
+          top: BorderSide(color: Color(0x33E4C590), width: 1.0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x44000000),
+            blurRadius: 10,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        height: 50,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFFE4BC6C),
+                Color(0xFFC79835),
+                Color(0xFF8C5D17),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x44DFB76C),
+                blurRadius: 12,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              launchPurchaseSearch(item.name);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.shopping_bag_outlined,
+                  color: Color(0xFF241829),
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Cari Tempat Membeli',
+                  style: JText.serif(
+                    14.5,
+                    weight: FontWeight.w700,
+                    color: const Color(0xFF241829),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     ),
   );

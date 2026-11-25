@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/purchase_search_helper.dart';
 import '../../core/theme.dart';
 import '../../data/culture_items.dart';
 import '../../widgets/photo_box.dart';
-import 'cultural_order_sheet.dart';
 
 /// Halaman Detail Warisan Budaya Editorial Mendalam JAVARA.
 /// Menampilkan sejarah otentik, filosofi adiluhung, sorotan keistimewaan,
@@ -291,95 +291,62 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
                     ),
                   ],
                 ),
-                child: Row(
-                  children: [
-                    if (item.price != null && item.price!.startsWith('Rp'))
-                      Padding(
-                        padding: const EdgeInsets.only(right: 16),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Harga Karya',
-                              style: JText.serif(10.5, color: JColors.muted),
-                            ),
-                            Text(
-                              item.price!,
-                              style: JText.serif(
-                                18,
-                                weight: FontWeight.w800,
-                                color: JColors.ink,
-                              ),
-                            ),
-                          ],
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFFE4BC6C),
+                          Color(0xFFC79835),
+                          Color(0xFF8C5D17),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x44DFB76C),
+                          blurRadius: 12,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        launchPurchaseSearch(item.title);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                    Expanded(
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          gradient: const LinearGradient(
-                            colors: [
-                              Color(0xFFE4BC6C),
-                              Color(0xFFC79835),
-                              Color(0xFF8C5D17),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.shopping_bag_outlined,
+                            color: Color(0xFF241829),
+                            size: 18,
                           ),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x44DFB76C),
-                              blurRadius: 12,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            showModalBottomSheet<void>(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (_) => CulturalOrderSheet(item: item),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Cari Tempat Membeli',
+                            style: JText.serif(
+                              14.5,
+                              weight: FontWeight.w700,
+                              color: const Color(0xFF241829),
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.shopping_bag_outlined,
-                                color: Color(0xFF241829),
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                item.price != null &&
-                                        item.price!.startsWith('Rp')
-                                    ? 'Pesan Karya Mpu'
-                                    : 'Akses Panduan Lengkap',
-                                style: JText.serif(
-                                  14.5,
-                                  weight: FontWeight.w700,
-                                  color: const Color(0xFF241829),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
