@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -1323,7 +1324,11 @@ class _HeroCard extends StatefulWidget {
 
 class _HeroCardState extends State<_HeroCard> {
   late final PageController _pageController;
+  Timer? _autoSlideTimer;
   int _currentPage = 0;
+  bool _isUserDragging = false;
+
+  static const Duration _autoSlideInterval = Duration(seconds: 4);
 
   static final List<HeroSlideData> _slides = [
     HeroSlideData(
@@ -1358,10 +1363,25 @@ class _HeroCardState extends State<_HeroCard> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    _startAutoSlide();
+  }
+
+  void _startAutoSlide() {
+    _autoSlideTimer?.cancel();
+    _autoSlideTimer = Timer.periodic(_autoSlideInterval, (_) {
+      if (!mounted || _isUserDragging || !_pageController.hasClients) return;
+      final nextPage = (_currentPage + 1) % _slides.length;
+      _pageController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 520),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   @override
   void dispose() {
+    _autoSlideTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -1373,61 +1393,75 @@ class _HeroCardState extends State<_HeroCard> {
       300.0,
     );
 
-    return SizedBox(
-      width: double.infinity,
-      height: heroHeight,
-      child: Stack(
-        children: [
-          // Full-width edge-to-edge hero PageView (no side margin, no border radius, no auto-slide)
-          PageView.builder(
-            controller: _pageController,
-            physics: const PageScrollPhysics(),
-            itemCount: _slides.length,
-            onPageChanged: (index) {
-              setState(() => _currentPage = index);
-            },
-            itemBuilder: (context, index) {
-              final slide = _slides[index];
-              return HeroSlide(
-                data: slide,
-                onTapAction: () {
-                  Navigator.of(
-                    context,
-                  ).push(fadeSlideRoute(slide.routeBuilder()));
-                },
-              );
-            },
-          ),
+    return Listener(
+      onPointerDown: (_) {
+        _isUserDragging = true;
+        _autoSlideTimer?.cancel();
+      },
+      onPointerUp: (_) {
+        _isUserDragging = false;
+        _startAutoSlide();
+      },
+      onPointerCancel: (_) {
+        _isUserDragging = false;
+        _startAutoSlide();
+      },
+      child: SizedBox(
+        width: double.infinity,
+        height: heroHeight,
+        child: Stack(
+          children: [
+            // Full-width edge-to-edge hero PageView (auto-slide setiap 4 detik, pause saat digeser)
+            PageView.builder(
+              controller: _pageController,
+              physics: const PageScrollPhysics(),
+              itemCount: _slides.length,
+              onPageChanged: (index) {
+                setState(() => _currentPage = index);
+              },
+              itemBuilder: (context, index) {
+                final slide = _slides[index];
+                return HeroSlide(
+                  data: slide,
+                  onTapAction: () {
+                    Navigator.of(
+                      context,
+                    ).push(fadeSlideRoute(slide.routeBuilder()));
+                  },
+                );
+              },
+            ),
 
-          // Indikator garis tipis 3 segmen DI DALAM hero, 12 dp dari dasar di atas gradien
-          Positioned(
-            left: 20,
-            right: 20,
-            bottom: 12,
-            child: IgnorePointer(
-              child: Row(
-                children: List.generate(_slides.length, (index) {
-                  final isActive = _currentPage == index;
-                  return Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        right: index < _slides.length - 1 ? 8 : 0,
+            // Indikator garis tipis 3 segmen DI DALAM hero, 12 dp dari dasar di atas gradien
+            Positioned(
+              left: 20,
+              right: 20,
+              bottom: 12,
+              child: IgnorePointer(
+                child: Row(
+                  children: List.generate(_slides.length, (index) {
+                    final isActive = _currentPage == index;
+                    return Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          right: index < _slides.length - 1 ? 8 : 0,
+                        ),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOut,
+                          height: 2.0,
+                          color: isActive
+                              ? Colors.white
+                              : Colors.white.withValues(alpha: 0.25),
+                        ),
                       ),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 220),
-                        curve: Curves.easeOut,
-                        height: 2.0,
-                        color: isActive
-                            ? Colors.white
-                            : Colors.white.withValues(alpha: 0.25),
-                      ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
