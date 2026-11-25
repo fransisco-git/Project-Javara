@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -35,6 +38,7 @@ class HomeTab extends StatefulWidget {
 class _HomeTabState extends State<HomeTab> {
   final _search = TextEditingController();
   final _scrollController = ScrollController();
+  final _pointerNotifier = ValueNotifier<Offset>(Offset.zero);
   final _searchFocusNode = FocusNode();
   final _isScrolledNotifier = ValueNotifier<bool>(false);
   String _q = '';
@@ -44,7 +48,23 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Pra-decode & cache foto slide hero ke VRAM agar mulus tanpa stutter
+    // Pra-decode & cache tekstur visual utama ke VRAM agar mulus tanpa stutter
+    precacheImage(
+      const AssetImage('assets/images/buddha_hand_left.png'),
+      context,
+    );
+    precacheImage(
+      const AssetImage('assets/images/buddha_hand_right.png'),
+      context,
+    );
+    precacheImage(
+      const AssetImage('assets/images/candi_3d_cinema.jpg'),
+      context,
+    );
+    precacheImage(
+      const AssetImage('assets/images/candi_3d_cutout.png'),
+      context,
+    );
     precacheImage(
       const AssetImage('assets/images/model_kebaya_kartini_solo.jpg'),
       context,
@@ -87,6 +107,7 @@ class _HomeTabState extends State<HomeTab> {
     _searchFocusNode.dispose();
     _isScrolledNotifier.dispose();
     _scrollController.dispose();
+    _pointerNotifier.dispose();
     super.dispose();
   }
 
@@ -142,6 +163,13 @@ class _HomeTabState extends State<HomeTab> {
     }
   }
 
+  void _updatePointer(Offset localPos, Size size) {
+    if (size.width <= 0 || size.height <= 0) return;
+    final nx = ((localPos.dx / size.width) - 0.5) * 2.0;
+    final ny = ((localPos.dy / size.height) - 0.5) * 2.0;
+    _pointerNotifier.value = Offset(nx, ny);
+  }
+
   @override
   Widget build(BuildContext context) {
     final allItems = [...popularItems, ...pickedItems];
@@ -149,12 +177,22 @@ class _HomeTabState extends State<HomeTab> {
     final empty = popular.isEmpty;
     final topPadding = MediaQuery.of(context).padding.top;
 
-    return Stack(
-      children: [
-        // Latar gelap solid selaras dengan warna dasar navbar
-        const Positioned.fill(
-          child: ColoredBox(color: JavaraBottomNav.surfaceColor),
-        ),
+    return MouseRegion(
+      onHover: (e) =>
+          _updatePointer(e.localPosition, MediaQuery.of(context).size),
+      child: Listener(
+        onPointerMove: (e) =>
+            _updatePointer(e.localPosition, MediaQuery.of(context).size),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: RepaintBoundary(
+                child: _Javara3DTempleBackground(
+                  scrollController: _scrollController,
+                  pointerNotifier: _pointerNotifier,
+                ),
+              ),
+            ),
 
             Positioned.fill(
               child: RepaintBoundary(
@@ -433,6 +471,8 @@ class _HomeTabState extends State<HomeTab> {
               ),
             ),
           ],
+        ),
+      ),
     );
   }
 }
@@ -474,6 +514,666 @@ class _JavaraGlassPanel extends StatelessWidget {
   }
 }
 
+class _Javara3DTempleBackground extends StatefulWidget {
+  const _Javara3DTempleBackground({
+    required this.scrollController,
+    required this.pointerNotifier,
+  });
+
+  final ScrollController scrollController;
+  final ValueNotifier<Offset> pointerNotifier;
+
+  @override
+  State<_Javara3DTempleBackground> createState() =>
+      _Javara3DTempleBackgroundState();
+}
+
+class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ticker;
+
+  double _smoothScroll = 0.0;
+  double _smoothPointerX = 0.0;
+  double _smoothPointerY = 0.0;
+  double _elapsedTime = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker =
+        AnimationController(vsync: this, duration: const Duration(seconds: 10))
+          ..addListener(_onTick)
+          ..repeat();
+  }
+
+  @override
+  void dispose() {
+    _ticker.dispose();
+    super.dispose();
+  }
+
+  void _onTick() {
+    final targetScroll = widget.scrollController.hasClients
+        ? widget.scrollController.offset
+        : 0.0;
+    final ptr = widget.pointerNotifier.value;
+
+    _smoothScroll =
+        ui.lerpDouble(_smoothScroll, targetScroll, 0.065) ?? targetScroll;
+    _smoothPointerX = ui.lerpDouble(_smoothPointerX, ptr.dx, 0.055) ?? ptr.dx;
+    _smoothPointerY = ui.lerpDouble(_smoothPointerY, ptr.dy, 0.055) ?? ptr.dy;
+
+    _elapsedTime += 0.016;
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final w = size.width;
+
+    final scrollRatio = (_smoothScroll / 650.0).clamp(0.0, 1.2);
+
+    // KINEMATIKA GERAK TANGAN MUDRA BUDDHA (DARI TERTUTUP MENJADI TERBUKA SAAT DI-SCROLL)
+    // 0.0 (Scroll = 0) : Kedua tangan TERTUTUP menyatu rapat di tengah (Anjali Mudra / Sembah Suci)
+    // 1.0 (Scroll > 0) : Kedua tangan TERBUKA menyibak ke pojok kiri & kanan menyingkap Candi Borobudur
+    // Jarak rentang diperpanjang ke 520px & kurva easeInOutCubic agar buka-tutup tenang & tidak cepat menutup
+    final openProgress = (_smoothScroll / 520.0).clamp(0.0, 1.0);
+    final openCurve = Curves.easeInOutCubic.transform(openProgress);
+
+    // Dimensi dan proporsi tangan fotorealistik diperbesar sesuai preferensi user
+    final handHeight = (w * 0.98).clamp(360.0, 480.0);
+    final leftHandWidth = handHeight * (682.0 / 735.0);
+    final rightHandWidth = handHeight * (694.0 / 735.0);
+    final centerX = w / 2;
+
+    // Posisi Tertutup di tengah (Closed Clapping Meeting Point):
+    final leftClosedX = centerX - leftHandWidth + 3.0;
+    final rightClosedX = centerX - 3.0;
+
+    // Posisi Terbuka di pojokan (Menyibak ke kiri & kanan secara dramatis):
+    final openDistance = (w * 0.36).clamp(120.0, 180.0);
+    final leftOpenX = leftClosedX - openDistance;
+    final rightOpenX = rightClosedX + openDistance;
+
+    // Interpolasi dari TERTUTUP -> TERBUKA seiring scroll
+    final leftTargetX =
+        ui.lerpDouble(leftClosedX, leftOpenX, openCurve)! +
+        (_smoothPointerX * 8.0);
+    final rightTargetX =
+        ui.lerpDouble(rightClosedX, rightOpenX, openCurve)! +
+        (_smoothPointerX * 8.0);
+
+    // Parallax posisi vertikal tangan:
+    final handsY =
+        ui.lerpDouble(115.0, 155.0, openCurve)! -
+        (_smoothScroll * 0.12) +
+        (_smoothPointerY * 12.0);
+
+    // Rotasi 3D spasial telapak tangan:
+    // Saat tertutup (0.0): tegak menghadap satu sama lain menyatu (sembah suci)
+    // Saat terbuka (1.0): berotasi menyibak ke luar secara 3D
+    final leftHandYaw =
+        ui.lerpDouble(0.0, -0.42, openCurve)! + (_smoothPointerX * 0.05);
+    final leftHandPitch = (_smoothPointerY * -0.05) + (scrollRatio * 0.04);
+    final leftHandRoll =
+        ui.lerpDouble(0.0, -0.16, openCurve)! + (_smoothPointerX * 0.02);
+
+    final rightHandYaw =
+        ui.lerpDouble(0.0, 0.42, openCurve)! + (_smoothPointerX * 0.05);
+    final rightHandPitch = (_smoothPointerY * -0.05) + (scrollRatio * 0.04);
+    final rightHandRoll =
+        ui.lerpDouble(0.0, 0.16, openCurve)! + (_smoothPointerX * 0.02);
+
+    final leftHandMatrix = Matrix4.identity()
+      ..setEntry(3, 2, 0.0016)
+      ..rotateX(leftHandPitch)
+      ..rotateY(leftHandYaw)
+      ..rotateZ(leftHandRoll);
+
+    final rightHandMatrix = Matrix4.identity()
+      ..setEntry(3, 2, 0.0016)
+      ..rotateX(rightHandPitch)
+      ..rotateY(rightHandYaw)
+      ..rotateZ(rightHandRoll);
+
+    final handsOpacity = (1.0 - ((_smoothScroll - 600.0) / 450.0)).clamp(
+      0.35,
+      1.0,
+    );
+
+    // DOLLY ZOOM SINEMATIK CANDI:
+    final ambientBreath = math.sin(_elapsedTime * 1.3) * 0.012;
+    final zoom = 1.0 + (scrollRatio * 0.45) + ambientBreath;
+
+    // Sudut 3D Spasial Candi (Pitch, Yaw, Roll):
+    final pitch =
+        (scrollRatio * 0.12) +
+        (_smoothPointerY * -0.05) +
+        (math.sin(_elapsedTime * 1.1) * 0.010);
+    final yaw =
+        (_smoothPointerX * 0.08) + (math.sin(_smoothScroll * 0.0035) * 0.025);
+    final roll =
+        (_smoothPointerX * 0.015) + (math.sin(_elapsedTime * 0.8) * 0.006);
+
+    // Translasi Vertikal & Horizontal Parallax Candi:
+    final translateY =
+        -_smoothScroll * 0.28 + (math.sin(_elapsedTime * 1.5) * 5.0);
+    final translateX =
+        (_smoothPointerX * 16.0) + (math.sin(_smoothScroll * 0.004) * 10.0);
+
+    final templeMatrix = Matrix4.identity()
+      ..setEntry(3, 2, 0.0016)
+      // ignore: deprecated_member_use
+      ..translate(translateX, translateY, 0.0)
+      // ignore: deprecated_member_use
+      ..scale(zoom, zoom, 1.0)
+      ..rotateX(pitch)
+      ..rotateY(yaw)
+      ..rotateZ(roll);
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // --- 1. LANGIT OBSIDIAN DUSK MISTIS (THREEUI KAGE STYLE) ---
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF040206), // Puncak langit malam obsidian
+                Color(0xFF0D0814),
+                Color(0xFF1B0E1E), // Atmospheric dusk
+                Color(0xFF2E1715), // Warm volcanic sunset horizon
+                Color(0xFF07040B), // Deep ground
+              ],
+              stops: [0.0, 0.25, 0.55, 0.82, 1.0],
+            ),
+          ),
+        ),
+
+        // --- 2. WATERMARK TIPOGRAFI ARSITEKTURAL RAKSASA (KAGE STYLE: "J A V A R A") ---
+        Positioned.fill(
+          child: _JavaraArchitecturalWatermark(
+            scrollOffset: _smoothScroll,
+            pointerX: _smoothPointerX,
+          ),
+        ),
+
+        // --- 3. SURYA MANDALA AKASA (GOD RAYS & RADIANT GOLD CORONA) ---
+        Positioned.fill(
+          child: CustomPaint(
+            painter: _JavaraSuryaMandalaPainter(
+              scrollOffset: _smoothScroll,
+              elapsedTime: _elapsedTime,
+              pointerX: _smoothPointerX,
+            ),
+          ),
+        ),
+
+        // --- 4. MODEL 3D CANDI BOROBUDUR SINEMATIK (OCTANE RENDER QUALITY) ---
+        Positioned(
+          top: -20,
+          left: -w * 0.12,
+          right: -w * 0.12,
+          bottom: -70,
+          child: RepaintBoundary(
+            child: Transform(
+              transform: templeMatrix,
+              alignment: Alignment.center,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(
+                    'assets/images/candi_3d_cinema.jpg',
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.medium,
+                    excludeFromSemantics: true,
+                  ),
+                  Image.asset(
+                    'assets/images/candi_3d_cutout.png',
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.medium,
+                    excludeFromSemantics: true,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        // --- 5. AURA ENERGI SUCI ANJALI MUDRA (BLOOM & SACRED RIPPLES SAAT TELAPAK BERTEMU DI TENGAH) ---
+        Positioned.fill(
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: _AnjaliMudraEnergyPainter(
+                contactPoint: Offset(
+                  centerX + (_smoothPointerX * 8.0),
+                  handsY + (handHeight * 0.44),
+                ),
+                openCurve: openCurve,
+                elapsedTime: _elapsedTime,
+              ),
+            ),
+          ),
+        ),
+
+        // --- 6. TANGAN KIRI BUDDHA 3D (MEMBUKA MENYIBAK KE KIRI SEIRING SCROLL) ---
+        Positioned(
+          top: handsY,
+          left: leftTargetX,
+          width: leftHandWidth,
+          height: handHeight,
+          child: RepaintBoundary(
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: handsOpacity,
+                child: Transform(
+                  transform: leftHandMatrix,
+                  alignment: Alignment.center,
+                  child: Image.asset(
+                    'assets/images/buddha_hand_left.png',
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.medium,
+                    excludeFromSemantics: true,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        // --- 7. TANGAN KANAN BUDDHA 3D (MEMBUKA MENYIBAK KE KANAN SEIRING SCROLL) ---
+        Positioned(
+          top: handsY,
+          left: rightTargetX,
+          width: rightHandWidth,
+          height: handHeight,
+          child: RepaintBoundary(
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: handsOpacity,
+                child: Transform(
+                  transform: rightHandMatrix,
+                  alignment: Alignment.center,
+                  child: Image.asset(
+                    'assets/images/buddha_hand_right.png',
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.medium,
+                    excludeFromSemantics: true,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        // --- 8. KABUT VOLUMETRIK & 32 PARTIKEL KUNANG-KUNANG EMAS ---
+        Positioned.fill(
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: _JavaraAtmospherePainter(
+                scrollOffset: _smoothScroll,
+                elapsedTime: _elapsedTime,
+                pointerX: _smoothPointerX,
+              ),
+            ),
+          ),
+        ),
+
+        // --- 10. VIGNETTE PEREDUP BAWAH (MEMASTIKAN KONTEN TERBACA JELAS) ---
+        Positioned.fill(
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0x22000000),
+                    Colors.transparent,
+                    const Color(0x6607040B),
+                    const Color(0xF507040B),
+                  ],
+                  stops: const [0.0, 0.20, 0.60, 1.0],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Watermark Tipografi Arsitektural Raksasa (ThreeUI Kage Style)
+class _JavaraArchitecturalWatermark extends StatelessWidget {
+  const _JavaraArchitecturalWatermark({
+    required this.scrollOffset,
+    required this.pointerX,
+  });
+
+  final double scrollOffset;
+  final double pointerX;
+
+  @override
+  Widget build(BuildContext context) {
+    final parallaxY = -scrollOffset * 0.15;
+    final parallaxX = pointerX * 12.0;
+
+    return Stack(
+      children: [
+        Positioned(
+          top: 65 + parallaxY,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: Transform.translate(
+              offset: Offset(parallaxX, 0),
+              child: Text(
+                'JAVARA',
+                style: JText.serif(
+                  82,
+                  weight: FontWeight.w900,
+                  color: const Color(0x18FFDF9E),
+                ).copyWith(letterSpacing: 14),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 170 + parallaxY * 0.8,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: Transform.translate(
+              offset: Offset(-parallaxX * 0.5, 0),
+              child: const Text(
+                'ꦗ ꦮ ꦫ',
+                style: TextStyle(
+                  fontSize: 24,
+                  color: Color(0x26DFB76C),
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 16,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Melukis Surya Mandala Emas & Volumetric God Rays
+class _JavaraSuryaMandalaPainter extends CustomPainter {
+  _JavaraSuryaMandalaPainter({
+    required this.scrollOffset,
+    required this.elapsedTime,
+    required this.pointerX,
+  });
+
+  final double scrollOffset;
+  final double elapsedTime;
+  final double pointerX;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+
+    final pulse = math.sin(elapsedTime * 1.5) * 12.0;
+    final sunX =
+        w * 0.70 + (pointerX * 16.0) - (math.sin(scrollOffset * 0.002) * 14);
+    final sunY =
+        160.0 + (scrollOffset * 0.08) + (math.cos(elapsedTime * 1.1) * 5);
+    final center = Offset(sunX, sunY);
+
+    // 1. Pendaran Luar Surya Akasa
+    final outerGlow = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFFDF9E48).withValues(alpha: 0.35),
+          const Color(0xFFC76828).withValues(alpha: 0.15),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.50, 1.0],
+      ).createShader(Rect.fromCircle(center: center, radius: 260 + pulse));
+    canvas.drawCircle(center, 260 + pulse, outerGlow);
+
+    // 2. Inti Surya Keemasan
+    final innerSun = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xFFFFF6E0).withValues(alpha: 0.85),
+          const Color(0xFFFFB84D).withValues(alpha: 0.65),
+          const Color(0xFFD46A28).withValues(alpha: 0.30),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.40, 0.75, 1.0],
+      ).createShader(Rect.fromCircle(center: center, radius: 130));
+    canvas.drawCircle(center, 130, innerSun);
+
+    // 3. Lingkaran Suci Mandala (Concentric Sacred Geometry Rings)
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = const Color(0xFFFFDF9E).withValues(alpha: 0.20)
+      ..strokeWidth = 1.0;
+
+    canvas.drawCircle(center, 80 + pulse * 0.3, ringPaint);
+    canvas.drawCircle(center, 120 + pulse * 0.5, ringPaint);
+
+    // 4. Volumetric God Rays (Sinar Surya Radial Berputar Halus)
+    final rayPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    const numRays = 16;
+    final angleOffset = elapsedTime * 0.08;
+
+    for (int i = 0; i < numRays; i++) {
+      final angle = (i * (2 * math.pi / numRays)) + angleOffset;
+      final rayAlpha = (0.10 + math.sin(elapsedTime * 2.0 + i) * 0.05).clamp(
+        0.04,
+        0.18,
+      );
+      rayPaint.color = const Color(0xFFFFD700).withValues(alpha: rayAlpha);
+
+      final start = Offset(
+        center.dx + math.cos(angle) * 70,
+        center.dy + math.sin(angle) * 70,
+      );
+      final end = Offset(
+        center.dx + math.cos(angle) * (200 + (i % 2 == 0 ? 50 : 20)),
+        center.dy + math.sin(angle) * (200 + (i % 2 == 0 ? 50 : 20)),
+      );
+
+      canvas.drawLine(start, end, rayPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _JavaraSuryaMandalaPainter oldDelegate) => true;
+}
+
+/// Melukis Aliran Kabut Fajar Lembut di Beranda (tanpa partikel titik emas melayang)
+class _JavaraAtmospherePainter extends CustomPainter {
+  _JavaraAtmospherePainter({
+    required this.scrollOffset,
+    required this.elapsedTime,
+    required this.pointerX,
+  });
+
+  final double scrollOffset;
+  final double elapsedTime;
+  final double pointerX;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+
+    // --- ALIRAN KABUT LEMBUT MELINTASI STUPA ---
+    final mistPaint = Paint()..style = PaintingStyle.fill;
+    final mist1X =
+        (w * 0.35 + math.sin(elapsedTime * 0.4) * 80 + (pointerX * 25)) %
+            (w * 1.4) -
+        (w * 0.2);
+    final mist1Y = h * 0.38 + math.cos(elapsedTime * 0.3) * 20;
+
+    mistPaint.shader =
+        RadialGradient(
+          colors: [
+            const Color(0xFFD4AF37).withValues(alpha: 0.14),
+            Colors.transparent,
+          ],
+        ).createShader(
+          Rect.fromCenter(
+            center: Offset(mist1X, mist1Y),
+            width: w * 0.9,
+            height: 160,
+          ),
+        );
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(mist1X, mist1Y),
+        width: w * 0.9,
+        height: 160,
+      ),
+      mistPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _JavaraAtmospherePainter oldDelegate) => true;
+}
+
+/// Melukis Pendaran Aura Emas Suci & Gelombang Anjali Mudra saat telapak tangan bertemu di tengah
+class _AnjaliMudraEnergyPainter extends CustomPainter {
+  _AnjaliMudraEnergyPainter({
+    required this.contactPoint,
+    required this.openCurve,
+    required this.elapsedTime,
+  });
+
+  final Offset contactPoint;
+  final double openCurve;
+  final double elapsedTime;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Pendaran sakral paling terang saat tangan menyatu tertutup di tengah (openCurve = 0),
+    // dan menghilang perlahan seiring tangan membuka menyibak (openCurve > 0.45)
+    if (openCurve > 0.45) return;
+
+    final intensity = ((0.45 - openCurve) / 0.45).clamp(0.0, 1.0);
+
+    // 1. Pendaran Inti Emas Luhur (Golden Prana Halo Core)
+    final pulse = math.sin(elapsedTime * 3.5) * 6.0;
+    final coreRadius = (46.0 + pulse) * intensity;
+    final corePaint = Paint()
+      ..shader =
+          RadialGradient(
+            colors: [
+              const Color(0xFFFFFBE8).withValues(alpha: 0.95 * intensity),
+              const Color(0xFFFFDF9E).withValues(alpha: 0.75 * intensity),
+              const Color(0xFFFFB84D).withValues(alpha: 0.40 * intensity),
+              Colors.transparent,
+            ],
+            stops: const [0.0, 0.35, 0.70, 1.0],
+          ).createShader(
+            Rect.fromCircle(center: contactPoint, radius: coreRadius * 2.0),
+          );
+
+    canvas.drawCircle(contactPoint, coreRadius * 2.0, corePaint);
+
+    // 2. Lingkaran Gelombang Suci Berkembang (Concentric Sacred Ripples)
+    final ripplePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    for (int i = 0; i < 3; i++) {
+      final phase = (elapsedTime * 1.2 + (i * 0.33)) % 1.0;
+      final r = (22.0 + phase * 95.0) * intensity;
+      final alpha = ((1.0 - phase) * 0.45 * intensity).clamp(0.0, 1.0);
+      ripplePaint.color = const Color(0xFFFFD700).withValues(alpha: alpha);
+      canvas.drawCircle(contactPoint, r, ripplePaint);
+    }
+
+    // 3. Kilau Bintang Berlian 8 Arah (Prabha Starburst) saat tangan tertutup rapat di tengah
+    if (intensity > 0.40) {
+      final starIntensity = ((intensity - 0.40) / 0.60);
+      final starPaint = Paint()
+        ..color = const Color(0xFFFFFFFF)
+            .withValues(alpha: 0.90 * starIntensity)
+        ..style = PaintingStyle.fill;
+
+      final longRay =
+          (40.0 + math.sin(elapsedTime * 6.0) * 8.0) * starIntensity;
+      final shortRay = longRay * 0.34;
+
+      final path = Path()
+        ..moveTo(contactPoint.dx, contactPoint.dy - longRay)
+        ..quadraticBezierTo(
+          contactPoint.dx,
+          contactPoint.dy,
+          contactPoint.dx + shortRay,
+          contactPoint.dy - shortRay,
+        )
+        ..quadraticBezierTo(
+          contactPoint.dx,
+          contactPoint.dy,
+          contactPoint.dx + longRay,
+          contactPoint.dy,
+        )
+        ..quadraticBezierTo(
+          contactPoint.dx,
+          contactPoint.dy,
+          contactPoint.dx + shortRay,
+          contactPoint.dy + shortRay,
+        )
+        ..quadraticBezierTo(
+          contactPoint.dx,
+          contactPoint.dy,
+          contactPoint.dx,
+          contactPoint.dy + longRay,
+        )
+        ..quadraticBezierTo(
+          contactPoint.dx,
+          contactPoint.dy,
+          contactPoint.dx - shortRay,
+          contactPoint.dy + shortRay,
+        )
+        ..quadraticBezierTo(
+          contactPoint.dx,
+          contactPoint.dy,
+          contactPoint.dx - longRay,
+          contactPoint.dy,
+        )
+        ..quadraticBezierTo(
+          contactPoint.dx,
+          contactPoint.dy,
+          contactPoint.dx - shortRay,
+          contactPoint.dy - shortRay,
+        )
+        ..close();
+
+      canvas.drawPath(path, starPaint);
+
+      // Pusat kilau intan putih murni
+      final diamondCore = Paint()
+        ..color = const Color(0xFFFFFFFF)
+            .withValues(alpha: 0.95 * starIntensity);
+      canvas.drawCircle(contactPoint, 4.0 * starIntensity, diamondCore);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _AnjaliMudraEnergyPainter oldDelegate) => true;
+}
 
 /// TOP APP BAR HEADER DENGAN LOGO JAVARA & MINIMALIST ACTION ICONS SESUAI GAMBAR REFERENSI
 class _HomeTopHeader extends StatelessWidget {
