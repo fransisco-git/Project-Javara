@@ -124,7 +124,9 @@ class _HomeTabState extends State<HomeTab> {
 
   void _onCategoryTapped(String label) {
     HapticFeedback.lightImpact();
-    if (label.contains('Keraton')) {
+    if (label == 'Busana') {
+      Navigator.of(context).push(fadeSlideRoute(const ClothingCatalogScreen()));
+    } else if (label.contains('Keraton')) {
       Navigator.of(context).push(
         fadeSlideRoute(
           const ClothingCatalogScreen(initialRegion: TraditionRegion.surakarta),
@@ -251,37 +253,46 @@ class _HomeTabState extends State<HomeTab> {
                                     duration: const Duration(seconds: 2),
                                   ),
                                 );
-                            },
-                            child: ListView(
-                              controller: _scrollController,
-                              physics: const BouncingScrollPhysics(),
-                              padding: EdgeInsets.fromLTRB(20, topPadding + 62, 20, 110),
-                              keyboardDismissBehavior:
-                                  ScrollViewKeyboardDismissBehavior.onDrag,
-                              children: [
-                      // --- MODE TAMPILAN UTAMA (EDITORIAL BERANDA) ---
-                      if (_q.isEmpty) ...[
-                        // Panggung visual tertata rapi di atas dengan ruang lega di tengah
-                        const SizedBox(height: 28),
-                        // 1. Hero Editorial ("Kebaya Kartini Solo Sutra")
-                        StaggerIn(
-                          index: 1,
-                          child: _HeroCard(
-                            onStart: () {
-                              Navigator.of(context).push(
-                                fadeSlideRoute(const JelajahiBusanaScreen()),
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 24),
+                              },
+                              child: ListView(
+                                controller: _scrollController,
+                                physics: const BouncingScrollPhysics(),
+                                padding: EdgeInsets.fromLTRB(
+                                  20,
+                                  topPadding + 62,
+                                  20,
+                                  110,
+                                ),
+                                keyboardDismissBehavior:
+                                    ScrollViewKeyboardDismissBehavior.onDrag,
+                                children: [
+                                  // --- MODE TAMPILAN UTAMA (EDITORIAL BERANDA) ---
+                                  if (_q.isEmpty) ...[
+                                    // Panggung visual tertata rapi di atas dengan ruang lega di tengah
+                                    const SizedBox(height: 28),
+                                    // 1. Hero Editorial ("Kebaya Kartini Solo Sutra")
+                                    StaggerIn(
+                                      index: 1,
+                                      child: _HeroCard(
+                                        onStart: () {
+                                          Navigator.of(context).push(
+                                            fadeSlideRoute(
+                                              const JelajahiBusanaScreen(),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(height: 24),
 
-                        // 2. 4 Kategori Utama
-                        StaggerIn(
-                          index: 2,
-                          child: _Categories(onTap: _onCategoryTapped),
-                        ),
-                        const SizedBox(height: 52),
+                                    // 2. 4 Kategori Utama
+                                    StaggerIn(
+                                      index: 2,
+                                      child: _Categories(
+                                        onTap: _onCategoryTapped,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 52),
 
                                     // 3. Grid "Warisan Populer" (Dinaikkan agar koleksi busana langsung terlihat)
                                     if (popular.isNotEmpty) ...[
@@ -1370,10 +1381,7 @@ class _TopHeaderIconButton extends StatelessWidget {
       child: Tooltip(
         message: tooltip,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: 48,
-            minHeight: 48,
-          ),
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           child: Material(
             color: Colors.transparent,
             child: InkResponse(
@@ -1381,7 +1389,8 @@ class _TopHeaderIconButton extends StatelessWidget {
               radius: 24,
               containedInkWell: true,
               child: Center(
-                child: iconWidget ??
+                child:
+                    iconWidget ??
                     Icon(icon, color: const Color(0xFFFAF6F0), size: 24),
               ),
             ),
@@ -1717,35 +1726,29 @@ class _HeroCardState extends State<_HeroCard> {
   }
 }
 
-/// KATEGORI PILAR ADIBUSANA JAWA TENGAH
+/// KATEGORI PILAR ADIBUSANA JAWA TENGAH (Busana, Aksesoris, Batik)
 class _Categories extends StatelessWidget {
   const _Categories({required this.onTap});
   final ValueChanged<String> onTap;
 
   static const _items = [
     (
-      icon: Icons.accessibility_new_rounded,
-      title: 'Busana Pria',
-      subtitle: 'Pria Adat',
-      actionKey: 'Pria',
-    ),
-    (
-      icon: Icons.spa_rounded,
-      title: 'Busana Wanita',
-      subtitle: 'Kebaya & Rias',
-      actionKey: 'Wanita',
-    ),
-    (
-      icon: Icons.texture_rounded,
-      title: 'Batik',
-      subtitle: 'Motif Pakem',
-      actionKey: 'Batik',
+      icon: Icons.checkroom_rounded,
+      title: 'Busana',
+      subtitle: 'Pria & Wanita',
+      actionKey: 'Busana',
     ),
     (
       icon: Icons.military_tech_rounded,
       title: 'Aksesoris',
       subtitle: 'Ricikan Adat',
       actionKey: 'Aksesoris',
+    ),
+    (
+      icon: Icons.texture_rounded,
+      title: 'Batik',
+      subtitle: 'Motif Pakem',
+      actionKey: 'Batik',
     ),
   ];
 
@@ -1760,65 +1763,68 @@ class _Categories extends StatelessWidget {
               pressedScale: 0.92,
               semanticLabel: 'Kategori ${item.title}',
               onTap: () => onTap(item.actionKey),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _JavaraGlassPanel(
-                    padding: EdgeInsets.zero,
-                    radius: 18,
-                    child: Container(
-                      width: 52,
-                      height: 52,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
-                        gradient: const RadialGradient(
-                          center: Alignment.topLeft,
-                          radius: 1.2,
-                          colors: [Color(0x35DFB76C), Color(0x05DFB76C)],
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _JavaraGlassPanel(
+                      padding: EdgeInsets.zero,
+                      radius: 18,
+                      child: Container(
+                        width: 52,
+                        height: 52,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                          gradient: const RadialGradient(
+                            center: Alignment.topLeft,
+                            radius: 1.2,
+                            colors: [Color(0x35DFB76C), Color(0x05DFB76C)],
+                          ),
+                        ),
+                        child: Icon(
+                          item.icon,
+                          size: 24,
+                          color: const Color(0xFFDFB76C),
                         ),
                       ),
-                      child: Icon(
-                        item.icon,
-                        size: 24,
-                        color: const Color(0xFFDFB76C),
+                    ),
+                    const SizedBox(height: 7),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              item.title,
+                              style: JText.serif(
+                                11.5,
+                                weight: FontWeight.w700,
+                                color: const Color(0xFFFFF0D0),
+                              ),
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 1.5),
+                            Text(
+                              item.subtitle,
+                              style: JText.sans(
+                                9.5,
+                                weight: FontWeight.w500,
+                                color: const Color(0xFFAFA08F),
+                              ),
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 7),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            item.title,
-                            style: JText.serif(
-                              11.5,
-                              weight: FontWeight.w700,
-                              color: const Color(0xFFFFF0D0),
-                            ),
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 1.5),
-                          Text(
-                            item.subtitle,
-                            style: JText.sans(
-                              9,
-                              weight: FontWeight.w500,
-                              color: const Color(0xFFAFA08F),
-                            ),
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

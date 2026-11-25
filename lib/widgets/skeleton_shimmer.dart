@@ -204,10 +204,10 @@ class HomeTabSkeletonView extends StatelessWidget {
 
             Row(
               children: List.generate(
-                4,
+                3,
                 (i) => Expanded(
                   child: Padding(
-                    padding: EdgeInsets.only(right: i < 3 ? 8 : 0),
+                    padding: EdgeInsets.only(right: i < 2 ? 8 : 0),
                     child: const ShimmerBox(
                       width: double.infinity,
                       height: 36,

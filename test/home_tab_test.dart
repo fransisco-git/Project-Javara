@@ -238,7 +238,7 @@ void main() {
     expect(find.text('AI Fashion Studio'), findsOneWidget);
   });
 
-  testWidgets('HomeTab renders updated categories: Busana Pria, Busana Wanita, Batik, Aksesoris', (
+  testWidgets('HomeTab renders 3 merged categories: Busana, Aksesoris, Batik', (
     WidgetTester tester,
   ) async {
     tester.view.physicalSize = const Size(360 * 2, 800 * 2);
@@ -254,16 +254,31 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 1200));
 
-    // Verify 4 category titles are rendered
-    expect(find.text('Busana Pria'), findsOneWidget);
-    expect(find.text('Busana Wanita'), findsOneWidget);
-    expect(find.text('Batik'), findsOneWidget);
-    expect(find.text('Aksesoris'), findsOneWidget);
+    // Verify Busana Pria & Busana Wanita are merged into Busana
+    expect(find.text('Busana Pria'), findsNothing);
+    expect(find.text('Busana Wanita'), findsNothing);
+
+    // Verify 3 category titles are rendered
+    final busanaFinder = find.text('Busana');
+    final aksesorisFinder = find.text('Aksesoris');
+    final batikFinder = find.text('Batik');
+    expect(busanaFinder, findsOneWidget);
+    expect(aksesorisFinder, findsOneWidget);
+    expect(batikFinder, findsOneWidget);
+
+    // Verify left-to-right order: Busana, Aksesoris, Batik
+    expect(
+      tester.getCenter(busanaFinder).dx,
+      lessThan(tester.getCenter(aksesorisFinder).dx),
+    );
+    expect(
+      tester.getCenter(aksesorisFinder).dx,
+      lessThan(tester.getCenter(batikFinder).dx),
+    );
 
     // Verify respective subtitles
-    expect(find.text('Pria Adat'), findsOneWidget);
-    expect(find.text('Kebaya & Rias'), findsOneWidget);
-    expect(find.text('Motif Pakem'), findsOneWidget);
+    expect(find.text('Pria & Wanita'), findsOneWidget);
     expect(find.text('Ricikan Adat'), findsOneWidget);
+    expect(find.text('Motif Pakem'), findsOneWidget);
   });
 }
