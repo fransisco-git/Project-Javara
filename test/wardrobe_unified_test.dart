@@ -7,7 +7,7 @@ import 'package:jawara_app/features/home/home_screen.dart';
 import 'package:jawara_app/features/home/javara_bottom_nav.dart';
 import 'package:jawara_app/services/saved_garments_service.dart';
 import 'package:jawara_app/widgets/navigation/nav_icon_hanger.dart';
-import 'package:jawara_app/widgets/navigation/nav_icon_wardrobe.dart';
+import 'package:jawara_app/widgets/navigation/nav_icon_home.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -39,18 +39,18 @@ void main() {
       expect(find.text('TERSIMPAN'), findsOneWidget);
       expect(find.text('PROFIL'), findsOneWidget);
 
-      // Verifikasi custom icons untuk Beranda (NavIconWardrobe) & Koleksi (NavIconHanger) 24x24
-      final wardrobeIconFinder = find.byType(NavIconWardrobe);
+      // Verifikasi custom icons untuk Beranda (NavIconHome) & Koleksi (NavIconHanger) 24x24
+      final homeIconFinder = find.byType(NavIconHome);
       final hangerIconFinder = find.byType(NavIconHanger);
-      expect(wardrobeIconFinder, findsOneWidget);
+      expect(homeIconFinder, findsOneWidget);
       expect(hangerIconFinder, findsOneWidget);
-      expect(tester.getSize(wardrobeIconFinder), const Size(24, 24));
+      expect(tester.getSize(homeIconFinder), const Size(24, 24));
       expect(tester.getSize(hangerIconFinder), const Size(24, 24));
-      final wardrobeIcon = tester.widget<NavIconWardrobe>(wardrobeIconFinder);
+      final homeIcon = tester.widget<NavIconHome>(homeIconFinder);
       final hangerIcon = tester.widget<NavIconHanger>(hangerIconFinder);
-      expect(wardrobeIcon.isActive, isTrue);
+      expect(homeIcon.isActive, isTrue);
       expect(hangerIcon.isActive, isFalse);
-      expect(wardrobeIcon.activeColor, Colors.white);
+      expect(homeIcon.activeColor, Colors.white);
       expect(hangerIcon.activeColor, Colors.white);
 
       // Verifikasi titik indikator aktif bawah sudah dihapus, bar full-width, & semua baseline label sejajar
@@ -75,11 +75,11 @@ void main() {
       expect(find.text('Jelajah'), findsNothing);
       expect(find.text('Katalog'), findsNothing);
 
-      // Switch ke Tab Koleksi (Tab 1) -> NavIconHanger menjadi aktif, NavIconWardrobe nonaktif
+      // Switch ke Tab Koleksi (Tab 1) -> NavIconHanger menjadi aktif, NavIconHome nonaktif
       await tester.tap(find.text('KOLEKSI'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 220));
-      expect(tester.widget<NavIconWardrobe>(wardrobeIconFinder).isActive, isFalse);
+      expect(tester.widget<NavIconHome>(homeIconFinder).isActive, isFalse);
       expect(tester.widget<NavIconHanger>(hangerIconFinder).isActive, isTrue);
 
       // Switch ke Tab Tersimpan (Tab 2)

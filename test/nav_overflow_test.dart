@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jawara_app/features/home/javara_bottom_nav.dart';
 import 'package:jawara_app/widgets/navigation/nav_icon_hanger.dart';
-import 'package:jawara_app/widgets/navigation/nav_icon_wardrobe.dart';
+import 'package:jawara_app/widgets/navigation/nav_icon_home.dart';
 
 Widget _berandaIcon(BuildContext context, bool isSelected) =>
-    NavIconWardrobe(isActive: isSelected);
+    NavIconHome(isActive: isSelected);
 
 Widget _koleksiIcon(BuildContext context, bool isSelected) =>
     NavIconHanger(isActive: isSelected);

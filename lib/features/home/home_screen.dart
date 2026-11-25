@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/theme.dart';
 import '../../widgets/navigation/nav_icon_hanger.dart';
-import '../../widgets/navigation/nav_icon_wardrobe.dart';
+import '../../widgets/navigation/nav_icon_home.dart';
 import '../fashion/screens/clothing_catalog_screen.dart';
 import '../fashion/screens/tersimpan_tab.dart';
 import 'home_tab.dart';
@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
 
   static Widget _buildBerandaIcon(BuildContext context, bool isSelected) {
-    return NavIconWardrobe(
+    return NavIconHome(
       isActive: isSelected,
       activeColor: JavaraBottomNav.activeColor,
       inactiveColor: JavaraBottomNav.inactiveColor,
