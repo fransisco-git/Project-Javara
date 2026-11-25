@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
-import '../../../core/transitions.dart';
-import '../data/javanese_clothing_data.dart';
-import 'clothing_detail_screen.dart';
 
 /// Screen 05 — Batik & Motif (Galeri Wastra & Tekstil Tradisional Jawa Tengah)
 class BatikMotifGalleryScreen extends StatefulWidget {
@@ -397,71 +394,25 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
               child: ListView(
                 physics: const BouncingScrollPhysics(),
                 children: [
-                  Row(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              activeMotif.name,
-                              style: JText.serif(
-                                20,
-                                weight: FontWeight.w800,
-                                color: const Color(0xFFFAF6F0),
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Asal: ${activeMotif.region}',
-                              style: const TextStyle(
-                                fontSize: 11.5,
-                                color: Color(0xFFB09F8F),
-                              ),
-                            ),
-                          ],
+                      Text(
+                        activeMotif.name,
+                        style: JText.serif(
+                          20,
+                          weight: FontWeight.w800,
+                          color: const Color(0xFFFAF6F0),
                         ),
                       ),
-                      if (activeMotif.relatedGarmentId != null)
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF38271B),
-                            foregroundColor: const Color(0xFFE4C590),
-                            elevation: 0,
-                            side: const BorderSide(
-                              color: Color(0xFFE4C590),
-                              width: 0.8,
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          icon: const Icon(Icons.checkroom_rounded, size: 14),
-                          label: const Text(
-                            'Lihat Busana',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          onPressed: () {
-                            final item = JavaneseClothingData.getItemById(
-                              activeMotif.relatedGarmentId!,
-                            );
-                            if (item != null) {
-                              Navigator.of(context).push(
-                                fadeSlideRoute(
-                                  ClothingDetailScreen(item: item),
-                                ),
-                              );
-                            }
-                          },
+                      const SizedBox(height: 2),
+                      Text(
+                        'Asal: ${activeMotif.region}',
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          color: Color(0xFFB09F8F),
                         ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 14),
