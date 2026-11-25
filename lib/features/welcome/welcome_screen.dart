@@ -13,10 +13,11 @@ import '../home/home_screen.dart';
 /// Konstanta path aset latar foto pasangan berbusana adat Jawa di Pendopo.
 const String kWelcomeHeroAsset = 'assets/images/welcome_pendopo_busana.jpg';
 
-/// Warna gelap khas layar selamat datang JAVARA.
+/// Warna aksen emas hangat dan gelap khas layar selamat datang JAVARA.
+const Color _kCtaGold = Color(0xFFDFB76C);
 const Color _kDarkBrown = Color(0xFF140C06);
-const Color _kDarkBrownBg = Color(0xFF100905);
-const Color _kScrimDarkBrown = Color(0xFF140D07);
+const Color _kDarkBrownBg = Color(0xFF0B0704);
+const Color _kScrimDarkBrown = Color(0xFF0E0905);
 
 /// Layar Selamat Datang JAVARA — Heritage Sunrise Borobudur & Budaya Luhur Jawa Tengah.
 ///
@@ -38,8 +39,7 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen>
-    with TickerProviderStateMixin {
-  late final AnimationController _ambientController;
+    with SingleTickerProviderStateMixin {
   late final AnimationController _entranceController;
 
   late final Animation<double> _headlineAnim;
@@ -52,12 +52,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   void initState() {
     super.initState();
-
-    // Kontroler ambien fajar berkelanjutan (pendar surya, kabut lembah, & partikel)
-    _ambientController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 8000),
-    )..repeat();
 
     // Kontroler animasi masuk bertahap (fade + slide ke atas ~16px)
     _entranceController = AnimationController(
@@ -122,7 +116,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   void dispose() {
     _stopAmbientFoley();
     _entranceController.dispose();
-    _ambientController.dispose();
     super.dispose();
   }
 
@@ -190,77 +183,43 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: const Color(0xFF040206),
-        body: AnimatedBuilder(
-          animation: _ambientController,
-          builder: (context, _) {
-            final ambientT = _ambientController.value;
+        backgroundColor: const Color(0xFF080503),
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            // 1. Foto Latar Pasangan Berbusana Adat Jawa di Pendopo (HD, tanpa zoom)
+            Positioned.fill(
+              child: Image.asset(
+                kWelcomeHeroAsset,
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+                filterQuality: FilterQuality.high,
+                isAntiAlias: true,
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+              ),
+            ),
 
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                  // 1. Foto Latar Pasangan Berbusana Adat Jawa di Pendopo (tanpa zoom / crop berlebih)
-                  Positioned.fill(
-                    child: Image.asset(
-                      kWelcomeHeroAsset,
-                      fit: BoxFit.fitWidth,
-                      alignment: Alignment.topCenter,
-                      filterQuality: FilterQuality.high,
-                      isAntiAlias: true,
-                      errorBuilder: (_, _, _) => const SizedBox.shrink(),
+            // 2. Scrim gradasi gelap halus di bagian bawah untuk keterbacaan tipografi & CTA
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: const [0.0, 0.50, 0.72, 0.88, 1.0],
+                      colors: [
+                        Colors.transparent,
+                        Colors.transparent,
+                        _kScrimDarkBrown.withValues(alpha: 0.72),
+                        _kDarkBrownBg.withValues(alpha: 0.94),
+                        const Color(0xFF080503),
+                      ],
                     ),
                   ),
-
-                  // 2. Pendaran Surya Fajar di Balik Puncak Gunung Merapi
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: _MerapiSunriseGlowPainter(
-                        ambientTime: ambientT,
-                        openProgress: 1.0,
-                      ),
-                    ),
-                  ),
-
-                  // 3. Kabut Lembah & Sawah Berundak Merayap Lembut (Valley Mist)
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: _ValleyMistPainter(
-                        time: ambientT,
-                        openProgress: 1.0,
-                      ),
-                    ),
-                  ),
-
-                  // 4. Partikel Keemasan Surya Mengapung Lembut di Udara
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: _SunlightMotesPainter(
-                        time: ambientT,
-                        progress: 1.0,
-                      ),
-                    ),
-                  ),
-
-                  // 5. Scrim gradasi pekat bawah: transparan di sekitar 40% tinggi layar menuju cokelat-hitam opak (>=0.92)
-                  Positioned.fill(
-                    child: IgnorePointer(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            stops: const [0.0, 0.40, 0.65, 1.0],
-                            colors: [
-                              Colors.transparent,
-                              Colors.transparent,
-                              _kScrimDarkBrown.withValues(alpha: 0.85),
-                              _kDarkBrownBg.withValues(alpha: 0.95),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                ),
+              ),
+            ),
 
                   // 6. Blok Konten Bawah: Headline, Subtitle, Tombol Utama & Masuk/Daftar
                   Positioned(
@@ -333,12 +292,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               //   ],
                               // ),
 
-                              // 1. Headline (Font Serif, 32-34sp atau 28sp jika h < 700, line height 1.15, putih penuh)
+                              // 1. Headline (Font Serif, 34sp atau 28sp jika h < 700, line height 1.15, putih penuh)
                               _buildStaggeredItem(
                                 animation: _headlineAnim,
                                 disableAnimations: disableAnimations,
                                 child: Text(
-                                  'Setiap busana punya cerita.',
+                                  'Mengenal warisan.\nMemahami makna.',
                                   style: JText.serif(
                                     h < 700 ? 28 : 34,
                                     weight: FontWeight.w700,
@@ -360,7 +319,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
                               SizedBox(height: h < 700 ? 8 : 12),
 
-                              // 2. Subtitle (15sp, w400, putih opacity 0.88, line height 1.5, maks 3 baris)
+                              // 2. Subtitle (14.5sp, w400, putih opacity 0.80, line height 1.5, maks 3 baris)
                               _buildStaggeredItem(
                                 animation: _subtitleAnim,
                                 disableAnimations: disableAnimations,
@@ -372,9 +331,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                     overflow: TextOverflow.ellipsis,
                                     textAlign: TextAlign.center,
                                     style: JText.sans(
-                                      15,
+                                      14.5,
                                       weight: FontWeight.w400,
-                                      color: Colors.white.withValues(alpha: 0.88),
+                                      color: Colors.white.withValues(alpha: 0.80),
                                       height: 1.5,
                                     ).copyWith(
                                       shadows: const [
@@ -391,17 +350,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
                               SizedBox(height: h < 700 ? 14 : 20),
 
-                              // 3. Tombol Utama Satu-satunya: "Mulai Menjelajah →" (Solid emas, teks cokelat gelap w600, tinggi 56, radius 12)
+                              // 3. Tombol Utama: "Mulai Eksplorasi Budaya →" (Solid emas hangat, teks cokelat gelap w600, tinggi 54, radius 12)
                               _buildStaggeredItem(
                                 animation: _primaryCtaAnim,
                                 disableAnimations: disableAnimations,
                                 child: SizedBox(
                                   width: double.infinity,
-                                  height: 56,
+                                  height: 54,
                                   child: ElevatedButton(
                                     onPressed: _onPrimaryExplore,
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: JColors.accentGold,
+                                      backgroundColor: _kCtaGold,
                                       foregroundColor: _kDarkBrown,
                                       elevation: 2,
                                       shadowColor: const Color(0x33000000),
@@ -415,13 +374,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            'Mulai Menjelajah',
+                                            'Mulai Eksplorasi Budaya',
                                             style: JText.sans(
                                               15,
                                               weight: FontWeight.w600,
                                               color: _kDarkBrown,
                                             ).copyWith(
-                                              letterSpacing: 0.3,
+                                              letterSpacing: 0.2,
                                             ),
                                           ),
                                           const SizedBox(width: 8),
@@ -437,9 +396,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 ),
                               ),
 
-                              SizedBox(height: h < 700 ? 4 : 8),
+                              SizedBox(height: h < 700 ? 6 : 10),
 
-                              // 4. Baris Masuk / Daftar (kontras tinggi, tap >= 48x48dp)
+                              // 4. Baris Masuk · Daftar (tap >= 48x48dp)
                               _buildStaggeredItem(
                                 animation: _secondaryCtaAnim,
                                 disableAnimations: disableAnimations,
@@ -454,26 +413,26 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                           minimumSize: const Size(48, 48),
                                           tapTargetSize: MaterialTapTargetSize.padded,
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 14,
+                                            horizontal: 12,
                                             vertical: 12,
                                           ),
                                         ),
                                         child: Text(
                                           'Masuk',
                                           style: JText.sans(
-                                            15,
+                                            14,
                                             weight: FontWeight.w600,
-                                            color: JColors.accentGold,
+                                            color: _kCtaGold,
                                           ),
                                         ),
                                       ),
                                       ExcludeSemantics(
                                         child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                                          padding: const EdgeInsets.symmetric(horizontal: 2),
                                           child: Text(
                                             '·',
                                             style: TextStyle(
-                                              color: Colors.white.withValues(alpha: 0.65),
+                                              color: Colors.white.withValues(alpha: 0.50),
                                               fontSize: 16,
                                               fontWeight: FontWeight.w700,
                                             ),
@@ -486,16 +445,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                           minimumSize: const Size(48, 48),
                                           tapTargetSize: MaterialTapTargetSize.padded,
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 14,
+                                            horizontal: 12,
                                             vertical: 12,
                                           ),
                                         ),
                                         child: Text(
                                           'Daftar',
                                           style: JText.sans(
-                                            15,
-                                            weight: FontWeight.w500,
-                                            color: Colors.white.withValues(alpha: 0.92),
+                                            14,
+                                            weight: FontWeight.w400,
+                                            color: Colors.white.withValues(alpha: 0.72),
                                           ),
                                         ),
                                       ),
@@ -509,141 +468,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       ),
                     ),
                   ),
-                  ),
-                ],
-            );
-          },
+                ),
+            ],
         ),
       ),
     );
   }
-}
-
-/// Melukis partikel keemasan melayang di udara (Sunlight Motes)
-class _SunlightMotesPainter extends CustomPainter {
-  _SunlightMotesPainter({
-    required this.time,
-    required this.progress,
-  });
-
-  final double time;
-  final double progress;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-
-    const int moteCount = 22;
-    final motePaint = Paint()..style = PaintingStyle.fill;
-
-    for (int i = 0; i < moteCount; i++) {
-      final speed = 0.25 + (i * 0.12 % 0.65);
-      final baseY = (i * 40.0) % h;
-      final driftY = (baseY - (time * 110.0 * speed)) % h;
-      final driftX =
-          ((i * 35.0) % w) + math.sin(time * 2 * math.pi + i) * 14.0;
-
-      final alpha =
-          ((math.sin(time * 3 * math.pi + i).abs() * 0.40 + 0.20) * progress)
-              .clamp(0.0, 1.0);
-      final radius = 1.2 + (i % 3) * 0.7;
-
-      motePaint.color = Color.fromRGBO(255, 235, 175, alpha);
-      canvas.drawCircle(Offset(driftX, driftY), radius, motePaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _SunlightMotesPainter old) =>
-      old.time != time || old.progress != progress;
-}
-
-/// Melukis pendar surya fajar lembut di balik puncak Gunung Merapi
-class _MerapiSunriseGlowPainter extends CustomPainter {
-  _MerapiSunriseGlowPainter({
-    required this.ambientTime,
-    required this.openProgress,
-  });
-
-  final double ambientTime;
-  final double openProgress;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-
-    // Posisi puncak kerucut Merapi di sepertiga tengah
-    final sunCenter = Offset(w * 0.50, h * 0.38);
-    final pulse = 1.0 + 0.05 * math.sin(ambientTime * 2 * math.pi);
-    final glowRadius = (w * 0.72) * pulse;
-
-    final glowPaint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          Color.fromRGBO(255, 220, 150, 0.42 * openProgress),
-          Color.fromRGBO(220, 150, 160, 0.20 * openProgress),
-          Colors.transparent,
-        ],
-        stops: const [0.0, 0.48, 1.0],
-      ).createShader(Rect.fromCircle(center: sunCenter, radius: glowRadius));
-
-    canvas.drawCircle(sunCenter, glowRadius, glowPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _MerapiSunriseGlowPainter old) =>
-      old.ambientTime != ambientTime || old.openProgress != openProgress;
-}
-
-/// Melukis lapisan kabut lembah dan sawah berundak yang merayap tenang
-class _ValleyMistPainter extends CustomPainter {
-  _ValleyMistPainter({
-    required this.time,
-    required this.openProgress,
-  });
-
-  final double time;
-  final double openProgress;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (openProgress <= 0.05) return;
-
-    final w = size.width;
-    final h = size.height;
-
-    final mistPaint = Paint()
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 38)
-      ..style = PaintingStyle.fill;
-
-    // Lapisan 1: Kabut fajar di lembah sawah berundak
-    final offset1 = math.sin(time * 2 * math.pi) * 28.0;
-    mistPaint.color = Color.fromRGBO(215, 210, 225, 0.18 * openProgress);
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(w * 0.48 + offset1, h * 0.56),
-        width: w * 1.20,
-        height: 65,
-      ),
-      mistPaint,
-    );
-
-    // Lapisan 2: Halimun tipis di atas pepohonan hutan
-    final offset2 = math.cos(time * 2 * math.pi * 0.75) * 24.0;
-    mistPaint.color = Color.fromRGBO(175, 195, 210, 0.14 * openProgress);
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(w * 0.52 + offset2, h * 0.70),
-        width: w * 1.30,
-        height: 75,
-      ),
-      mistPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _ValleyMistPainter old) =>
-      old.time != time || old.openProgress != openProgress;
 }
