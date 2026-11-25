@@ -71,7 +71,7 @@ class _HomeTabState extends State<HomeTab> {
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/model_jawi_jangkep_solo.jpg'),
+      const AssetImage('assets/images/hero_beskap_surakarta.jpg'),
       context,
     );
     precacheImage(
@@ -1342,8 +1342,8 @@ class _HeroCardState extends State<_HeroCard> {
     ),
     HeroSlideData(
       eyebrow: 'ARSIP 02 · BUSANA PRIA',
-      title: 'Jawi Jangkep Keprabon',
-      imagePath: 'assets/images/model_jawi_jangkep_solo.jpg',
+      title: 'Beskap Surakarta Klasik',
+      imagePath: 'assets/images/hero_beskap_surakarta.jpg',
       imageAlignment: const Alignment(0, -0.6),
       imageScale: 1.0,
       routeBuilder: () =>

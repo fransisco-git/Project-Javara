@@ -340,7 +340,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('ARSIP 02 · BUSANA PRIA'), findsOneWidget);
-    expect(find.text('Jawi Jangkep Keprabon'), findsOneWidget);
+    expect(find.text('Beskap Surakarta Klasik'), findsOneWidget);
     expect(find.text('LIHAT KOLEKSI'), findsOneWidget);
 
     // Swipe horizontally to Slide 3
