@@ -85,7 +85,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
     ),
     _ExtendedBatikData(
       id: 'motif_truntum',
-      name: 'Truntum Sri Katon',
+      name: 'Truntum',
       javaneseScript: 'ꦠꦿꦸꦤ꧀ꦠꦸꦩ꧀',
       category: 'Ceplok Bintang',
       region: 'Kasunanan Surakarta',

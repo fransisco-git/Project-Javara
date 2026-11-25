@@ -345,7 +345,7 @@ class JavaneseClothingData {
     ),
     ClothingItem(
       id: 'jarik_batik_truntum_solo',
-      name: 'Kain Jarik Batik Truntum Sri Katon',
+      name: 'Kain Jarik Batik Truntum',
       javaneseScript: 'ꦠꦿꦸꦤ꧀ꦠꦸꦩ꧀',
       category: ClothingCategory.lowerBody,
       gender: GenderTarget.unisex,
