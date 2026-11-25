@@ -507,57 +507,38 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
       child: SizedBox(
         width: double.infinity,
         height: 50,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFFE4BC6C),
-                Color(0xFFC79835),
-                Color(0xFF8C5D17),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        child: ElevatedButton(
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            launchPurchaseSearch(item.name);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: JColors.accentGold,
+            foregroundColor: JColors.ink,
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
             ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x44DFB76C),
-                blurRadius: 12,
-                offset: Offset(0, 4),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Cari Tempat Membeli',
+                style: JText.serif(
+                  14.5,
+                  weight: FontWeight.w700,
+                  color: JColors.ink,
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Icon(
+                Icons.north_east,
+                color: JColors.ink,
+                size: 16,
               ),
             ],
-          ),
-          child: ElevatedButton(
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              launchPurchaseSearch(item.name);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.shopping_bag_outlined,
-                  color: Color(0xFF241829),
-                  size: 18,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Cari Tempat Membeli',
-                  style: JText.serif(
-                    14.5,
-                    weight: FontWeight.w700,
-                    color: const Color(0xFF241829),
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),
