@@ -988,39 +988,27 @@ class _ProfileTabState extends State<ProfileTab> {
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Profil Pengguna',
-                        style: JText.serif(
-                          26,
-                          weight: FontWeight.w800,
-                          color: const Color(0xFF382315),
-                        ),
-                      ),
-                      if (_showJavaneseScript)
-                        const Text(
-                          'ꦥꦿꦺꦴꦥ꦳ꦶꦭ꧀ꦥꦼꦔꦁꦒꦺꦴ',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF9E7E50),
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 2.0,
-                          ),
-                        ),
-                    ],
+                Text(
+                  'Profil Pengguna',
+                  style: JText.serif(
+                    26,
+                    weight: FontWeight.w800,
+                    color: const Color(0xFF382315),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.edit_note_rounded, color: Color(0xFF382315), size: 24),
-                  tooltip: 'Ubah Profil',
-                  onPressed: () => _openEditProfileModal(context),
-                ),
+                if (_showJavaneseScript)
+                  const Text(
+                    'ꦥꦿꦺꦴꦥ꦳ꦶꦭ꧀ꦥꦼꦔꦁꦒꦺꦴ',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF9E7E50),
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 2.0,
+                    ),
+                  ),
               ],
             ),
 

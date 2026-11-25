@@ -35,6 +35,8 @@ void main() {
 
     // 1. Verify Header and Fashion Identity
     expect(find.text('Profil Pengguna'), findsOneWidget);
+    expect(find.byIcon(Icons.edit_note_rounded), findsNothing);
+    expect(find.byTooltip('Ubah Profil'), findsNothing);
     expect(find.text('Pelestari Wastra Jawa Tengah'), findsOneWidget);
     expect(find.text('Edit Profil'), findsOneWidget);
     expect(find.text('Alamat Kirim'), findsOneWidget);
