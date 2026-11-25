@@ -414,10 +414,10 @@ void main() {
       lessThan(tester.getCenter(batikFinder).dx),
     );
 
-    // Verify respective subtitles
-    expect(find.text('Pria & Wanita'), findsOneWidget);
-    expect(find.text('Ricikan Adat'), findsOneWidget);
-    expect(find.text('Motif Pakem'), findsOneWidget);
+    // Verify removed subtitles are not rendered
+    expect(find.text('Pria & Wanita'), findsNothing);
+    expect(find.text('Ricikan Adat'), findsNothing);
+    expect(find.text('Motif Pakem'), findsNothing);
 
     // Verify bespoke themed Javanese vector icons are rendered instead of generic Material icons
     expect(find.byKey(const ValueKey('category_icon_busana')), findsOneWidget);

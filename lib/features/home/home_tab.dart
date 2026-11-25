@@ -1471,19 +1471,16 @@ class _Categories extends StatelessWidget {
     (
       iconType: JavaraCategoryIconType.busana,
       title: 'Busana',
-      subtitle: 'Pria & Wanita',
       actionKey: 'Busana',
     ),
     (
       iconType: JavaraCategoryIconType.aksesoris,
       title: 'Aksesoris',
-      subtitle: 'Ricikan Adat',
       actionKey: 'Aksesoris',
     ),
     (
       iconType: JavaraCategoryIconType.batik,
       title: 'Batik',
-      subtitle: 'Motif Pakem',
       actionKey: 'Batik',
     ),
   ];
@@ -1529,31 +1526,15 @@ class _Categories extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              item.title,
-                              style: JText.serif(
-                                12.5,
-                                weight: FontWeight.w700,
-                                color: const Color(0xFFFFF0D0),
-                              ),
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 1.5),
-                            Text(
-                              item.subtitle,
-                              style: JText.sans(
-                                10.0,
-                                weight: FontWeight.w500,
-                                color: const Color(0xFFAFA08F),
-                              ),
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                        child: Text(
+                          item.title,
+                          style: JText.serif(
+                            13.5,
+                            weight: FontWeight.w600,
+                            color: const Color(0xFFFFF0D0),
+                          ),
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ),
