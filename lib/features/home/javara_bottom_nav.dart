@@ -11,13 +11,11 @@ class NavItemData {
     required this.label,
     required this.activeIcon,
     required this.inactiveIcon,
-    this.isPill = false,
   });
 
   final String label;
   final IconData activeIcon;
   final IconData inactiveIcon;
-  final bool isPill;
 }
 
 /// Floating Frosted Glass Capsule Bottom Navigation Bar khas JAVARA.
@@ -52,12 +50,10 @@ class JavaraBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     const activeColor = Color(0xFFFED897);
     const inactiveColor = Color(0xFF8F857B);
-    const pillBgColor = Color(0xFF261D16);
-    const pillBorderColor = Color(0xFFDFB76C);
 
-    // Hitung posisi horizontal alignment untuk sliding indicator (-0.80 sampai +0.80)
-    final double slidingAlignmentX = items.length > 1
-        ? -0.80 + (index * (1.60 / (items.length - 1)))
+    // Hitung posisi horizontal alignment tepat di tengah masing-masing slot tab
+    final double slidingAlignmentX = items.isNotEmpty
+        ? ((2 * index + 1) - items.length) / items.length
         : 0.0;
 
     return SafeArea(
@@ -105,35 +101,23 @@ class JavaraBottomNav extends StatelessWidget {
                       duration: const Duration(milliseconds: 280),
                       curve: Curves.easeOutCubic,
                       alignment: Alignment(slidingAlignmentX, 0.62),
-                      child: AnimatedScale(
-                        duration: const Duration(milliseconds: 200),
-                        scale: (index < items.length && items[index].isPill)
-                            ? 0.0
-                            : 1.0,
-                        child: AnimatedOpacity(
-                          duration: const Duration(milliseconds: 200),
-                          opacity: (index < items.length && items[index].isPill)
-                              ? 0.0
-                              : 1.0,
-                          child: Container(
-                            width: 22,
-                            height: 6,
-                            alignment: Alignment.center,
-                            child: Container(
-                              width: 4.5,
-                              height: 4.5,
-                              decoration: BoxDecoration(
-                                color: activeColor,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: activeColor.withValues(alpha: 0.85),
-                                    blurRadius: 5,
-                                    spreadRadius: 0.5,
-                                  ),
-                                ],
+                      child: Container(
+                        width: 22,
+                        height: 6,
+                        alignment: Alignment.center,
+                        child: Container(
+                          width: 4.5,
+                          height: 4.5,
+                          decoration: BoxDecoration(
+                            color: activeColor,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: activeColor.withValues(alpha: 0.85),
+                                blurRadius: 5,
+                                spreadRadius: 0.5,
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       ),
@@ -145,32 +129,18 @@ class JavaraBottomNav extends StatelessWidget {
                     children: [
                       for (var i = 0; i < items.length; i++)
                         Expanded(
-                          child: items[i].isPill
-                              ? _InteractivePillItem(
-                                  item: items[i],
-                                  isSelected: i == index,
-                                  pillBgColor: pillBgColor,
-                                  pillBorderColor: pillBorderColor,
-                                  activeColor: activeColor,
-                                  onTap: () {
-                                    if (i != index) {
-                                      HapticFeedback.selectionClick();
-                                      onChanged(i);
-                                    }
-                                  },
-                                )
-                              : _InteractiveNavItem(
-                                  item: items[i],
-                                  isSelected: i == index,
-                                  activeColor: activeColor,
-                                  inactiveColor: inactiveColor,
-                                  onTap: () {
-                                    if (i != index) {
-                                      HapticFeedback.selectionClick();
-                                      onChanged(i);
-                                    }
-                                  },
-                                ),
+                          child: _InteractiveNavItem(
+                            item: items[i],
+                            isSelected: i == index,
+                            activeColor: activeColor,
+                            inactiveColor: inactiveColor,
+                            onTap: () {
+                              if (i != index) {
+                                HapticFeedback.selectionClick();
+                                onChanged(i);
+                              }
+                            },
+                          ),
                         ),
                     ],
                   ),
@@ -285,108 +255,6 @@ class _InteractiveNavItemState extends State<_InteractiveNavItem> {
                 ),
                 const SizedBox(height: 8.0),
               ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Tombol Aksi Pil Tengah (Hero Hanger) Interaktif
-class _InteractivePillItem extends StatefulWidget {
-  const _InteractivePillItem({
-    required this.item,
-    required this.isSelected,
-    required this.pillBgColor,
-    required this.pillBorderColor,
-    required this.activeColor,
-    required this.onTap,
-  });
-
-  final NavItemData item;
-  final bool isSelected;
-  final Color pillBgColor;
-  final Color pillBorderColor;
-  final Color activeColor;
-  final VoidCallback onTap;
-
-  @override
-  State<_InteractivePillItem> createState() => _InteractivePillItemState();
-}
-
-class _InteractivePillItemState extends State<_InteractivePillItem> {
-  bool _isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      selected: widget.isSelected,
-      label: widget.item.label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: (_) {
-          setState(() => _isPressed = true);
-          HapticFeedback.lightImpact();
-        },
-        onTapUp: (_) {
-          setState(() => _isPressed = false);
-          widget.onTap();
-        },
-        onTapCancel: () {
-          setState(() => _isPressed = false);
-        },
-        child: AnimatedScale(
-          scale: _isPressed ? 0.92 : (widget.isSelected ? 1.03 : 1.0),
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutBack,
-          child: Center(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 240),
-              curve: Curves.easeOutCubic,
-              width: 66,
-              height: 38,
-              decoration: BoxDecoration(
-                color: widget.isSelected
-                    ? const Color(0xFF2E2218)
-                    : widget.pillBgColor,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: widget.isSelected
-                      ? widget.activeColor
-                      : widget.pillBorderColor,
-                  width: widget.isSelected ? 1.3 : 1.1,
-                ),
-                boxShadow: widget.isSelected
-                    ? [
-                        BoxShadow(
-                          color: widget.activeColor.withValues(alpha: 0.35),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.25),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-              ),
-              alignment: Alignment.center,
-              child: AnimatedScale(
-                scale: widget.isSelected ? 1.08 : 1.0,
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutBack,
-                child: Icon(
-                  widget.item.activeIcon,
-                  size: 24,
-                  color: widget.isSelected
-                      ? widget.activeColor
-                      : const Color(0xFFE4C590),
-                ),
-              ),
             ),
           ),
         ),

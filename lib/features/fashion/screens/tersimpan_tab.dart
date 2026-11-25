@@ -291,33 +291,35 @@ class _TersimpanTabState extends State<TersimpanTab> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                if (widget.onOpenWardrobe != null) ...[
+                  const SizedBox(height: 8),
 
-                // Tombol Coba di Wardrobe
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      HapticFeedback.selectionClick();
-                      SavedGarmentsService.instance.requestEquip(item);
-                      widget.onOpenWardrobe?.call();
-                    },
-                    icon: const Icon(Icons.checkroom_outlined, size: 14),
-                    label: const Text('Coba di Wardrobe'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2E2218),
-                      foregroundColor: const Color(0xFFFFDF9E),
-                      elevation: 0,
-                      side: const BorderSide(color: Color(0x66DFB76C), width: 0.8),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
+                  // Tombol Coba di Wardrobe
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        SavedGarmentsService.instance.requestEquip(item);
+                        widget.onOpenWardrobe?.call();
+                      },
+                      icon: const Icon(Icons.checkroom_outlined, size: 14),
+                      label: const Text('Coba di Wardrobe'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E2218),
+                        foregroundColor: const Color(0xFFFFDF9E),
+                        elevation: 0,
+                        side: const BorderSide(color: Color(0x66DFB76C), width: 0.8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ),

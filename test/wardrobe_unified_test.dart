@@ -16,8 +16,8 @@ void main() {
     SavedGarmentsService.instance.savedOutfitsNotifier.value = [];
   });
 
-  group('5-Tab Floating Capsule Navigation Bar & HomeScreen Tests', () {
-    testWidgets('HomeScreen renders exactly 5 tabs: Beranda, Koleksi, Hero Hanger Pill, Tersimpan, Profil', (
+  group('4-Tab Floating Capsule Navigation Bar & HomeScreen Tests', () {
+    testWidgets('HomeScreen renders exactly 4 tabs: Beranda, Koleksi, Tersimpan, Profil without Wardrobe pill', (
       tester,
     ) async {
       tester.view.physicalSize = const Size(720, 1280);
@@ -36,8 +36,9 @@ void main() {
       expect(find.text('Tersimpan'), findsOneWidget);
       expect(find.text('Profil'), findsOneWidget);
 
-      // Verifikasi tombol hero hanger pill di tengah (berbasis semantic / ikon)
-      expect(find.byIcon(Icons.checkroom_outlined), findsOneWidget);
+      // Verifikasi tombol Wardrobe pill di navbar sudah dihapus
+      expect(find.text('Wardrobe'), findsNothing);
+      expect(find.byIcon(Icons.checkroom_outlined), findsNothing);
 
       // Verifikasi tidak ada label tab lama yang tidak ada di desain baru
       expect(find.text('Jelajah'), findsNothing);
@@ -48,15 +49,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      // Switch ke Tab Wardrobe Hero Pill (Tab 2)
-      await tester.tap(find.byIcon(Icons.checkroom_outlined));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-
-      expect(find.text('Wardrobe Pribadi'), findsOneWidget);
-      expect(find.text('Kanvas Gaya'), findsOneWidget);
-
-      // Switch ke Tab Tersimpan (Tab 3)
+      // Switch ke Tab Tersimpan (Tab 2)
       await tester.tap(find.text('Tersimpan'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
@@ -64,6 +57,13 @@ void main() {
       expect(find.text('Koleksi Tersimpan'), findsOneWidget);
       expect(find.text('Item Busana'), findsOneWidget);
       expect(find.text('Setelan Pusaka'), findsNothing);
+
+      // Switch ke Tab Profil (Tab 3)
+      await tester.tap(find.text('Profil'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('Profil Pengguna'), findsOneWidget);
 
       // Pastikan timer di HomeTab selesai
       await tester.pump(const Duration(seconds: 2));

@@ -990,11 +990,15 @@ class _ProfileTabState extends State<ProfileTab> {
                                     color: _isGuest ? const Color(0xFF9E7E50) : const Color(0xFFB08D57),
                                   ),
                                   const SizedBox(width: 5),
-                                  Text(
-                                    _isGuest
-                                        ? 'Akun Tamu · Penjelajah Budaya'
-                                        : 'Pelestari Wastra Jawa Tengah',
-                                    style: JText.serif(10, weight: FontWeight.w700, color: const Color(0xFF382315)),
+                                  Flexible(
+                                    child: Text(
+                                      _isGuest
+                                          ? 'Akun Tamu · Penjelajah Budaya'
+                                          : 'Pelestari Wastra Jawa Tengah',
+                                      style: JText.serif(10, weight: FontWeight.w700, color: const Color(0xFF382315)),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ],
                               ),

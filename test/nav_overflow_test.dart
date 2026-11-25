@@ -15,12 +15,6 @@ void main() {
       inactiveIcon: Icons.grid_view_outlined,
     ),
     NavItemData(
-      label: 'Wardrobe',
-      activeIcon: Icons.checkroom_outlined,
-      inactiveIcon: Icons.checkroom_outlined,
-      isPill: true,
-    ),
-    NavItemData(
       label: 'Tersimpan',
       activeIcon: Icons.bookmark_rounded,
       inactiveIcon: Icons.bookmark_outline_rounded,
