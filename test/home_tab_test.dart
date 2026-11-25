@@ -326,7 +326,7 @@ void main() {
     expect(heroSize.width, 390.0);
     expect(heroSize.height, inInclusiveRange(240.0, 300.0));
     expect(find.text('ARSIP 01 · BUSANA PUTRI'), findsOneWidget);
-    expect(find.text('Kebaya Kartini Solo Sutra'), findsOneWidget);
+    expect(find.text('Kebaya Beludru Solo Putri'), findsOneWidget);
     expect(find.text('LIHAT KOLEKSI'), findsOneWidget);
     expect(find.byIcon(Icons.auto_awesome), findsNothing);
 

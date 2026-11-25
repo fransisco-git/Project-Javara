@@ -1333,7 +1333,7 @@ class _HeroCardState extends State<_HeroCard> {
   static final List<HeroSlideData> _slides = [
     HeroSlideData(
       eyebrow: 'ARSIP 01 · BUSANA PUTRI',
-      title: 'Kebaya Kartini Solo Sutra',
+      title: 'Kebaya Beludru Solo Putri',
       imagePath: 'assets/images/model_kebaya_kartini_solo.jpg',
       imageAlignment: const Alignment(0, -0.6),
       imageScale: 1.0,
