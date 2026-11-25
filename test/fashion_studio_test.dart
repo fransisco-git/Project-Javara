@@ -63,7 +63,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Coba Virtual Try-On (AI Studio)'), findsOneWidget);
-      expect(find.text('Coba di Studio Busana 3D'), findsOneWidget);
+      expect(find.text('Coba di Studio Busana 3D'), findsNothing);
     });
   });
 }

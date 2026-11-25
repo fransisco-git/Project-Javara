@@ -6,7 +6,6 @@ import '../../../services/saved_garments_service.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
 import 'javara_studio_screen.dart';
-import 'javanese_wardrobe_screen.dart';
 
 /// Screen 03 — Detail Pakaian (Halaman Ensiklopedia Busana Adat Jawa Tengah)
 class ClothingDetailScreen extends StatefulWidget {
@@ -328,10 +327,8 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
 
                   const SizedBox(height: 20),
 
-                  // DUAL BUTTON: VIRTUAL TRY-ON (AI STUDIO) & STUDIO 3D
+                  // TOMBOL VIRTUAL TRY-ON (AI STUDIO)
                   _buildVirtualTryOnButton(context, item),
-                  const SizedBox(height: 10),
-                  _buildStudio3DButton(context, item),
 
                   const SizedBox(height: 24),
 
@@ -507,68 +504,6 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                   Icon(
                     Icons.arrow_forward_ios_rounded,
                     color: Color(0xFFFFDF9E),
-                    size: 13,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStudio3DButton(BuildContext context, ClothingItem item) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: const Color(0xFFC79B3A),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x28000000),
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            Navigator.of(context).push(
-              fadeSlideRoute(
-                const JavaneseWardrobeScreen(),
-              ),
-            );
-          },
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.view_in_ar_rounded,
-                    color: Color(0xFF14100D),
-                    size: 22,
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    'Coba di Studio Busana 3D',
-                    style: TextStyle(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF14100D),
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  SizedBox(width: 6),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Color(0xFF14100D),
                     size: 13,
                   ),
                 ],

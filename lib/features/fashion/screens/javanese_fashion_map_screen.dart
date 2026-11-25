@@ -4,7 +4,6 @@ import '../../../core/transitions.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
 import 'clothing_detail_screen.dart';
-import 'javanese_wardrobe_screen.dart';
 
 /// Screen 06 — Peta Persebaran Busana Tradisional Jawa Tengah
 class JavaneseFashionMapScreen extends StatefulWidget {
@@ -454,34 +453,6 @@ class _JavaneseFashionMapScreenState extends State<JavaneseFashionMapScreen> {
                         },
                       );
                     }).toList(),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // TOMBOL COBA BUSANA DAERAH INI DI STUDIO 3D
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE4C590),
-                      foregroundColor: const Color(0xFF14100D),
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    icon: const Icon(Icons.view_in_ar_rounded, size: 18),
-                    label: Text(
-                      'Buka Studio 3D Busana ${activeDossier.title.split('(').first.trim()}',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        fadeSlideRoute(const JavaneseWardrobeScreen()),
-                      );
-                    },
                   ),
                 ],
               ),

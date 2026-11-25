@@ -6,13 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/theme.dart';
-import '../../../core/transitions.dart';
 import '../../../services/fashn_ai_service.dart';
 import '../../../services/supabase_service.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
 import '../models/realistic_fashion_model.dart';
-import 'javanese_wardrobe_screen.dart';
 
 /// Mode Penampil Utama di JAVARA STUDIO
 enum StudioViewingMode {
@@ -1704,23 +1702,7 @@ class _JavaraStudioScreenState extends State<JavaraStudioScreen>
             ),
           ),
 
-          // Tombol Buka Mode 3D WebGL / Turntable
-          CircleAvatar(
-            backgroundColor: const Color(0x66000000),
-            radius: 18,
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              icon: const Icon(
-                Icons.view_in_ar_rounded,
-                size: 18,
-                color: Color(0xFFFFDF9E),
-              ),
-              onPressed: () {
-                Navigator.of(context)
-                    .push(fadeSlideRoute(const JavaneseWardrobeScreen()));
-              },
-            ),
-          ),
+          const SizedBox(width: 36),
         ],
       ),
     );

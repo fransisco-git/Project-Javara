@@ -43,7 +43,6 @@ dependencies:
   audioplayers: ^6.8.1
   flutter_volume_controller: ^2.0.2
   http: ^1.2.1
-  webview_flutter: ^4.10.0
   camera: ^0.12.2
   image_picker: ^1.2.4
   video_player: ^2.9.2
@@ -72,7 +71,6 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/web_3d/
     - assets/audio/
     - assets/videos/
     - assets/garments/

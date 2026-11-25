@@ -8,7 +8,6 @@ import '../../home/javara_bottom_nav.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
 import 'clothing_detail_screen.dart';
-import 'javanese_wardrobe_screen.dart';
 
 /// Screen 02 — Katalog Busana Tradisional Jawa Tengah (UNIQLO x ZARA Editorial)
 ///
@@ -1064,48 +1063,13 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${outfit.region.title} · ${outfit.era}',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFFDFB76C),
-                          ),
-                        ),
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFDFB76C),
-                            foregroundColor: const Color(0xFF14100D),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          icon: const Icon(Icons.checkroom_rounded, size: 14),
-                          label: const Text(
-                            'Coba di Wardrobe',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              fadeSlideRoute(
-                                JavaneseWardrobeScreen(
-                                  initialOutfit: outfit,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                    Text(
+                      '${outfit.region.title} · ${outfit.era}',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFDFB76C),
+                      ),
                     ),
                   ],
                 ),
