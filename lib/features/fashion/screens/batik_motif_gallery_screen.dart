@@ -26,7 +26,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
       usageContext:
           'Motif Larangan Keraton (Batik Awisan Dalem) tingkat tertinggi. Dahulu mutlak hanya boleh dikenakan oleh Sunan/Raja dan Putra Mahkota pada upacara Hajad Dalem.',
       technicalDetails:
-          'Ukuran ragam hias parang di atas 8 cm. Digambar dengan canting klowong mori primissima dan dibabar dengan soga jembangan alami Laweyan.',
+          'Ukuran ragam hias parang di atas 8 cm. Digambar dengan canting klowong di atas kain mori primisima dan dibabar menggunakan pewarna soga jambangan alami khas Laweyan.',
       historicalOrigin:
           'Diciptakan pada masa Sultan Agung Hanyakrakusuma di Mataram Islam abad ke-17 saat bermeditasi di pesisir Pantai Parangkusumo.',
       primaryColor: const Color(0xFF382315),
@@ -46,7 +46,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
       usageContext:
           'Dikenakan oleh kalangan cendekiawan, abdi dalem, dan priyayi yang mengedepankan ketulusan budi dan pengendalian hawa nafsu.',
       technicalDetails:
-          'Ragam hias tersusun atas 4 lingkaran lonjong berpotongan simetris. Berukuran kecil sebesar uang koin picis kuno.',
+          'Ragam hias tersusun atas empat bulatan lonjong berpotongan simetris berukuran kecil sebesar uang koin picis kuno. Ditulis menggunakan canting klowong untuk kerangka utama dan canting cecek untuk isen-isen titik, lalu dibabar dengan pewarna alami keraton berupa wedel biru nila dan soga cokelat.',
       historicalOrigin:
           'Salah satu motif tertua di Nusantara yang telah terpahat pada relief candi zaman Singhasari dan Majapahit abad ke-13.',
       primaryColor: const Color(0xFF2C1E14),
@@ -56,7 +56,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
     ),
     _ExtendedBatikData(
       id: 'motif_sidomukti',
-      name: 'Sidomukti Mangkunegaran',
+      name: 'Sidomukti Solo',
       javaneseScript: 'ꦱꦶꦢꦺꦴꦩꦸꦏ꧀ꦠꦶ',
       category: 'Semen / Gurda',
       region: 'Surakarta Hadiningrat',
@@ -66,7 +66,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
       usageContext:
           'Kain jarik wajib bagi mempelai pengantin adat Jawa gaya Solo saat prosesi panggih pernikahan.',
       technicalDetails:
-          'Ornamen sayap garuda (lar), pohon hayat, tahta singgasana, dan kupu-kupu yang dianyam halus dengan latar ukel uwer sogan cokelat kemerahan.',
+          'Ornamen sayap garuda (lar), pohon hayat, takhta singgasana, dan kupu-kupu yang ditulis dengan canting secara halus di atas latar ukel uwer berpewarna soga cokelat kemerahan.',
       historicalOrigin:
           'Dikembangkan pada masa Susuhunan Paku Buwono IV di Kasunanan Surakarta pada akhir abad ke-18.',
       primaryColor: const Color(0xFF422C1A),
@@ -86,7 +86,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
       usageContext:
           'Dikenakan khusus oleh orang tua pengantin pada upacara panggih pernikahan adat Jawa sebagai simbol doa restu yang tulus.',
       technicalDetails:
-          'Bunga melati kuncup bersusun empat kelopak yang diulang secara rapat membentuk gugusan rasi bintang kencana.',
+          'Bunga melati kuncup bersusun empat kelopak yang ditulis rapat menggunakan canting cecek halus membentuk gugusan bintang kencana, dibabar dengan pewarna alami soga dan wedel gelap. Kerap dipadukan dengan ornamen gurda pada variasi Truntum Seling atau Truntum Gurda.',
       historicalOrigin:
           'Diciptakan oleh Kanjeng Ratu Beruk (permaisuri Paku Buwono III) saat menatap bintang gemerlap di langit malam Keraton Solo.',
       primaryColor: const Color(0xFF281A10),
@@ -96,7 +96,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
     ),
     _ExtendedBatikData(
       id: 'motif_buketan_pekalongan',
-      name: 'Batik Buketan Pekalongan',
+      name: 'Buketan Pekalongan',
       javaneseScript: 'ꦧꦸꦏꦺꦠꦤ꧀ꦥꦼꦏꦭꦺꦴꦔꦤ꧀',
       category: 'Pesisir Flora Fauna',
       region: 'Pesisir Pekalongan (Pantura)',
@@ -104,9 +104,9 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
       philosophy:
           'Rangkaian karangan bunga mawar, krisan, dan burung merak mencerminkan kegembiraan hidup masyarakat pesisir maritim yang terbuka terhadap pengaruh budaya dunia.',
       usageContext:
-          'Busana keseharian masyarakat pesisir, pesta perkawinan peranakan, dan diplomasi maritim Jawa.',
+          'Busana keseharian masyarakat pesisir, pesta perkawinan peranakan, serta busana pergaulan masyarakat Indo-Eropa, Peranakan Tionghoa, dan perempuan pesisir.',
       technicalDetails:
-          'Pewarnaan cerah kontras (merah jambu, toska, kuning emas) dengan gradasi tumpal segitiga pada kepala sarung.',
+          'Rangkaian karangan bunga bergaya Eropa (bouquet) lengkap dengan dedaunan dan burung kecil yang ditulis halus dengan canting di atas kain putih gading, dibabar dalam palet kelengan monokrom biru nila alami maupun pewarna sintetis pesisir abad ke-20.',
       historicalOrigin:
           'Akulturasi budaya pesisir Pekalongan dengan perajin Indo-Eropa dan Tionghoa pada awal abad ke-20.',
       primaryColor: const Color(0xFF5A1C1C),
@@ -116,17 +116,17 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
     ),
     _ExtendedBatikData(
       id: 'motif_lasem_tiga_negeri',
-      name: 'Batik Tiga Negeri Lasem',
+      name: 'Tiga Negeri Lasem',
       javaneseScript: 'ꦧꦠꦶꦏ꧀ꦭꦱꦼꦩ꧀',
       category: 'PESISIRAN · AKULTURASI',
       region: 'Lasem, Rembang · Jawa Tengah',
       isLarangan: false,
       philosophy:
-          'Melambangkan keharmonisan lintas budaya Jawa dan Tionghoa di pesisir utara Jawa Tengah. Tiga warna utamanya mencerminkan tiga daerah pewarnaan klasik—merah darah ayam (getih pitik) khas Lasem sebagai simbol keberanian dan kebahagiaan, biru nila khas pesisir sebagai keteduhan, serta cokelat sogan khas Surakarta sebagai kebijaksanaan.',
+          'Melambangkan keharmonisan lintas budaya Jawa dan Tionghoa di pesisir utara Jawa Tengah. Perpaduan tiga warna utamanya menyimbolkan keberanian dan kebahagiaan, keteduhan jiwa, serta kebijaksanaan dalam menjalani kehidupan.',
       usageContext:
           'Umumnya dikenakan pada acara perayaan, jamuan resmi, dan busana kebaya encim atau busana adat pesisir Jawa Tengah.',
       technicalDetails:
-          'Pewarnaan tiga tahap lintas daerah: merah mengkudu (getih pitik) khas Lasem, biru nila khas pesisir utara, dan cokelat sogan khas Surakarta di atas kain mori primissima halus.',
+          'Dikerjakan melalui proses pencelupan lintas tiga kota klasik di atas kain mori primisima: Lasem untuk warna merah akar mengkudu (abang getih pithik), Pekalongan atau Kudus untuk biru nila, serta Solo (Surakarta) untuk cokelat soga.',
       historicalOrigin:
           'Berkembang sejak abad ke-19 di pesisir Lasem, Rembang, Jawa Tengah melalui akulturasi pembatik Jawa dan peranakan Tionghoa yang melahirkan warna merah darah ayam legendaris.',
       primaryColor: const Color(0xFF4A1818),
@@ -364,13 +364,13 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
                   ),
                   const SizedBox(height: 12),
                   _buildDetailTile(
-                    'Teknik & Pewarnaan Alami',
+                    'Ciri Motif, Teknik & Pewarnaan',
                     activeMotif.technicalDetails,
                     Icons.color_lens_rounded,
                   ),
                   const SizedBox(height: 12),
                   _buildDetailTile(
-                    'Latar Sejarah & Tokoh Pencipta',
+                    'Latar Sejarah & Asal-Usul',
                     activeMotif.historicalOrigin,
                     Icons.history_edu_rounded,
                   ),
