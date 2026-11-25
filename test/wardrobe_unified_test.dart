@@ -63,6 +63,7 @@ void main() {
 
       expect(find.text('Koleksi Tersimpan'), findsOneWidget);
       expect(find.text('Item Busana'), findsOneWidget);
+      expect(find.text('Setelan Pusaka'), findsNothing);
 
       // Pastikan timer di HomeTab selesai
       await tester.pump(const Duration(seconds: 2));

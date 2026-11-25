@@ -3,11 +3,10 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme.dart';
 import '../../../services/saved_garments_service.dart';
-import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
 
 /// Tab Koleksi Tersimpan - Halaman terpisah khusus untuk melihat dan mengelola
-/// seluruh item busana bookmark dan setelan pusaka yang telah disimpan pengguna.
+/// seluruh item busana yang telah disimpan pengguna.
 class TersimpanTab extends StatefulWidget {
   const TersimpanTab({
     super.key,
@@ -23,9 +22,6 @@ class TersimpanTab extends StatefulWidget {
 }
 
 class _TersimpanTabState extends State<TersimpanTab> {
-  // 0: Item Busana, 1: Setelan Pusaka
-  int _activeSubTab = 0;
-
   @override
   void initState() {
     super.initState();
@@ -57,60 +53,6 @@ class _TersimpanTabState extends State<TersimpanTab> {
     );
   }
 
-  void _deleteOutfit(SavedOutfit outfit) {
-    HapticFeedback.lightImpact();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1712),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0x33DFB76C)),
-        ),
-        title: Text(
-          'Hapus Setelan?',
-          style: JText.editorial(16, weight: FontWeight.w700, color: const Color(0xFFFAF6F0)),
-        ),
-        content: Text(
-          'Setelan "${outfit.customName}" akan dihapus dari koleksi tersimpan Anda.',
-          style: JText.sans(12.5, color: const Color(0xFFD4C8B8)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              'Batal',
-              style: JText.sans(13, color: const Color(0xFFB0A290)),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B251E),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            onPressed: () {
-              Navigator.pop(ctx);
-              SavedGarmentsService.instance.deleteOutfit(outfit.id);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  duration: const Duration(milliseconds: 1400),
-                  backgroundColor: const Color(0xFF241A14),
-                  behavior: SnackBarBehavior.floating,
-                  content: Text(
-                    'Setelan "${outfit.customName}" dihapus.',
-                    style: const TextStyle(color: Color(0xFFFAF6F0), fontSize: 12.5),
-                  ),
-                ),
-              );
-            },
-            child: const Text('Hapus'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,11 +64,9 @@ class _TersimpanTabState extends State<TersimpanTab> {
           child: Column(
             children: [
               _buildHeader(),
-              _buildSubTabSwitcher(),
+              _buildSavedItemsBar(),
               Expanded(
-                child: _activeSubTab == 0
-                    ? _buildSavedGarmentsList()
-                    : _buildSavedOutfitsList(),
+                child: _buildSavedGarmentsList(),
               ),
             ],
           ),
@@ -171,7 +111,7 @@ class _TersimpanTabState extends State<TersimpanTab> {
                 ),
                 const SizedBox(height: 1),
                 Text(
-                  'ꦏꦺꦴꦭꦺꦏ꧀ꦱꦶꦠꦼꦂꦱꦶꦩ꧀ꦥꦤ꧀ • Pusaka & Setelan Favorit',
+                  'ꦏꦺꦴꦭꦺꦏ꧀ꦱꦶꦠꦼꦂꦱꦶꦩ꧀ꦥꦤ꧀ • Item Busana Favorit',
                   style: JText.sans(
                     11,
                     weight: FontWeight.w400,
@@ -188,114 +128,45 @@ class _TersimpanTabState extends State<TersimpanTab> {
     );
   }
 
-  Widget _buildSubTabSwitcher() {
+  Widget _buildSavedItemsBar() {
     return ValueListenableBuilder<Set<String>>(
       valueListenable: SavedGarmentsService.instance.savedItemIdsNotifier,
       builder: (context, savedIds, _) {
-        return ValueListenableBuilder<List<SavedOutfit>>(
-          valueListenable: SavedGarmentsService.instance.savedOutfitsNotifier,
-          builder: (context, savedOutfits, _) {
-            final itemCount = savedIds.length;
-            final outfitCount = savedOutfits.length;
+        final itemCount = savedIds.length;
 
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1712),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0x22DFB76C)),
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+          child: Row(
+            children: [
+              Text(
+                'Item Busana',
+                style: JText.sans(
+                  12.5,
+                  weight: FontWeight.w700,
+                  color: const Color(0xFFFFDF9E),
+                ),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildSubTabButton(
-                      index: 0,
-                      label: 'Item Busana',
-                      count: itemCount,
-                      isSelected: _activeSubTab == 0,
-                    ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0x2ADFB76C),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0x44DFB76C), width: 0.8),
+                ),
+                child: Text(
+                  '$itemCount',
+                  style: JText.sans(
+                    10.5,
+                    weight: FontWeight.w700,
+                    color: const Color(0xFFFFDF9E),
                   ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: _buildSubTabButton(
-                      index: 1,
-                      label: 'Setelan Pusaka',
-                      count: outfitCount,
-                      isSelected: _activeSubTab == 1,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            );
-          },
+            ],
+          ),
         );
       },
-    );
-  }
-
-  Widget _buildSubTabButton({
-    required int index,
-    required String label,
-    required int count,
-    required bool isSelected,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          if (_activeSubTab != index) {
-            HapticFeedback.selectionClick();
-            setState(() => _activeSubTab = index);
-          }
-        },
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF2C2017) : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isSelected ? const Color(0x66DFB76C) : Colors.transparent,
-              width: 1.0,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: JText.sans(
-                    12,
-                    weight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected ? const Color(0xFFFFDF9E) : const Color(0xFF8F8073),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                  decoration: BoxDecoration(
-                    color: isSelected ? const Color(0x33DFB76C) : const Color(0x11FFFFFF),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '$count',
-                    style: JText.sans(
-                      10.5,
-                      weight: FontWeight.w700,
-                      color: isSelected ? const Color(0xFFFFDF9E) : const Color(0xFF8F8073),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -448,170 +319,6 @@ class _TersimpanTabState extends State<TersimpanTab> {
                   ),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSavedOutfitsList() {
-    return ValueListenableBuilder<List<SavedOutfit>>(
-      valueListenable: SavedGarmentsService.instance.savedOutfitsNotifier,
-      builder: (context, outfits, _) {
-        if (outfits.isEmpty) {
-          return _buildEmptyState(
-            icon: Icons.checkroom_outlined,
-            title: 'Belum Ada Setelan Tersimpan',
-            description:
-                'Kombinasikan atasan, bawahan, dan aksesori di Wardrobe Kanvas Gaya lalu simpan setelan kreasi Anda di sini.',
-            ctaLabel: 'Rancang di Wardrobe',
-            onCtaTap: () => widget.onOpenWardrobe?.call(),
-          );
-        }
-
-        return ListView.separated(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            12,
-            20,
-            MediaQuery.of(context).padding.bottom + 90,
-          ),
-          physics: const BouncingScrollPhysics(),
-          itemCount: outfits.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 14),
-          itemBuilder: (context, index) {
-            final outfit = outfits[index];
-            return _buildOutfitCard(outfit);
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildOutfitCard(SavedOutfit outfit) {
-    final head = JavaneseClothingData.getItemById(outfit.headwearId);
-    final upper = JavaneseClothingData.getItemById(outfit.upperBodyId);
-    final lower = JavaneseClothingData.getItemById(outfit.lowerBodyId);
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1712),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0x33DFB76C), width: 1.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      outfit.customName,
-                      style: JText.serif(
-                        15,
-                        weight: FontWeight.w700,
-                        color: const Color(0xFFFAF6F0),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${outfit.gender.label} • Keselarasan Budaya: ${'★' * outfit.harmonyRating}',
-                      style: JText.sans(
-                        11,
-                        weight: FontWeight.w600,
-                        color: const Color(0xFFDFB76C),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                iconSize: 18,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFF8F8073)),
-                tooltip: 'Hapus Setelan',
-                onPressed: () => _deleteOutfit(outfit),
-              ),
-            ],
-          ),
-          const Divider(height: 16, color: Color(0x22DFB76C)),
-
-          // Rincian Komponen Busana
-          if (head != null) _buildOutfitLayerRow('Kepala', head.name),
-          if (upper != null) _buildOutfitLayerRow('Atasan', upper.name),
-          if (lower != null) _buildOutfitLayerRow('Bawahan', lower.name),
-
-          const SizedBox(height: 10),
-
-          // Tombol Terapkan ke Kanvas Wardrobe
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                SavedGarmentsService.instance.requestApplyOutfit(outfit);
-                widget.onOpenWardrobe?.call();
-              },
-              icon: const Icon(Icons.palette_outlined, size: 15),
-              label: const Text('Terapkan ke Wardrobe Kanvas'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: JColors.antiqueGold,
-                foregroundColor: const Color(0xFF14100D),
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 9),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOutfitLayerRow(String category, String name) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.5),
-      child: Row(
-        children: [
-          Container(
-            width: 64,
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-            decoration: BoxDecoration(
-              color: const Color(0x1ADFB76C),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              category,
-              style: JText.sans(
-                9.5,
-                weight: FontWeight.w700,
-                color: const Color(0xFFDFB76C),
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              name,
-              style: JText.sans(
-                11.5,
-                weight: FontWeight.w500,
-                color: const Color(0xFFE8E0D5),
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
