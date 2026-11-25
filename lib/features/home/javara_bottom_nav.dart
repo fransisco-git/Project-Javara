@@ -46,7 +46,7 @@ class JavaraBottomNav extends StatelessWidget {
 
   static const double barHeight = 64.0;
   static const double bottomMargin = 8.0;
-  static const Color activeColor = Color(0xFFFED897);
+  static const Color activeColor = JColors.accentGold;
   static const Color inactiveColor = Color(0xFFB8B0A6);
   static const Color surfaceColor = Color(0xFF16110D);
 

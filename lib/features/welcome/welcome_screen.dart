@@ -14,9 +14,10 @@ import '../home/home_screen.dart';
 const String kWelcomeHeroAsset =
     'assets/images/borobudur_buddha_merapi_dawn.jpg';
 
-/// Warna aksen emas prada dan cokelat gelap khas layar selamat datang JAVARA
-/// (diturunkan dari token desain dan palet layar yang ada, ~#E0B865 & ~#1A120B).
-const Color _kCtaGold = Color(0xFFDFB76C);
+/// Konstanta path aset logo monogram JAVARA.
+const String kWelcomeLogoAsset = 'assets/images/logo_javara.png';
+
+/// Warna gelap khas layar selamat datang JAVARA.
 const Color _kDarkBrown = Color(0xFF140C06);
 const Color _kDarkBrownBg = Color(0xFF100905);
 const Color _kScrimDarkBrown = Color(0xFF140D07);
@@ -116,9 +117,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Pra-muat panorama megah Borobudur Buddha & Merapi fajar
+    // Pra-muat panorama megah Borobudur Buddha & Merapi fajar serta logo monogram
     precacheImage(
       const AssetImage(kWelcomeHeroAsset),
+      context,
+    );
+    precacheImage(
+      const AssetImage(kWelcomeLogoAsset),
       context,
     );
   }
@@ -286,6 +291,28 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ),
                   ),
 
+                  // 5b. Logo Monogram J-V kecil di bawah SafeArea atas (rata tengah, tinggi 44 px)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Center(
+                          child: Image.asset(
+                            kWelcomeLogoAsset,
+                            height: 44,
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.high,
+                            errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
                   // 6. Blok Konten Bawah: Headline, Subtitle, Tombol Utama & Masuk/Daftar
                   Positioned(
                     left: 0,
@@ -362,7 +389,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 animation: _headlineAnim,
                                 disableAnimations: disableAnimations,
                                 child: Text(
-                                  'Mengenal warisan.\nMemahami makna.',
+                                  'Setiap busana punya cerita.',
                                   style: JText.serif(
                                     h < 700 ? 28 : 34,
                                     weight: FontWeight.w700,
@@ -415,7 +442,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
                               SizedBox(height: h < 700 ? 14 : 20),
 
-                              // 3. Tombol Utama Satu-satunya: "Mulai Eksplorasi Budaya →" (Solid emas, teks cokelat gelap w600, tinggi 56, radius 12)
+                              // 3. Tombol Utama Satu-satunya: "Mulai Menjelajah →" (Solid emas, teks cokelat gelap w600, tinggi 56, radius 12)
                               _buildStaggeredItem(
                                 animation: _primaryCtaAnim,
                                 disableAnimations: disableAnimations,
@@ -425,7 +452,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   child: ElevatedButton(
                                     onPressed: _onPrimaryExplore,
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: _kCtaGold,
+                                      backgroundColor: JColors.accentGold,
                                       foregroundColor: _kDarkBrown,
                                       elevation: 2,
                                       shadowColor: const Color(0x33000000),
@@ -439,7 +466,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            'Mulai Eksplorasi Budaya',
+                                            'Mulai Menjelajah',
                                             style: JText.sans(
                                               15,
                                               weight: FontWeight.w600,
@@ -463,7 +490,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
                               SizedBox(height: h < 700 ? 4 : 8),
 
-                              // 4. Baris Masuk / Daftar (TextButton Masuk w600 emas & TextButton Daftar putih opacity 0.75 dipisah titik tengah, tap >= 48dp)
+                              // 4. Baris Masuk / Daftar (kontras tinggi, tap >= 48x48dp)
                               _buildStaggeredItem(
                                 animation: _secondaryCtaAnim,
                                 disableAnimations: disableAnimations,
@@ -476,27 +503,28 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                         onPressed: _onLoginAction,
                                         style: TextButton.styleFrom(
                                           minimumSize: const Size(48, 48),
+                                          tapTargetSize: MaterialTapTargetSize.padded,
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
+                                            horizontal: 14,
                                             vertical: 12,
                                           ),
                                         ),
                                         child: Text(
                                           'Masuk',
                                           style: JText.sans(
-                                            14,
+                                            15,
                                             weight: FontWeight.w600,
-                                            color: _kCtaGold,
+                                            color: JColors.accentGold,
                                           ),
                                         ),
                                       ),
-                                      const ExcludeSemantics(
+                                      ExcludeSemantics(
                                         child: Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 2),
+                                          padding: const EdgeInsets.symmetric(horizontal: 4),
                                           child: Text(
                                             '·',
                                             style: TextStyle(
-                                              color: Color(0x80FFFFFF),
+                                              color: Colors.white.withValues(alpha: 0.65),
                                               fontSize: 16,
                                               fontWeight: FontWeight.w700,
                                             ),
@@ -507,17 +535,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                         onPressed: _onSignUpAction,
                                         style: TextButton.styleFrom(
                                           minimumSize: const Size(48, 48),
+                                          tapTargetSize: MaterialTapTargetSize.padded,
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
+                                            horizontal: 14,
                                             vertical: 12,
                                           ),
                                         ),
                                         child: Text(
                                           'Daftar',
                                           style: JText.sans(
-                                            14,
-                                            weight: FontWeight.w400,
-                                            color: Colors.white.withValues(alpha: 0.75),
+                                            15,
+                                            weight: FontWeight.w500,
+                                            color: Colors.white.withValues(alpha: 0.92),
                                           ),
                                         ),
                                       ),

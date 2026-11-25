@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:jawara_app/core/theme.dart';
 import 'package:jawara_app/features/auth/login_screen.dart';
 import 'package:jawara_app/features/auth/signup_screen.dart';
+import 'package:jawara_app/features/home/javara_bottom_nav.dart';
 import 'package:jawara_app/features/welcome/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,12 +29,32 @@ void main() {
       expect(find.byType(WelcomeScreen), findsOneWidget);
 
       // Editorial UI and buttons exist immediately
-      expect(find.text('Mengenal warisan.\nMemahami makna.'), findsOneWidget);
-      expect(find.text('Mulai Eksplorasi Budaya'), findsOneWidget);
+      expect(find.text('Setiap busana punya cerita.'), findsOneWidget);
+      expect(find.text('Mulai Menjelajah'), findsOneWidget);
       expect(find.text('Masuk'), findsOneWidget);
       expect(find.text('Daftar'), findsOneWidget);
       expect(find.text(' · '), findsNothing); // Separated by dot character '·'
       expect(find.text('·'), findsOneWidget);
+
+      // Verify monogram logo asset is rendered under top SafeArea with height 44
+      final logoFinder = find.byWidgetPredicate(
+        (w) =>
+            w is Image &&
+            w.image is AssetImage &&
+            (w.image as AssetImage).assetName == kWelcomeLogoAsset,
+      );
+      expect(logoFinder, findsOneWidget);
+      expect(tester.widget<Image>(logoFinder).height, 44);
+
+      // Verify CTA gold matches navbar accent constant (single source of truth)
+      final ctaButton = tester.widget<ElevatedButton>(
+        find.widgetWithText(ElevatedButton, 'Mulai Menjelajah'),
+      );
+      expect(
+        ctaButton.style?.backgroundColor?.resolve({}),
+        JavaraBottomNav.activeColor,
+      );
+      expect(JavaraBottomNav.activeColor, JColors.accentGold);
 
       // Aksara Jawa element above headline is commented out (hidden)
       expect(find.textContaining('ꦗ ꦮ ꦫ'), findsNothing);
@@ -75,7 +97,7 @@ void main() {
             await tester.pump(const Duration(milliseconds: 200));
 
             // Verify essential interactive elements are present and mounted
-            expect(find.text('Mulai Eksplorasi Budaya'), findsOneWidget);
+            expect(find.text('Mulai Menjelajah'), findsOneWidget);
             expect(find.text('Masuk'), findsOneWidget);
             expect(find.text('Daftar'), findsOneWidget);
           }
@@ -109,7 +131,7 @@ void main() {
       expect(find.byIcon(Icons.volume_off_rounded), findsNothing);
     });
 
-    testWidgets('Tapping Mulai Eksplorasi Budaya signs in as guest automatically', (tester) async {
+    testWidgets('Tapping Mulai Menjelajah signs in as guest automatically', (tester) async {
       SharedPreferences.setMockInitialValues({});
       tester.view.physicalSize = const Size(390 * 2, 844 * 2);
       tester.view.devicePixelRatio = 2.0;
@@ -122,7 +144,7 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 600));
 
-      final exploreFinder = find.text('Mulai Eksplorasi Budaya');
+      final exploreFinder = find.text('Mulai Menjelajah');
       expect(exploreFinder, findsOneWidget);
 
       await tester.tap(exploreFinder);
@@ -193,7 +215,7 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 200));
 
-      final headlineFinder = find.text('Mengenal warisan.\nMemahami makna.');
+      final headlineFinder = find.text('Setiap busana punya cerita.');
       expect(headlineFinder, findsOneWidget);
       final textWidgetSmall = tester.widget<Text>(headlineFinder);
       expect(textWidgetSmall.style?.fontSize, 28);
@@ -230,8 +252,8 @@ void main() {
       // Frame renders immediately
       await tester.pump();
 
-      expect(find.text('Mengenal warisan.\nMemahami makna.'), findsOneWidget);
-      expect(find.text('Mulai Eksplorasi Budaya'), findsOneWidget);
+      expect(find.text('Setiap busana punya cerita.'), findsOneWidget);
+      expect(find.text('Mulai Menjelajah'), findsOneWidget);
       expect(find.text('Masuk'), findsOneWidget);
       expect(find.text('Daftar'), findsOneWidget);
     });
