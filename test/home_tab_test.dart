@@ -185,7 +185,7 @@ void main() {
       expect(find.text('Beskap Jawi Jangkep'), findsOneWidget);
       expect(find.text('Solo Basahan'), findsOneWidget);
       expect(find.text('Batik Tulis Parang Barong'), findsOneWidget);
-      expect(find.text('Kebaya Kartini Jawa Tengah'), findsOneWidget);
+      expect(find.text('Kebaya Kartini'), findsOneWidget);
 
       // Verify repetitive "Pelajari Tradisi →" button text has been completely removed
       expect(find.text('Pelajari Tradisi →'), findsNothing);
@@ -412,7 +412,7 @@ void main() {
       expect(
         resolveCulturalMapsQuery(
           itemId: 'kebaya_kartini_rembang',
-          title: 'Kebaya Kartini Jawa Tengah',
+          title: 'Kebaya Kartini',
           location: 'Sentra Bordir & Kebaya Rembang - Jepara',
           region: 'Kabupaten Rembang',
         ),

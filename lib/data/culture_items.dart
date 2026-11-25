@@ -94,7 +94,7 @@ const popularItems = <CultureItem>[
   ),
   CultureItem(
     id: 'kebaya_kartini_rembang',
-    title: 'Kebaya Kartini Jawa Tengah',
+    title: 'Kebaya Kartini',
     meta: 'Busana Tradisional Wanita · Rembang & Jepara',
     price: 'Rp325.000',
     actionLabel: 'Sewa / Beli',
