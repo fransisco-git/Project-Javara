@@ -54,7 +54,7 @@ const popularItems = <CultureItem>[
   ),
   CultureItem(
     id: 'busana_pengantin_solo_basahan',
-    title: 'Solo Basahan',
+    title: 'Solo Basahan Pengantin',
     meta: 'Busana Pengantin Adat · Surakarta, Jateng',
     price: 'Rp1.250.000',
     actionLabel: 'Sewa Busana',
