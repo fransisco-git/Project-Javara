@@ -13,11 +13,11 @@ import '../heritage/culture_detail_screen.dart';
 import '../fashion/screens/clothing_detail_screen.dart';
 import '../fashion/screens/clothing_catalog_screen.dart';
 import '../fashion/screens/batik_motif_gallery_screen.dart';
-import '../fashion/data/javanese_clothing_data.dart';
 import '../fashion/models/javanese_clothing_models.dart';
 import '../../services/saved_garments_service.dart';
 import '../../widgets/skeleton_shimmer.dart';
 import '../../widgets/interactive_feedback.dart';
+import 'event_guide_data.dart';
 import 'javara_bottom_nav.dart';
 import 'widgets/category_theme_icons.dart';
 import 'widgets/hero_slide.dart';
@@ -325,14 +325,16 @@ class _HomeTabState extends State<HomeTab> {
                                       const SizedBox(height: 24),
                                     ],
 
-                                    // 4. Sorotan Kurasi "Busana Pilihan Hari Ini"
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(
+                                    // 4. Kartu "Panduan Acara"
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
                                         horizontal: 20,
                                       ),
                                       child: StaggerIn(
                                         index: 3,
-                                        child: _FeaturedOutfitOfTheDayCard(),
+                                        child: _EventGuideCard(
+                                          onOpenMap: () => widget.onOpenTab(1),
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(height: 26),
@@ -1815,219 +1817,281 @@ class _EditorialCultureCard extends StatelessWidget {
   }
 }
 
-/// Card Busana Pilihan Hari Ini (Featured Outfit of the Day)
-/// Disajikan dengan layout editorial tenang, rotasi harian berbasis tanggal,
-/// dan satu tombol CTA penuh tanpa tombol sekunder yang redundan.
-class _FeaturedOutfitOfTheDayCard extends StatelessWidget {
-  const _FeaturedOutfitOfTheDayCard();
+/// Kartu "Panduan Acara" bergaya editorial selaras Hero Banner.
+/// Tanpa badge bintang, tanpa aksara Jawa, tanpa ikon.
+class _EventGuideCard extends StatelessWidget {
+  const _EventGuideCard({required this.onOpenMap});
 
-  static List<String> _ricikanTagsFor(String outfitId) {
-    switch (outfitId) {
-      case 'outfit_jawi_jangkep_kasunanan':
-        return const [
-          'Blangkon Trepes',
-          'Beskap Langenharjan',
-          'Batik Parang Barong',
-          'Keris Ladrang Solo',
-        ];
-      case 'outfit_solo_kanigaran_beludru':
-        return const [
-          'Kuluk Kanigaran',
-          'Beskap Sikepan Beludru',
-          'Batik Sidomukti',
-          'Keris Ladrang Solo',
-        ];
-      case 'outfit_kebaya_kartini_jepara_ningrat':
-        return const [
-          'Sanggul Tekuk Melati',
-          'Kebaya Kartini Jepara',
-          'Batik Kawung Picis',
-          'Bros Rodha Putri',
-        ];
-      case 'outfit_priyayi_surjan_ontrokusumo':
-        return const [
-          'Blangkon Solo',
-          'Surjan Ontrokusumo',
-          'Batik Kawung Picis',
-          'Keris Ladrang Solo',
-        ];
-      default:
-        return const [
-          'Blangkon Trepes',
-          'Beskap Langenharjan',
-          'Batik Parang Barong',
-          'Keris Ladrang Solo',
-        ];
-    }
+  final VoidCallback onOpenMap;
+
+  void _openEventSheet(BuildContext context, EventGuideItem guide) {
+    HapticFeedback.lightImpact();
+    final recommendations = resolveEventRecommendations(guide);
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return _EventGuideBottomSheet(
+          guide: guide,
+          recommendations: recommendations,
+          onSelectRecommendation: (rec) {
+            Navigator.of(sheetContext).pop();
+            if (rec.cultureItem != null) {
+              Navigator.of(context).push(
+                fadeSlideRoute(
+                  CultureDetailScreen(
+                    item: rec.cultureItem!,
+                    onOpenMap: onOpenMap,
+                  ),
+                ),
+              );
+            } else if (rec.clothingItem != null) {
+              Navigator.of(context).push(
+                fadeSlideRoute(
+                  ClothingDetailScreen(item: rec.clothingItem!),
+                ),
+              );
+            }
+          },
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final outfits = JavaneseClothingData.curatedOutfits;
-    final dayIndex =
-        DateTime.now().difference(DateTime(2026, 1, 1)).inDays.abs() %
-        outfits.length;
-    final outfit = outfits[dayIndex];
-    final ricikanTags = _ricikanTagsFor(outfit.id);
+    final row1 = eventGuideItems.take(2).toList();
+    final row2 = eventGuideItems.skip(2).take(2).toList();
 
-    void navigateToDetail() {
-      HapticFeedback.lightImpact();
-      final item = JavaneseClothingData.clothingItems.firstWhere(
-        (it) => it.id == outfit.upperBodyId,
-        orElse: () => JavaneseClothingData.clothingItems.first,
-      );
-      Navigator.of(context)
-          .push(fadeSlideRoute(ClothingDetailScreen(item: item)));
-    }
-
-    return InteractiveCard(
-      onTap: navigateToDetail,
-      borderRadius: 20,
-      padding: EdgeInsets.zero,
-      backgroundColor: const Color(0xFF181614),
-      border: Border.all(color: const Color(0x14FFFFFF), width: 1.0),
-      semanticLabel: 'Busana Pilihan Hari Ini - ${outfit.title}',
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFF181614),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0x14FFFFFF), width: 1.0),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Badge & Aksara Jawa
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0x1AE4C590),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: const Color(0x33E4C590),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.star_rounded,
-                        size: 12,
-                        color: Color(0xFFE4C590),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'BUSANA PILIHAN HARI INI',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFFE4C590),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  outfit.javaneseScript,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFFDFC08E),
+          Text(
+            'PANDUAN ACARA',
+            style: JText.sans(
+              10,
+              weight: FontWeight.w600,
+              color: const Color(0xFFC5A467),
+            ).copyWith(letterSpacing: 1.8),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Pilih Busana Sesuai Acara',
+            style: JText.serif(
+              20,
+              weight: FontWeight.w700,
+              color: const Color(0xFFFAF6F0),
+            ).copyWith(height: 1.2),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Padanan busana dan pakem untuk momenmu.',
+            style: JText.sans(
+              12,
+              weight: FontWeight.w400,
+              color: const Color(0xFFB09F8F),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              for (int i = 0; i < row1.length; i++) ...[
+                if (i > 0) const SizedBox(width: 10),
+                Expanded(
+                  child: _EventOutlineButton(
+                    label: row1[i].title,
+                    onTap: () => _openEventSheet(context, row1[i]),
                   ),
                 ),
               ],
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              for (int i = 0; i < row2.length; i++) ...[
+                if (i > 0) const SizedBox(width: 10),
+                Expanded(
+                  child: _EventOutlineButton(
+                    label: row2[i].title,
+                    onTap: () => _openEventSheet(context, row2[i]),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EventOutlineButton extends StatelessWidget {
+  const _EventOutlineButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFFFAF6F0),
+        backgroundColor: const Color(0x08FFFFFF),
+        side: const BorderSide(color: Color(0x2EFFFFFF), width: 0.9),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 13),
+        minimumSize: const Size(0, 44),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      onPressed: onTap,
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: JText.sans(
+          12.5,
+          weight: FontWeight.w600,
+          color: const Color(0xFFFAF6F0),
+        ),
+      ),
+    );
+  }
+}
+
+class _EventGuideBottomSheet extends StatelessWidget {
+  const _EventGuideBottomSheet({
+    required this.guide,
+    required this.recommendations,
+    required this.onSelectRecommendation,
+  });
+
+  final EventGuideItem guide;
+  final List<ResolvedEventRecommendation> recommendations;
+  final ValueChanged<ResolvedEventRecommendation> onSelectRecommendation;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxHeight = MediaQuery.of(context).size.height * 0.78;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
+    return Container(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      decoration: const BoxDecoration(
+        color: Color(0xFF161311),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border(
+          top: BorderSide(color: Color(0x33E4C590), width: 1.0),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: 12, bottom: 8),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: const Color(0x44E4C590),
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
-
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  outfit.title,
-                  style: JText.serif(
-                    18,
-                    weight: FontWeight.w800,
-                    color: const Color(0xFFFAF6F0),
+          Flexible(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'PANDUAN ACARA',
+                    style: JText.sans(
+                      10,
+                      weight: FontWeight.w600,
+                      color: const Color(0xFFC5A467),
+                    ).copyWith(letterSpacing: 1.6),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${outfit.collectionCategory} • ${outfit.era}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFFB09F8F),
+                  const SizedBox(height: 4),
+                  Text(
+                    guide.title,
+                    style: JText.serif(
+                      22,
+                      weight: FontWeight.w700,
+                      color: const Color(0xFFFAF6F0),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  outfit.summary,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFFDCD2C5),
-                    height: 1.45,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 14),
+                  const SizedBox(height: 16),
 
-                // Komponen Ricikan Tags
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    for (final tag in ricikanTags) _RicikanTag(tag),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Tombol Utama Full-Width: Lihat Detail Busana →
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFFFAF6F0),
-                      backgroundColor: const Color(0x0FFFFFFF),
-                      side: const BorderSide(
-                        color: Color(0x22FFFFFF),
-                        width: 1,
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 11),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  // Kotak Pakem & Etika
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1F1A16),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: const Color(0x33E4C590),
+                        width: 0.9,
                       ),
                     ),
-                    onPressed: navigateToDetail,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Lihat Detail Busana',
+                          'Pakem & Etika',
                           style: JText.sans(
-                            12,
-                            weight: FontWeight.w600,
-                            color: const Color(0xFFFAF6F0),
+                            11.5,
+                            weight: FontWeight.w700,
+                            color: const Color(0xFFE4C590),
                           ),
                         ),
-                        const SizedBox(width: 6),
-                        const Icon(
-                          Icons.arrow_forward_rounded,
-                          size: 14,
-                          color: Color(0xFFE4C590),
+                        const SizedBox(height: 6),
+                        Text(
+                          guide.pakemText,
+                          style: JText.sans(
+                            12.5,
+                            weight: FontWeight.w400,
+                            color: const Color(0xFFE2D8CB),
+                          ).copyWith(height: 1.5),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ],
+
+                  if (recommendations.isNotEmpty) ...[
+                    const SizedBox(height: 18),
+                    Text(
+                      'Rekomendasi Busana',
+                      style: JText.sans(
+                        11.5,
+                        weight: FontWeight.w700,
+                        color: const Color(0xFFB8A999),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    for (int i = 0; i < recommendations.length; i++) ...[
+                      if (i > 0) const SizedBox(height: 10),
+                      _EventRecommendationTile(
+                        recommendation: recommendations[i],
+                        onTap: () => onSelectRecommendation(recommendations[i]),
+                      ),
+                    ],
+                  ],
+                ],
+              ),
             ),
           ),
         ],
@@ -2036,25 +2100,83 @@ class _FeaturedOutfitOfTheDayCard extends StatelessWidget {
   }
 }
 
-class _RicikanTag extends StatelessWidget {
-  const _RicikanTag(this.label);
-  final String label;
+class _EventRecommendationTile extends StatelessWidget {
+  const _EventRecommendationTile({
+    required this.recommendation,
+    required this.onTap,
+  });
+
+  final ResolvedEventRecommendation recommendation;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: const Color(0xFF221812),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0x33E4C590), width: 0.6),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 10,
-          color: Color(0xFFE4C590),
-          fontWeight: FontWeight.w600,
+    return Material(
+      color: const Color(0xFF1E1915),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0x1EFFFFFF), width: 0.8),
+          ),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: SizedBox(
+                  width: 56,
+                  height: 56,
+                  child: Image.asset(
+                    recommendation.imagePath,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                    errorBuilder: (_, _, _) => Container(
+                      color: const Color(0xFF28211B),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      recommendation.title,
+                      style: JText.serif(
+                        14,
+                        weight: FontWeight.w700,
+                        color: const Color(0xFFFAF6F0),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      recommendation.subtitle,
+                      style: JText.sans(
+                        11,
+                        weight: FontWeight.w400,
+                        color: const Color(0xFFAFA08F),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.chevron_right_rounded,
+                size: 18,
+                color: Color(0xFFC5A467),
+              ),
+            ],
+          ),
         ),
       ),
     );

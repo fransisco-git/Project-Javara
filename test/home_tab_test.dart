@@ -223,9 +223,9 @@ void main() {
     expect(find.byTooltip('Tanya Abdi Pakar'), findsNothing);
     expect(find.text('Tanya Abdi Pakar soal busana adat'), findsNothing);
 
-    // Scroll down to Busana Pilihan Hari Ini below Warisan Populer
+    // Scroll down to Panduan Acara below Warisan Populer
     await tester.scrollUntilVisible(
-      find.text('BUSANA PILIHAN HARI INI'),
+      find.text('PANDUAN ACARA'),
       400,
       scrollable: find.descendant(
         of: find.byType(ListView).first,
@@ -239,8 +239,69 @@ void main() {
     expect(find.text('Studio Wardrobe 3D'), findsNothing);
     expect(find.text('AI Fashion Studio'), findsNothing);
 
-    // Verify featured outfit section remains intact
-    expect(find.text('BUSANA PILIHAN HARI INI'), findsOneWidget);
+    // Verify Panduan Acara card replaced Busana Pilihan Hari Ini
+    expect(find.text('BUSANA PILIHAN HARI INI'), findsNothing);
+    expect(find.text('PANDUAN ACARA'), findsOneWidget);
+    expect(find.text('Pilih Busana Sesuai Acara'), findsOneWidget);
+    expect(find.text('Pernikahan'), findsOneWidget);
+    expect(find.text('Kondangan'), findsOneWidget);
+    expect(find.text('Wisuda'), findsOneWidget);
+    expect(find.text('Upacara Adat'), findsOneWidget);
+  });
+
+  testWidgets('Panduan Acara opens bottom sheet without overflow at 360dp and 1.3 text scale', (
+    WidgetTester tester,
+  ) async {
+    final errors = <FlutterErrorDetails>[];
+    final originalOnError = FlutterError.onError;
+    FlutterError.onError = (details) => errors.add(details);
+
+    try {
+      tester.view.physicalSize = const Size(360 * 2, 800 * 2);
+      tester.view.devicePixelRatio = 2.0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(
+              size: Size(360, 800),
+              textScaler: TextScaler.linear(1.3),
+            ),
+            child: Scaffold(
+              body: HomeTab(onOpenTab: (_) {}),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 1200));
+
+      await tester.scrollUntilVisible(
+        find.text('Pernikahan'),
+        350,
+        scrollable: find.descendant(
+          of: find.byType(ListView).first,
+          matching: find.byType(Scrollable),
+        ).first,
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+
+      await tester.tap(find.text('Pernikahan'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text('Pakem & Etika'), findsOneWidget);
+      expect(find.textContaining('Solo Basahan'), findsAtLeastNWidgets(1));
+      expect(find.text('Kain Jarik Batik Sidomukti Pengantin'), findsOneWidget);
+      expect(find.text('Kain Jarik Batik Truntum'), findsOneWidget);
+
+      final overflowErrors =
+          errors.where((e) => e.toString().contains('overflowed')).toList();
+      expect(overflowErrors, isEmpty,
+          reason: 'Found overflows: ${overflowErrors.map((e) => e.summary).toList()}');
+    } finally {
+      tester.view.resetPhysicalSize();
+      FlutterError.onError = originalOnError;
+    }
   });
 
   testWidgets('HomeTab renders 3 merged categories: Busana, Aksesoris, Batik', (
