@@ -44,7 +44,7 @@ class JavaraBottomNav extends StatelessWidget {
   final ValueChanged<int> onChanged;
   final List<NavItemData> items;
 
-  static const double barHeight = 64.0;
+  static const double barHeight = 58.0;
   static const double bottomMargin = 8.0;
   static const Color activeColor = JColors.accentGold;
   static const Color inactiveColor = Color(0xFFB8B0A6);
@@ -158,63 +158,37 @@ class _InteractiveNavItem extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTapDown: (_) => HapticFeedback.lightImpact(),
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox.square(
-                dimension: 24,
-                child: Center(
-                  child: item.iconBuilder != null
-                      ? item.iconBuilder!(context, isSelected)
-                      : AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          switchInCurve: Curves.easeOut,
-                          switchOutCurve: Curves.easeOut,
-                          transitionBuilder: (child, anim) {
-                            final scale = Tween<double>(
-                              begin: 0.9,
-                              end: 1.0,
-                            ).animate(anim);
-                            return FadeTransition(
-                              opacity: anim,
-                              child: ScaleTransition(
-                                scale: scale,
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: Icon(
-                            isSelected ? item.activeIcon : item.inactiveIcon,
-                            key: ValueKey('${item.label}_$isSelected'),
-                            size: 24,
-                            color: isSelected ? activeColor : inactiveColor,
+        child: Center(
+          child: SizedBox.square(
+            dimension: 24,
+            child: Center(
+              child: item.iconBuilder != null
+                  ? item.iconBuilder!(context, isSelected)
+                  : AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeOut,
+                      transitionBuilder: (child, anim) {
+                        final scale = Tween<double>(
+                          begin: 0.9,
+                          end: 1.0,
+                        ).animate(anim);
+                        return FadeTransition(
+                          opacity: anim,
+                          child: ScaleTransition(
+                            scale: scale,
+                            child: child,
                           ),
-                        ),
-                ),
-              ),
-              const SizedBox(height: 4),
-              SizedBox(
-                height: 15,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.bottomCenter,
-                  child: AnimatedDefaultTextStyle(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOut,
-                    style: JText.sans(
-                      11.0,
-                      weight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: isSelected ? activeColor : inactiveColor,
-                      letterSpacing: 0.1,
+                        );
+                      },
+                      child: Icon(
+                        isSelected ? item.activeIcon : item.inactiveIcon,
+                        key: ValueKey('${item.label}_$isSelected'),
+                        size: 24,
+                        color: isSelected ? activeColor : inactiveColor,
+                      ),
                     ),
-                    child: Text(item.label, maxLines: 1),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
