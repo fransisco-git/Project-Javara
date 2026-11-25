@@ -536,7 +536,7 @@ class JavaneseClothingData {
         'selop_beludru_sulam_emas',
       ],
       summary:
-          'Setelan busana resmi pria keraton Surakarta Hadiningrat paling paripurna yang mencerminkan martabat adiluhung, wibawa kepemimpinan ksatria, dan kepatuhan pada aturan tatakrama istana.',
+          'Setelan busana resmi pria keraton Surakarta Hadiningrat paling paripurna yang mencerminkan martabat adiluhung, wibawa kepemimpinan ksatria, dan kepatuhan pada aturan tata krama istana.',
       culturalPhilosophy:
           'Jawi Jangkep bermakna busana Jawa yang lengkap lahir batin. Penutup kepala blangkon trepes menundukkan ego akal, beskap kancing leher mengendalikan ucapan, kain jarik melangkah teratur, dan keris di belakang mengendalikan hawa nafsu amarah.',
       etiquetteRules:

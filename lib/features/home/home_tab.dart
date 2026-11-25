@@ -11,7 +11,6 @@ import '../../data/culture_items.dart';
 import '../../widgets/motion.dart';
 import '../heritage/culture_detail_screen.dart';
 import '../fashion/screens/clothing_detail_screen.dart';
-import '../fashion/screens/jelajahi_busana_screen.dart';
 import '../fashion/screens/clothing_catalog_screen.dart';
 import '../fashion/screens/batik_motif_gallery_screen.dart';
 import '../fashion/data/javanese_clothing_data.dart';
@@ -327,20 +326,13 @@ class _HomeTabState extends State<HomeTab> {
                                     ],
 
                                     // 4. Sorotan Kurasi "Busana Pilihan Hari Ini"
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(
                                         horizontal: 20,
                                       ),
                                       child: StaggerIn(
                                         index: 3,
-                                        child: _FeaturedOutfitOfTheDayCard(
-                                          onOpenExplore: () =>
-                                              Navigator.of(context).push(
-                                                fadeSlideRoute(
-                                                  const JelajahiBusanaScreen(),
-                                                ),
-                                              ),
-                                        ),
+                                        child: _FeaturedOutfitOfTheDayCard(),
                                       ),
                                     ),
                                     const SizedBox(height: 26),
@@ -1824,15 +1816,59 @@ class _EditorialCultureCard extends StatelessWidget {
 }
 
 /// Card Busana Pilihan Hari Ini (Featured Outfit of the Day)
-/// Disajikan dengan layout editorial tenang, bebas tombol mencolok yang berebut fokus.
+/// Disajikan dengan layout editorial tenang, rotasi harian berbasis tanggal,
+/// dan satu tombol CTA penuh tanpa tombol sekunder yang redundan.
 class _FeaturedOutfitOfTheDayCard extends StatelessWidget {
-  const _FeaturedOutfitOfTheDayCard({this.onOpenExplore});
+  const _FeaturedOutfitOfTheDayCard();
 
-  final VoidCallback? onOpenExplore;
+  static List<String> _ricikanTagsFor(String outfitId) {
+    switch (outfitId) {
+      case 'outfit_jawi_jangkep_kasunanan':
+        return const [
+          'Blangkon Trepes',
+          'Beskap Langenharjan',
+          'Batik Parang Barong',
+          'Keris Ladrang Solo',
+        ];
+      case 'outfit_solo_kanigaran_beludru':
+        return const [
+          'Kuluk Kanigaran',
+          'Beskap Sikepan Beludru',
+          'Batik Sidomukti',
+          'Keris Ladrang Solo',
+        ];
+      case 'outfit_kebaya_kartini_jepara_ningrat':
+        return const [
+          'Sanggul Tekuk Melati',
+          'Kebaya Kartini Jepara',
+          'Batik Kawung Picis',
+          'Bros Rodha Putri',
+        ];
+      case 'outfit_priyayi_surjan_ontrokusumo':
+        return const [
+          'Blangkon Solo',
+          'Surjan Ontrokusumo',
+          'Batik Kawung Picis',
+          'Keris Ladrang Solo',
+        ];
+      default:
+        return const [
+          'Blangkon Trepes',
+          'Beskap Langenharjan',
+          'Batik Parang Barong',
+          'Keris Ladrang Solo',
+        ];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final outfit = JavaneseClothingData.curatedOutfits.first;
+    final outfits = JavaneseClothingData.curatedOutfits;
+    final dayIndex =
+        DateTime.now().difference(DateTime(2026, 1, 1)).inDays.abs() %
+        outfits.length;
+    final outfit = outfits[dayIndex];
+    final ricikanTags = _ricikanTagsFor(outfit.id);
 
     void navigateToDetail() {
       HapticFeedback.lightImpact();
@@ -1946,84 +1982,50 @@ class _FeaturedOutfitOfTheDayCard extends StatelessWidget {
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
-                  children: const [
-                    _RicikanTag('Blangkon Trepes'),
-                    _RicikanTag('Beskap Landhung'),
-                    _RicikanTag('Batik Parang Barong'),
-                    _RicikanTag('Keris Ladrang Solo'),
+                  children: [
+                    for (final tag in ricikanTags) _RicikanTag(tag),
                   ],
                 ),
 
                 const SizedBox(height: 16),
 
-                // Tombol Sekunder / Ghost Button: Lihat Detail Busana →
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFFAF6F0),
-                          backgroundColor: const Color(0x0FFFFFFF),
-                          side: const BorderSide(
-                            color: Color(0x22FFFFFF),
-                            width: 1,
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 11),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: navigateToDetail,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Lihat Detail Busana',
-                              style: JText.sans(
-                                12,
-                                weight: FontWeight.w600,
-                                color: const Color(0xFFFAF6F0),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            const Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 14,
-                              color: Color(0xFFE4C590),
-                            ),
-                          ],
-                        ),
+                // Tombol Utama Full-Width: Lihat Detail Busana →
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFFFAF6F0),
+                      backgroundColor: const Color(0x0FFFFFFF),
+                      side: const BorderSide(
+                        color: Color(0x22FFFFFF),
+                        width: 1,
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 11),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    if (onOpenExplore != null) ...[
-                      const SizedBox(width: 10),
-                      OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFB09F8F),
-                          side: const BorderSide(
-                            color: Color(0x14FFFFFF),
-                            width: 1,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 11,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: onOpenExplore,
-                        child: Text(
-                          'Koleksi Lain',
+                    onPressed: navigateToDetail,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Lihat Detail Busana',
                           style: JText.sans(
                             12,
                             weight: FontWeight.w600,
-                            color: const Color(0xFFB09F8F),
+                            color: const Color(0xFFFAF6F0),
                           ),
                         ),
-                      ),
-                    ],
-                  ],
+                        const SizedBox(width: 6),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 14,
+                          color: Color(0xFFE4C590),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
