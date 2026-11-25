@@ -10,7 +10,7 @@ class HeroSlideData {
     required this.title,
     required this.imagePath,
     required this.routeBuilder,
-    this.imageAlignment = Alignment.topCenter,
+    this.imageAlignment = const Alignment(0, -0.6),
   });
 
   final String eyebrow;
@@ -22,10 +22,9 @@ class HeroSlideData {
 
 /// Shared editorial hero slide template used across all 3 slides on the home screen.
 ///
-/// Renders a full-bleed photo (`BoxFit.cover`), a bottom-only dark readability
-/// gradient (transparent top → ~75% black bottom), and exactly three left-aligned
-/// elements: uppercase eyebrow, large serif title, and a thin-outlined
-/// "LIHAT KOLEKSI" button.
+/// Renders a full-bleed photo (`BoxFit.cover`, aligned upward at `Alignment(0, -0.6)`),
+/// a bottom-only dark readability gradient (transparent up to 40% → ~85% black at bottom),
+/// and left-aligned eyebrow, serif title, and 40 dp outline CTA above the in-hero indicator.
 class HeroSlide extends StatelessWidget {
   const HeroSlide({
     super.key,
@@ -43,7 +42,7 @@ class HeroSlide extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // 1. Full-bleed garment photography
+        // 1. Full-bleed garment photography aligned upward to keep face & upper garment clear
         Image.asset(
           data.imagePath,
           fit: BoxFit.cover,
@@ -52,30 +51,30 @@ class HeroSlide extends StatelessWidget {
           errorBuilder: (_, _, _) => const ColoredBox(color: Color(0xFF14100D)),
         ),
 
-        // 2. Bottom readability scrim only (transparent top -> 75% black bottom)
+        // 2. Bottom readability scrim (transparent up to 40% -> ~85% black at bottom)
         const IgnorePointer(
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: [0.0, 0.42, 0.72, 1.0],
+                stops: [0.0, 0.40, 0.66, 1.0],
                 colors: [
                   Colors.transparent,
                   Colors.transparent,
-                  Color(0x66000000),
-                  Color(0xBF000000), // ~75% black
+                  Color(0x94000000), // ~58% black under eyebrow for high contrast
+                  Color(0xD9000000), // ~85% black at hero base
                 ],
               ),
             ),
           ),
         ),
 
-        // 3. Left-aligned editorial copy: eyebrow, serif title, outline CTA
+        // 3. Left-aligned editorial copy above the 3-segment indicator (12 dp from base)
         Align(
           alignment: Alignment.bottomLeft,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 22),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,19 +82,19 @@ class HeroSlide extends StatelessWidget {
                 Text(
                   data.eyebrow.toUpperCase(),
                   style: JText.sans(
-                    11,
-                    weight: FontWeight.w500,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    letterSpacing: 2.2,
+                    10.5,
+                    weight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.90),
+                    letterSpacing: 2.0,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   data.title,
                   style: JText.editorial(
-                    28,
+                    23,
                     weight: FontWeight.w700,
                     color: Colors.white,
                     height: 1.12,
@@ -103,36 +102,36 @@ class HeroSlide extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 16),
-                OutlinedButton(
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    onTapAction();
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.transparent,
-                    side: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.85),
-                      width: 1.0,
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 40,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      onTapAction();
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.transparent,
+                      side: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        width: 1.0,
+                      ),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.zero,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      minimumSize: const Size(0, 40),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 12,
-                    ),
-                    minimumSize: const Size(0, 42),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(
-                    ctaLabel,
-                    style: JText.sans(
-                      11.5,
-                      weight: FontWeight.w600,
-                      color: Colors.white,
-                      letterSpacing: 1.8,
+                    child: Text(
+                      ctaLabel,
+                      style: JText.sans(
+                        11,
+                        weight: FontWeight.w600,
+                        color: Colors.white,
+                        letterSpacing: 1.8,
+                      ),
                     ),
                   ),
                 ),

@@ -311,14 +311,21 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 1200));
 
-    // Slide 1: full-width HeroSlide, exact eyebrow, title, and LIHAT KOLEKSI button
+    // Slide 1: full-width HeroSlide, height clamped 240-300 (32% of 844 = 270.08),
+    // exact eyebrow, title, and 40 dp LIHAT KOLEKSI button
     final heroSlideFinder = find.byType(HeroSlide);
     expect(heroSlideFinder, findsOneWidget);
-    expect(tester.getSize(heroSlideFinder).width, 390.0);
+    final heroSize = tester.getSize(heroSlideFinder);
+    expect(heroSize.width, 390.0);
+    expect(heroSize.height, inInclusiveRange(240.0, 300.0));
     expect(find.text('ARSIP 01 · BUSANA PUTRI'), findsOneWidget);
     expect(find.text('Kebaya Kartini Solo Sutra'), findsOneWidget);
     expect(find.text('LIHAT KOLEKSI'), findsOneWidget);
     expect(find.byIcon(Icons.auto_awesome), findsNothing);
+
+    // Categories row & Warisan Populer header are visible on the first viewport above navbar
+    expect(tester.getBottomLeft(find.text('Busana')).dy, lessThan(760.0));
+    expect(tester.getBottomLeft(find.text('Warisan Populer')).dy, lessThan(760.0));
 
     // Swipe horizontally to Slide 2
     final pageViewFinder = find.byType(PageView);
