@@ -10,9 +10,8 @@ import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
 import '../home/home_screen.dart';
 
-/// Konstanta path aset latar panorama Candi Borobudur & Merapi fajar.
-const String kWelcomeHeroAsset =
-    'assets/images/borobudur_buddha_merapi_dawn.jpg';
+/// Konstanta path aset latar foto pasangan berbusana adat Jawa di Pendopo.
+const String kWelcomeHeroAsset = 'assets/images/welcome_pendopo_busana.jpg';
 
 /// Konstanta path aset logo monogram JAVARA.
 const String kWelcomeLogoAsset = 'assets/images/logo_javara.png';
@@ -233,7 +232,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         child: Image.asset(
                           kWelcomeHeroAsset,
                           fit: BoxFit.cover,
-                          alignment: Alignment.center,
+                          alignment: const Alignment(0, -0.15),
                           errorBuilder: (_, _, _) => const SizedBox.shrink(),
                         ),
                       ),

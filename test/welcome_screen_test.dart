@@ -36,6 +36,16 @@ void main() {
       expect(find.text(' · '), findsNothing); // Separated by dot character '·'
       expect(find.text('·'), findsOneWidget);
 
+      // Verify new pendopo Javanese attire hero background is rendered
+      final heroFinder = find.byWidgetPredicate(
+        (w) =>
+            w is Image &&
+            w.image is AssetImage &&
+            (w.image as AssetImage).assetName ==
+                'assets/images/welcome_pendopo_busana.jpg',
+      );
+      expect(heroFinder, findsOneWidget);
+
       // Verify monogram logo asset is rendered under top SafeArea with height 44
       final logoFinder = find.byWidgetPredicate(
         (w) =>
