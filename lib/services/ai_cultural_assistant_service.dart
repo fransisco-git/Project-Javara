@@ -84,7 +84,17 @@ class AiCulturalAssistantService {
   String get effectiveApiKey => apiKey ?? AppConfig.llmApiKey;
 
   /// Model Gemini yang digunakan
-  String get effectiveModel => model ?? AppConfig.geminiModel;
+  String get effectiveModel {
+    final candidate = (model ?? AppConfig.geminiModel).trim();
+    final sanitized = candidate.replaceFirst(RegExp(r'^/?(models/)?'), '');
+    if (sanitized.isEmpty) {
+      final fallback = AppConfig.geminiModel
+          .trim()
+          .replaceFirst(RegExp(r'^/?(models/)?'), '');
+      return fallback.isNotEmpty ? fallback : 'gemini-1.5-pro';
+    }
+    return candidate;
+  }
 
   /// Menentukan apakah Gemini Pro API telah terkonfigurasi
   bool get isConfigured => effectiveApiKey.trim().isNotEmpty;
@@ -118,7 +128,8 @@ Prinsip & Pedoman Utama:
   /// Membangun URL Endpoint Google Gemini API
   Uri buildEndpointUrl() {
     final rawModel = effectiveModel.trim();
-    final cleanModel = rawModel.replaceFirst(RegExp(r'^/?(models/)?'), '');
+    final sanitized = rawModel.replaceFirst(RegExp(r'^/?(models/)?'), '');
+    final cleanModel = sanitized.isNotEmpty ? sanitized : 'gemini-1.5-pro';
     final key = effectiveApiKey.trim();
     return Uri.https(
       'generativelanguage.googleapis.com',
@@ -334,8 +345,11 @@ Prinsip & Pedoman Utama:
     }
 
     // Bila endpoint lawas menolak field system_instruction, lakukan fallback retry dengan menyisipkan ke user turn pertama
+    final lowerErrorBody = response.body.toLowerCase();
     if (response.statusCode == 400 &&
-        response.body.contains('system_instruction')) {
+        (lowerErrorBody.contains('system_instruction') ||
+            lowerErrorBody.contains('systeminstruction') ||
+            lowerErrorBody.contains('developer instruction'))) {
       debugPrint(
         '[AiCulturalAssistantService] system_instruction tidak didukung, mengirim ulang dengan prompt tersemat.',
       );
@@ -451,7 +465,9 @@ Prinsip & Pedoman Utama:
 
       final buffer = StringBuffer();
       for (final part in parts) {
-        if (part is Map && part['text'] is String) {
+        if (part is Map &&
+            part['thought'] != true &&
+            part['text'] is String) {
           buffer.write(part['text']);
         }
       }

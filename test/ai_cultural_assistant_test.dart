@@ -6,7 +6,10 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 import 'package:jawara_app/features/fashion/screens/ai_cultural_assistant_screen.dart';
+import 'package:jawara_app/features/home/home_tab.dart';
 import 'package:jawara_app/services/ai_cultural_assistant_service.dart';
+import 'package:jawara_app/services/saved_garments_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group('AiCulturalAssistantService Tests', () {
@@ -47,6 +50,24 @@ void main() {
       expect(
         service2.buildEndpointUrl().path,
         equals('/v1beta/models/gemini-pro:generateContent'),
+      );
+
+      final serviceEmpty = AiCulturalAssistantService(
+        apiKey: 'key3',
+        model: 'models/',
+      );
+      expect(
+        serviceEmpty.buildEndpointUrl().path,
+        equals('/v1beta/models/gemini-1.5-pro:generateContent'),
+      );
+
+      final serviceBlank = AiCulturalAssistantService(
+        apiKey: 'key4',
+        model: '   ',
+      );
+      expect(
+        serviceBlank.buildEndpointUrl().path,
+        equals('/v1beta/models/gemini-1.5-pro:generateContent'),
       );
     });
 
@@ -496,9 +517,111 @@ void main() {
       expect(reply.action!.type, equals('garment_detail'));
       expect(reply.action!.targetGarment, isNotNull);
     });
+
+    test('Retries when Gemini 1.0 Pro rejects Developer instruction', () async {
+      int callCount = 0;
+      late Map<String, dynamic> retryPayload;
+
+      final mockClient = MockClient((request) async {
+        callCount++;
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        if (callCount == 1) {
+          return http.Response(
+            jsonEncode({
+              'error': {
+                'code': 400,
+                'message':
+                    'Developer instruction is not enabled for models/gemini-pro',
+                'status': 'INVALID_ARGUMENT',
+              }
+            }),
+            400,
+          );
+        }
+        retryPayload = body;
+        return http.Response(
+          jsonEncode({
+            'candidates': [
+              {
+                'content': {
+                  'parts': [
+                    {'text': 'Blangkon Surakarta ber-mondholan trepes.'}
+                  ],
+                  'role': 'model',
+                }
+              }
+            ]
+          }),
+          200,
+        );
+      });
+
+      final service = AiCulturalAssistantService(
+        httpClient: mockClient,
+        apiKey: 'key',
+        model: 'gemini-pro',
+      );
+
+      final reply = await service.sendMessage('Apa itu blangkon Solo?');
+      expect(callCount, equals(2));
+      expect(retryPayload.containsKey('system_instruction'), isFalse);
+      expect(
+        retryPayload['contents'][0]['parts'][0]['text'],
+        contains('Abdi Pakar Busana JAVARA'),
+      );
+      expect(reply.text, equals('Blangkon Surakarta ber-mondholan trepes.'));
+    });
+
+    test('Ignores internal thought parts from Gemini thinking models', () async {
+      final mockClient = MockClient((request) async {
+        return http.Response(
+          jsonEncode({
+            'candidates': [
+              {
+                'content': {
+                  'parts': [
+                    {
+                      'thought': true,
+                      'text': 'Internal reasoning: analyze Surakarta etiquette.',
+                    },
+                    {
+                      'text': 'Beskap Sikepan dikenakan untuk acara resmi keraton.',
+                    },
+                  ],
+                  'role': 'model',
+                }
+              }
+            ]
+          }),
+          200,
+        );
+      });
+
+      final service = AiCulturalAssistantService(
+        httpClient: mockClient,
+        apiKey: 'key',
+        model: 'gemini-2.5-pro',
+      );
+
+      final reply = await service.sendMessage('Kapan memakai Beskap Sikepan?');
+      expect(reply.text, isNot(contains('Internal reasoning')));
+      expect(
+        reply.text,
+        equals('Beskap Sikepan dikenakan untuk acara resmi keraton.'),
+      );
+    });
   });
 
   group('AiCulturalAssistantScreen Widget Tests', () {
+    late AiCulturalAssistantService originalInstance;
+
+    setUp(() {
+      originalInstance = AiCulturalAssistantService.instance;
+    });
+
+    tearDown(() {
+      AiCulturalAssistantService.instance = originalInstance;
+    });
     testWidgets('Renders initial greeting, action chips, and sends live message', (
       tester,
     ) async {
@@ -742,7 +865,83 @@ void main() {
       expect(find.text('Coba AI Studio'), findsOneWidget);
     });
 
-    testWidgets('Zero RenderFlex overflow on narrow viewport (320dp width) with 1.3x text scale', (
+    testWidgets('Multi-turn TextField conversation preserves context in Gemini requests', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final recordedPayloads = <Map<String, dynamic>>[];
+      int turn = 0;
+
+      final mockClient = MockClient((request) async {
+        turn++;
+        recordedPayloads.add(jsonDecode(request.body) as Map<String, dynamic>);
+        return http.Response(
+          jsonEncode({
+            'candidates': [
+              {
+                'content': {
+                  'parts': [
+                    {
+                      'text': turn == 1
+                          ? 'Blangkon Solo memakai mondholan trepes.'
+                          : 'Mondholan pipih melambangkan pengendalian diri.',
+                    }
+                  ],
+                  'role': 'model',
+                }
+              }
+            ]
+          }),
+          200,
+        );
+      });
+
+      AiCulturalAssistantService.instance = AiCulturalAssistantService(
+        httpClient: mockClient,
+        apiKey: 'test-multi-turn-ui-key',
+      );
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: AiCulturalAssistantScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Turn 1 via TextField + Send button
+      await tester.enterText(find.byType(TextField), 'Apa ciri blangkon Solo?');
+      await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Blangkon Solo memakai mondholan trepes.'), findsOneWidget);
+
+      // Turn 2 via TextField + Send button
+      await tester.enterText(find.byType(TextField), 'Mengapa mondholannya pipih?');
+      await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Mondholan pipih melambangkan pengendalian diri.'), findsOneWidget);
+      expect(recordedPayloads.length, equals(2));
+
+      final secondContents = recordedPayloads[1]['contents'] as List;
+      expect(secondContents.length, equals(3));
+      expect(secondContents[0]['role'], equals('user'));
+      expect(secondContents[0]['parts'][0]['text'], equals('Apa ciri blangkon Solo?'));
+      expect(secondContents[1]['role'], equals('model'));
+      expect(secondContents[1]['parts'][0]['text'], contains('Blangkon Solo memakai mondholan trepes.'));
+      expect(secondContents[2]['role'], equals('user'));
+      expect(secondContents[2]['parts'][0]['text'], equals('Mengapa mondholannya pipih?'));
+    });
+
+    testWidgets('Zero RenderFlex overflow on narrow viewport (320dp width) with garment action card and 1.3x text scale', (
       tester,
     ) async {
       tester.view.physicalSize = const Size(320, 640);
@@ -761,7 +960,7 @@ void main() {
                   'parts': [
                     {
                       'text':
-                          'Solo Basahan Dodot Ageng merupakan busana pengantin Jawa Surakarta.',
+                          'Blangkon Mondholan Trepes merupakan penutup kepala pria Surakarta.',
                     }
                   ],
                   'role': 'model',
@@ -791,14 +990,76 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final chipTopLeft = tester.getTopLeft(find.byType(ActionChip).first);
-      await tester.tapAt(chipTopLeft + const Offset(50, 10));
+      await tester.enterText(find.byType(TextField), 'Pakem blangkon Solo');
+      await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
       await tester.pump();
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('Buka Studio 3D'), findsOneWidget);
-      expect(find.text('Coba AI Studio'), findsOneWidget);
+      expect(find.text('Pelajari Makna'), findsOneWidget);
+    });
+
+    testWidgets('Tapping top-right Abdi Pakar icon on HomeTab opens AI assistant and dispatches live request', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({'abdi_coach_seen': true});
+      await SavedGarmentsService.instance.initialize();
+
+      tester.view.physicalSize = const Size(390 * 2, 844 * 2);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      bool calledGemini = false;
+      final mockClient = MockClient((request) async {
+        calledGemini = true;
+        return http.Response(
+          jsonEncode({
+            'candidates': [
+              {
+                'content': {
+                  'parts': [
+                    {'text': 'Jawi Jangkep cocok untuk upacara resmi keraton.'}
+                  ],
+                  'role': 'model',
+                }
+              }
+            ]
+          }),
+          200,
+        );
+      });
+
+      AiCulturalAssistantService.instance = AiCulturalAssistantService(
+        httpClient: mockClient,
+        apiKey: 'test-home-nav-key',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: HomeTab(onOpenTab: (_) {}),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 1100));
+
+      final abdiButton = find.byTooltip('Tanya Abdi Pakar');
+      expect(abdiButton, findsOneWidget);
+      await tester.tap(abdiButton);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Abdi Pakar Busana JAVARA'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), 'Rekomendasi sowan keraton');
+      await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(calledGemini, isTrue);
+      expect(find.textContaining('Jawi Jangkep cocok untuk upacara resmi keraton.'), findsOneWidget);
     });
   });
 }
