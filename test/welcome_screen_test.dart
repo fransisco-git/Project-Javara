@@ -36,7 +36,7 @@ void main() {
       expect(find.text(' · '), findsNothing); // Separated by dot character '·'
       expect(find.text('·'), findsOneWidget);
 
-      // Verify new pendopo Javanese attire hero background is rendered
+      // Verify new pendopo Javanese attire hero background is rendered without zoom/crop
       final heroFinder = find.byWidgetPredicate(
         (w) =>
             w is Image &&
@@ -45,16 +45,16 @@ void main() {
                 'assets/images/welcome_pendopo_busana.jpg',
       );
       expect(heroFinder, findsOneWidget);
+      expect(tester.widget<Image>(heroFinder).fit, BoxFit.fitWidth);
 
-      // Verify monogram logo asset is rendered under top SafeArea with height 44
+      // Verify small JAVARA monogram logo is NOT rendered on WelcomeScreen
       final logoFinder = find.byWidgetPredicate(
         (w) =>
             w is Image &&
             w.image is AssetImage &&
-            (w.image as AssetImage).assetName == kWelcomeLogoAsset,
+            (w.image as AssetImage).assetName == 'assets/images/logo_javara.png',
       );
-      expect(logoFinder, findsOneWidget);
-      expect(tester.widget<Image>(logoFinder).height, 44);
+      expect(logoFinder, findsNothing);
 
       // Verify CTA gold matches navbar accent constant (single source of truth)
       final ctaButton = tester.widget<ElevatedButton>(

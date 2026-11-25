@@ -13,9 +13,6 @@ import '../home/home_screen.dart';
 /// Konstanta path aset latar foto pasangan berbusana adat Jawa di Pendopo.
 const String kWelcomeHeroAsset = 'assets/images/welcome_pendopo_busana.jpg';
 
-/// Konstanta path aset logo monogram JAVARA.
-const String kWelcomeLogoAsset = 'assets/images/logo_javara.png';
-
 /// Warna gelap khas layar selamat datang JAVARA.
 const Color _kDarkBrown = Color(0xFF140C06);
 const Color _kDarkBrownBg = Color(0xFF100905);
@@ -51,8 +48,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   late final Animation<double> _secondaryCtaAnim;
 
   AudioPlayer? _ambientPlayer;
-  double _pointerX = 0.0;
-  double _pointerY = 0.0;
 
   @override
   void initState() {
@@ -116,27 +111,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Pra-muat panorama megah Borobudur Buddha & Merapi fajar serta logo monogram
+    // Pra-muat foto latar welcome screen
     precacheImage(
       const AssetImage(kWelcomeHeroAsset),
       context,
     );
-    precacheImage(
-      const AssetImage(kWelcomeLogoAsset),
-      context,
-    );
-  }
-
-  void _updatePointer(Offset localPosition, Size size) {
-    if (size.width == 0 || size.height == 0) return;
-    final px = ((localPosition.dx / size.width) * 2.0 - 1.0).clamp(-1.0, 1.0);
-    final py = ((localPosition.dy / size.height) * 2.0 - 1.0).clamp(-1.0, 1.0);
-    if ((px - _pointerX).abs() > 0.01 || (py - _pointerY).abs() > 0.01) {
-      setState(() {
-        _pointerX = px;
-        _pointerY = py;
-      });
-    }
   }
 
   @override
@@ -217,25 +196,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           builder: (context, _) {
             final ambientT = _ambientController.value;
 
-            return Listener(
-              onPointerMove: (e) => _updatePointer(e.localPosition, size),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // 1. Panorama Megah Candi Borobudur & Fajar Merapi dengan Patung Buddha di Kiri
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                  // 1. Foto Latar Pasangan Berbusana Adat Jawa di Pendopo (tanpa zoom / crop berlebih)
                   Positioned.fill(
-                    child: Transform.translate(
-                      offset: Offset(_pointerX * -10.0, _pointerY * -6.0),
-                      child: Transform.scale(
-                        scale: 1.05,
-                        alignment: Alignment.center,
-                        child: Image.asset(
-                          kWelcomeHeroAsset,
-                          fit: BoxFit.cover,
-                          alignment: const Alignment(0, -0.15),
-                          errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                        ),
-                      ),
+                    child: Image.asset(
+                      kWelcomeHeroAsset,
+                      fit: BoxFit.fitWidth,
+                      alignment: Alignment.topCenter,
+                      filterQuality: FilterQuality.high,
+                      isAntiAlias: true,
+                      errorBuilder: (_, _, _) => const SizedBox.shrink(),
                     ),
                   ),
 
@@ -284,28 +256,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               _kScrimDarkBrown.withValues(alpha: 0.85),
                               _kDarkBrownBg.withValues(alpha: 0.95),
                             ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // 5b. Logo Monogram J-V kecil di bawah SafeArea atas (rata tengah, tinggi 44 px)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: SafeArea(
-                      bottom: false,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: Center(
-                          child: Image.asset(
-                            kWelcomeLogoAsset,
-                            height: 44,
-                            fit: BoxFit.contain,
-                            filterQuality: FilterQuality.high,
-                            errorBuilder: (_, _, _) => const SizedBox.shrink(),
                           ),
                         ),
                       ),
@@ -561,7 +511,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   ),
                   ),
                 ],
-              ),
             );
           },
         ),
