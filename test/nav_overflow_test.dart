@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jawara_app/features/home/javara_bottom_nav.dart';
+import 'package:jawara_app/widgets/navigation/nav_icon_hanger.dart';
+import 'package:jawara_app/widgets/navigation/nav_icon_wardrobe.dart';
+
+Widget _berandaIcon(BuildContext context, bool isSelected) =>
+    NavIconWardrobe(isActive: isSelected);
+
+Widget _koleksiIcon(BuildContext context, bool isSelected) =>
+    NavIconHanger(isActive: isSelected);
 
 void main() {
   const items = [
@@ -8,11 +16,13 @@ void main() {
       label: 'Beranda',
       activeIcon: Icons.home_rounded,
       inactiveIcon: Icons.home_outlined,
+      iconBuilder: _berandaIcon,
     ),
     NavItemData(
       label: 'Koleksi',
       activeIcon: Icons.grid_view_rounded,
       inactiveIcon: Icons.grid_view_outlined,
+      iconBuilder: _koleksiIcon,
     ),
     NavItemData(
       label: 'Tersimpan',

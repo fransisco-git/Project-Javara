@@ -11,11 +11,13 @@ class NavItemData {
     required this.label,
     required this.activeIcon,
     required this.inactiveIcon,
+    this.iconBuilder,
   });
 
   final String label;
   final IconData activeIcon;
   final IconData inactiveIcon;
+  final Widget Function(BuildContext context, bool isSelected)? iconBuilder;
 }
 
 /// Floating Frosted Glass Capsule Bottom Navigation Bar khas JAVARA.
@@ -179,6 +181,69 @@ class _InteractiveNavItemState extends State<_InteractiveNavItem> {
 
   @override
   Widget build(BuildContext context) {
+    final hasCustomIcon = widget.item.iconBuilder != null;
+
+    final itemContent = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (hasCustomIcon)
+            widget.item.iconBuilder!(context, widget.isSelected)
+          else
+            // Ikon Navigasi standar dengan efek skala & transisi
+            AnimatedScale(
+              scale: widget.isSelected ? 1.08 : 1.0,
+              duration: const Duration(milliseconds: 240),
+              curve: Curves.easeOutBack,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                transitionBuilder: (child, anim) => FadeTransition(
+                  opacity: anim,
+                  child: ScaleTransition(scale: anim, child: child),
+                ),
+                child: Icon(
+                  widget.isSelected
+                      ? widget.item.activeIcon
+                      : widget.item.inactiveIcon,
+                  key: ValueKey(
+                    '${widget.item.label}_${widget.isSelected}',
+                  ),
+                  size: 21,
+                  color: widget.isSelected
+                      ? widget.activeColor
+                      : widget.inactiveColor,
+                ),
+              ),
+            ),
+          const SizedBox(height: 2),
+
+          // Label Teks: Inter 11sp, semi-bold saat aktif, terproteksi FittedBox
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: JText.sans(
+                  11.0,
+                  weight: widget.isSelected
+                      ? FontWeight.w600
+                      : FontWeight.w500,
+                  color: widget.isSelected
+                      ? widget.activeColor
+                      : widget.inactiveColor,
+                  letterSpacing: 0.1,
+                ),
+                child: Text(widget.item.label, maxLines: 1),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8.0),
+        ],
+      ),
+    );
+
     return Semantics(
       button: true,
       selected: widget.isSelected,
@@ -196,68 +261,14 @@ class _InteractiveNavItemState extends State<_InteractiveNavItem> {
         onTapCancel: () {
           setState(() => _isPressed = false);
         },
-        child: AnimatedScale(
-          scale: _isPressed ? 0.90 : (widget.isSelected ? 1.04 : 1.0),
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutBack,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Ikon Navigasi dengan Efek Skala & Pendaran Halus
-                AnimatedScale(
-                  scale: widget.isSelected ? 1.08 : 1.0,
-                  duration: const Duration(milliseconds: 240),
-                  curve: Curves.easeOutBack,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    transitionBuilder: (child, anim) => FadeTransition(
-                      opacity: anim,
-                      child: ScaleTransition(scale: anim, child: child),
-                    ),
-                    child: Icon(
-                      widget.isSelected
-                          ? widget.item.activeIcon
-                          : widget.item.inactiveIcon,
-                      key: ValueKey(
-                        '${widget.item.label}_${widget.isSelected}',
-                      ),
-                      size: 21,
-                      color: widget.isSelected
-                          ? widget.activeColor
-                          : widget.inactiveColor,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 2),
-
-                // Label Teks: Inter 11sp, semi-bold saat aktif, terproteksi FittedBox
-                Flexible(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: AnimatedDefaultTextStyle(
-                      duration: const Duration(milliseconds: 200),
-                      style: JText.sans(
-                        11.0,
-                        weight: widget.isSelected
-                            ? FontWeight.w600
-                            : FontWeight.w500,
-                        color: widget.isSelected
-                            ? widget.activeColor
-                            : widget.inactiveColor,
-                        letterSpacing: 0.1,
-                      ),
-                      child: Text(widget.item.label, maxLines: 1),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8.0),
-              ],
-            ),
-          ),
-        ),
+        child: hasCustomIcon
+            ? itemContent
+            : AnimatedScale(
+                scale: _isPressed ? 0.90 : (widget.isSelected ? 1.04 : 1.0),
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOutBack,
+                child: itemContent,
+              ),
       ),
     );
   }

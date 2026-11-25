@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme.dart';
+import '../../widgets/navigation/nav_icon_hanger.dart';
+import '../../widgets/navigation/nav_icon_wardrobe.dart';
 import '../fashion/screens/clothing_catalog_screen.dart';
 import '../fashion/screens/tersimpan_tab.dart';
 import 'home_tab.dart';
@@ -20,16 +22,26 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
 
+  static Widget _buildBerandaIcon(BuildContext context, bool isSelected) {
+    return NavIconWardrobe(isActive: isSelected);
+  }
+
+  static Widget _buildKoleksiIcon(BuildContext context, bool isSelected) {
+    return NavIconHanger(isActive: isSelected);
+  }
+
   static const _items = [
     NavItemData(
       label: 'Beranda',
       activeIcon: Icons.home,
       inactiveIcon: Icons.home_outlined,
+      iconBuilder: _buildBerandaIcon,
     ),
     NavItemData(
       label: 'Koleksi',
       activeIcon: Icons.grid_view_rounded,
       inactiveIcon: Icons.grid_view_outlined,
+      iconBuilder: _buildKoleksiIcon,
     ),
     NavItemData(
       label: 'Tersimpan',

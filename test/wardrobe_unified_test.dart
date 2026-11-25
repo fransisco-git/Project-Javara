@@ -5,6 +5,8 @@ import 'package:jawara_app/features/fashion/models/javanese_clothing_models.dart
 import 'package:jawara_app/features/fashion/screens/wardrobe_tab.dart';
 import 'package:jawara_app/features/home/home_screen.dart';
 import 'package:jawara_app/services/saved_garments_service.dart';
+import 'package:jawara_app/widgets/navigation/nav_icon_hanger.dart';
+import 'package:jawara_app/widgets/navigation/nav_icon_wardrobe.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +38,16 @@ void main() {
       expect(find.text('Tersimpan'), findsOneWidget);
       expect(find.text('Profil'), findsOneWidget);
 
+      // Verifikasi custom icons untuk Beranda (NavIconWardrobe) & Koleksi (NavIconHanger) 24x24
+      final wardrobeIconFinder = find.byType(NavIconWardrobe);
+      final hangerIconFinder = find.byType(NavIconHanger);
+      expect(wardrobeIconFinder, findsOneWidget);
+      expect(hangerIconFinder, findsOneWidget);
+      expect(tester.getSize(wardrobeIconFinder), const Size(24, 24));
+      expect(tester.getSize(hangerIconFinder), const Size(24, 24));
+      expect(tester.widget<NavIconWardrobe>(wardrobeIconFinder).isActive, isTrue);
+      expect(tester.widget<NavIconHanger>(hangerIconFinder).isActive, isFalse);
+
       // Verifikasi tombol Wardrobe pill di navbar sudah dihapus
       expect(find.text('Wardrobe'), findsNothing);
       expect(find.byIcon(Icons.checkroom_outlined), findsNothing);
@@ -44,10 +56,12 @@ void main() {
       expect(find.text('Jelajah'), findsNothing);
       expect(find.text('Katalog'), findsNothing);
 
-      // Switch ke Tab Koleksi (Tab 1)
+      // Switch ke Tab Koleksi (Tab 1) -> NavIconHanger menjadi aktif, NavIconWardrobe nonaktif
       await tester.tap(find.text('Koleksi'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 220));
+      expect(tester.widget<NavIconWardrobe>(wardrobeIconFinder).isActive, isFalse);
+      expect(tester.widget<NavIconHanger>(hangerIconFinder).isActive, isTrue);
 
       // Switch ke Tab Tersimpan (Tab 2)
       await tester.tap(find.text('Tersimpan'));
