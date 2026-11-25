@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jawara_app/features/home/home_tab.dart';
 import 'package:jawara_app/features/home/widgets/category_theme_icons.dart';
+import 'package:jawara_app/features/home/widgets/hero_slide.dart';
 import 'package:jawara_app/services/saved_garments_service.dart';
 
 void main() {
@@ -292,5 +293,48 @@ void main() {
     expect(find.byType(JavaraCategoryThemeIcon), findsNWidgets(3));
     expect(find.byIcon(Icons.military_tech_rounded), findsNothing);
     expect(find.byIcon(Icons.texture_rounded), findsNothing);
+  });
+
+  testWidgets('HomeTab hero carousel uses unified full-width HeroSlide across all 3 slides', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390 * 2, 844 * 2);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: HomeTab(onOpenTab: (_) {}),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 1200));
+
+    // Slide 1: full-width HeroSlide, exact eyebrow, title, and LIHAT KOLEKSI button
+    final heroSlideFinder = find.byType(HeroSlide);
+    expect(heroSlideFinder, findsOneWidget);
+    expect(tester.getSize(heroSlideFinder).width, 390.0);
+    expect(find.text('ARSIP 01 · BUSANA PUTRI'), findsOneWidget);
+    expect(find.text('Kebaya Kartini Solo Sutra'), findsOneWidget);
+    expect(find.text('LIHAT KOLEKSI'), findsOneWidget);
+    expect(find.byIcon(Icons.auto_awesome), findsNothing);
+
+    // Swipe horizontally to Slide 2
+    final pageViewFinder = find.byType(PageView);
+    await tester.drag(pageViewFinder, const Offset(-390, 0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('ARSIP 02 · BUSANA PRIA'), findsOneWidget);
+    expect(find.text('Jawi Jangkep Keprabon'), findsOneWidget);
+    expect(find.text('LIHAT KOLEKSI'), findsOneWidget);
+
+    // Swipe horizontally to Slide 3
+    await tester.drag(pageViewFinder, const Offset(-390, 0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('ARSIP 03 · BUSANA PENGANTIN'), findsOneWidget);
+    expect(find.text('Solo Basahan Kampuhan'), findsOneWidget);
+    expect(find.text('LIHAT KOLEKSI'), findsOneWidget);
   });
 }
