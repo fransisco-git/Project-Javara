@@ -274,7 +274,7 @@ class _HomeTabState extends State<HomeTab> {
                                       index: 1,
                                       child: _HeroCard(),
                                     ),
-                                    const SizedBox(height: 16),
+                                    const SizedBox(height: 24),
 
                                     // 2. 3 Kategori Utama
                                     Padding(
