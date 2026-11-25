@@ -33,11 +33,15 @@ void main() {
       );
       await tester.pump();
 
-      // Verifikasi 4 label teks tab standar
-      expect(find.text('Beranda'), findsOneWidget);
-      expect(find.text('Koleksi'), findsOneWidget);
-      expect(find.text('Tersimpan'), findsOneWidget);
-      expect(find.text('Profil'), findsOneWidget);
+      // Verifikasi Scaffold memakai extendBody: false agar kartu tidak tertutup navbar
+      final scaffold = tester.widget<Scaffold>(find.byType(Scaffold).first);
+      expect(scaffold.extendBody, isFalse);
+
+      // Verifikasi 4 label teks tab huruf kapital
+      expect(find.text('BERANDA'), findsOneWidget);
+      expect(find.text('KOLEKSI'), findsOneWidget);
+      expect(find.text('TERSIMPAN'), findsOneWidget);
+      expect(find.text('PROFIL'), findsOneWidget);
 
       // Verifikasi custom icons untuk Beranda (NavIconHome) & Koleksi (NavIconHanger) 24x24
       final homeIconFinder = find.byType(NavIconHome);
@@ -50,12 +54,10 @@ void main() {
       final hangerIcon = tester.widget<NavIconHanger>(hangerIconFinder);
       expect(homeIcon.isActive, isTrue);
       expect(hangerIcon.isActive, isFalse);
-      expect(homeIcon.activeColor, JavaraBottomNav.activeColor);
-      expect(hangerIcon.activeColor, JavaraBottomNav.activeColor);
-      expect(homeIcon.activeColor, isNot(Colors.white));
-      expect(hangerIcon.activeColor, isNot(Colors.white));
+      expect(homeIcon.activeColor, Colors.white);
+      expect(hangerIcon.activeColor, Colors.white);
 
-      // Verifikasi titik indikator aktif bawah sudah dihapus & semua baseline label sejajar
+      // Verifikasi titik indikator aktif bawah sudah dihapus, bar full-width, & semua baseline label sejajar
       expect(
         find.descendant(
           of: find.byType(JavaraBottomNav),
@@ -63,10 +65,11 @@ void main() {
         ),
         findsNothing,
       );
-      final berandaDy = tester.getBottomLeft(find.text('Beranda')).dy;
-      expect(tester.getBottomLeft(find.text('Koleksi')).dy, berandaDy);
-      expect(tester.getBottomLeft(find.text('Tersimpan')).dy, berandaDy);
-      expect(tester.getBottomLeft(find.text('Profil')).dy, berandaDy);
+      expect(tester.getSize(find.byType(JavaraBottomNav)).width, 360.0);
+      final berandaDy = tester.getBottomLeft(find.text('BERANDA')).dy;
+      expect(tester.getBottomLeft(find.text('KOLEKSI')).dy, berandaDy);
+      expect(tester.getBottomLeft(find.text('TERSIMPAN')).dy, berandaDy);
+      expect(tester.getBottomLeft(find.text('PROFIL')).dy, berandaDy);
 
       // Verifikasi tombol Wardrobe pill di navbar sudah dihapus
       expect(find.text('Wardrobe'), findsNothing);
@@ -77,14 +80,14 @@ void main() {
       expect(find.text('Katalog'), findsNothing);
 
       // Switch ke Tab Koleksi (Tab 1) -> NavIconHanger menjadi aktif, NavIconHome nonaktif
-      await tester.tap(find.text('Koleksi'));
+      await tester.tap(find.text('KOLEKSI'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 220));
       expect(tester.widget<NavIconHome>(homeIconFinder).isActive, isFalse);
       expect(tester.widget<NavIconHanger>(hangerIconFinder).isActive, isTrue);
 
       // Switch ke Tab Tersimpan (Tab 2)
-      await tester.tap(find.text('Tersimpan'));
+      await tester.tap(find.text('TERSIMPAN'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -93,7 +96,7 @@ void main() {
       expect(find.text('Setelan Pusaka'), findsNothing);
 
       // Switch ke Tab Profil (Tab 3)
-      await tester.tap(find.text('Profil'));
+      await tester.tap(find.text('PROFIL'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 

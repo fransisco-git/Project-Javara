@@ -79,11 +79,11 @@ class _HomeScreenState extends State<HomeScreen> {
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark.copyWith(
           statusBarColor: Colors.transparent,
-          systemNavigationBarColor: const Color(0xFF14100D),
+          systemNavigationBarColor: const Color(0xFF0D0C0B),
           systemNavigationBarIconBrightness: Brightness.light,
         ),
         child: Scaffold(
-          extendBody: true,
+          extendBody: false,
           body: IndexedStack(
             index: _index,
             children: [

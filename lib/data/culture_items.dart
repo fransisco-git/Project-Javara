@@ -38,7 +38,7 @@ const popularItems = <CultureItem>[
     meta: 'Busana Resmi Pria · Surakarta, Jateng',
     price: 'Rp485.000',
     actionLabel: 'Sewa / Beli',
-    image: 'kebaya.png',
+    image: 'model_surjan_pranakan_solo.jpg',
     tag: 'AGUNG KASUNANAN',
     category: 'Busana Tradisi',
     regency: 'Kota Surakarta',
