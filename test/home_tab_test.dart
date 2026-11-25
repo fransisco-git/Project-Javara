@@ -168,7 +168,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1200));
 
       // Scroll down to bring Warisan Populer and its cards into viewport
-      await tester.drag(find.byType(ListView), const Offset(0, -600));
+      await tester.drag(find.byType(ListView), const Offset(0, -420));
       await tester.pump(const Duration(milliseconds: 300));
 
       // Verify Warisan Populer section header
@@ -464,11 +464,10 @@ void main() {
       expect(find.text('LIHAT KOLEKSI'), findsOneWidget);
       expect(find.byIcon(Icons.auto_awesome), findsNothing);
 
-      // Categories row sits pushed down near the bottom of the first viewport above navbar,
-      // leaving open vertical space below the hero carousel for the temple background
+      // Categories row sits cleanly below the 88dp hero-to-category spacer above navbar
       final busanaBottom = tester.getBottomLeft(find.text('Busana')).dy;
-      expect(busanaBottom, greaterThan(550.0));
-      expect(busanaBottom, lessThan(760.0));
+      expect(busanaBottom, greaterThan(450.0));
+      expect(busanaBottom, lessThan(600.0));
 
       // Swipe horizontally to Slide 2
       final pageViewFinder = find.byType(PageView);

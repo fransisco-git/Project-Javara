@@ -176,20 +176,7 @@ class _HomeTabState extends State<HomeTab> {
     final popular = _q.isEmpty ? popularItems : _filter(allItems);
     final empty = popular.isEmpty;
     final topPadding = MediaQuery.of(context).padding.top;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final heroHeight = (screenHeight * 0.32).clamp(240.0, 300.0);
-    final navClearance = JavaraBottomNav.contentBottomPadding(
-      context,
-      extra: 14.0,
-    );
-    const categoriesRowHeight = 86.0;
-    final heroToCategorySpace = (screenHeight -
-            (topPadding + 58) -
-            heroHeight -
-            categoriesRowHeight -
-            navClearance -
-            90.0)
-        .clamp(120.0, 220.0);
+    const heroToCategorySpace = 88.0;
 
     return MouseRegion(
       onHover: (e) =>
