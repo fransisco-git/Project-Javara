@@ -61,63 +61,88 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
             pinned: true,
             backgroundColor: const Color(0xFF181310),
             elevation: 0,
+            leadingWidth: 64,
             leading: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CircleAvatar(
-                backgroundColor: const Color(0x99181310),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    color: Color(0xFFE4C590),
-                    size: 18,
+              padding: const EdgeInsets.only(left: 12),
+              child: Center(
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xB3181310),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0x33E4C590),
+                      width: 0.8,
+                    ),
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: Color(0xFFE4C590),
+                      size: 18,
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
                 ),
               ),
             ),
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: 12),
-                child: CircleAvatar(
-                  backgroundColor: const Color(0x99181310),
-                  child: IconButton(
-                    tooltip: _isBookmarked ? 'Hapus dari Wardrobe' : 'Simpan ke Wardrobe',
-                    icon: Icon(
-                      _isBookmarked
-                          ? Icons.bookmark_added_rounded
-                          : Icons.bookmark_border_rounded,
-                      color: const Color(0xFFE4C590),
-                      size: 20,
+                child: Center(
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xB3181310),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0x33E4C590),
+                        width: 0.8,
+                      ),
                     ),
-                    onPressed: () async {
-                      final messenger = ScaffoldMessenger.of(context);
-                      final isSaved = await SavedGarmentsService.instance.toggleSave(item.id);
-                      if (!mounted) return;
-                      messenger.hideCurrentSnackBar();
-                      messenger.showSnackBar(
-                        SnackBar(
-                          duration: const Duration(milliseconds: 1400),
-                          backgroundColor: const Color(0xFF241A14),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(
-                              color: Color(0xFFE4C590),
-                              width: 1,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      tooltip: _isBookmarked ? 'Hapus dari Wardrobe' : 'Simpan ke Wardrobe',
+                      icon: Icon(
+                        _isBookmarked
+                            ? Icons.bookmark_added_rounded
+                            : Icons.bookmark_border_rounded,
+                        color: const Color(0xFFE4C590),
+                        size: 20,
+                      ),
+                      onPressed: () async {
+                        final messenger = ScaffoldMessenger.of(context);
+                        final isSaved = await SavedGarmentsService.instance.toggleSave(item.id);
+                        if (!mounted) return;
+                        messenger.hideCurrentSnackBar();
+                        messenger.showSnackBar(
+                          SnackBar(
+                            duration: const Duration(milliseconds: 1400),
+                            backgroundColor: const Color(0xFF241A14),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: const BorderSide(
+                                color: Color(0xFFE4C590),
+                                width: 1,
+                              ),
+                            ),
+                            content: Text(
+                              isSaved
+                                  ? '${item.name} disimpan ke Wardrobe'
+                                  : '${item.name} dihapus dari Wardrobe',
+                              style: const TextStyle(
+                                color: Color(0xFFFAF6F0),
+                                fontSize: 13,
+                              ),
                             ),
                           ),
-                          content: Text(
-                            isSaved
-                                ? '${item.name} disimpan ke Wardrobe'
-                                : '${item.name} dihapus dari Wardrobe',
-                            style: const TextStyle(
-                              color: Color(0xFFFAF6F0),
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -136,6 +161,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                         child: Image.asset(
                           item.assetImagePath!,
                           fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
                           filterQuality: FilterQuality.high,
                           errorBuilder: (_, _, _) => Container(
                             color: item.primaryColor,
@@ -224,6 +250,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                                 ? Image.asset(
                                     item.assetImagePath!,
                                     fit: BoxFit.cover,
+                                    alignment: Alignment.topCenter,
                                     errorBuilder: (_, _, _) => Center(
                                       child: Icon(
                                         item.category.icon,

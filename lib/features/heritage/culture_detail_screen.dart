@@ -81,34 +81,52 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
                   expandedHeight: (h * 0.44).clamp(320.0, 420.0),
                   pinned: true,
                   backgroundColor: const Color(0xFF191014),
-                  leading: IconButton(
-                    icon: Container(
-                      padding: const EdgeInsets.all(7),
-                      decoration: const BoxDecoration(
-                        color: Color(0x99191014),
-                        shape: BoxShape.circle,
+                  leadingWidth: 64,
+                  leading: Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      icon: Container(
+                        width: 38,
+                        height: 38,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: const Color(0xB3191014),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0x33FFFFFF),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 17,
+                          color: Colors.white,
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        size: 16,
-                        color: Colors.white,
-                      ),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
-                    onPressed: () => Navigator.of(context).pop(),
                   ),
                   actions: [
                     IconButton(
+                      padding: EdgeInsets.zero,
                       icon: Container(
-                        padding: const EdgeInsets.all(7),
-                        decoration: const BoxDecoration(
-                          color: Color(0x99191014),
+                        width: 38,
+                        height: 38,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: const Color(0xB3191014),
                           shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0x33FFFFFF),
+                            width: 0.8,
+                          ),
                         ),
                         child: Icon(
                           _isBookmarked
                               ? Icons.bookmark_rounded
                               : Icons.bookmark_border_rounded,
-                          size: 20,
+                          size: 19,
                           color: _isBookmarked
                               ? const Color(0xFFFFD700)
                               : Colors.white,
@@ -122,7 +140,11 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
                     background: Stack(
                       fit: StackFit.expand,
                       children: [
-                        AssetPhoto(file: item.image, radius: 0),
+                        AssetPhoto(
+                          file: item.image,
+                          radius: 0,
+                          alignment: Alignment.topCenter,
+                        ),
                         // Gradasi pencahayaan dusk sinematik
                         const DecoratedBox(
                           decoration: BoxDecoration(

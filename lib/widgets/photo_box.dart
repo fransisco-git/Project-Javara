@@ -12,6 +12,7 @@ class AssetPhoto extends StatelessWidget {
     this.aspectRatio,
     this.width,
     this.height,
+    this.alignment = Alignment.center,
     this.semanticLabel,
   });
 
@@ -20,6 +21,7 @@ class AssetPhoto extends StatelessWidget {
   final double? aspectRatio;
   final double? width;
   final double? height;
+  final AlignmentGeometry alignment;
   final String? semanticLabel;
 
   @override
@@ -29,6 +31,7 @@ class AssetPhoto extends StatelessWidget {
       child: Image.asset(
         'assets/images/$file',
         fit: BoxFit.cover,
+        alignment: alignment,
         filterQuality: FilterQuality.medium,
         width: width,
         height: height,
