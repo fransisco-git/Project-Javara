@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jawara_app/core/purchase_search_helper.dart';
 import 'package:jawara_app/data/culture_items.dart';
 import 'package:jawara_app/features/heritage/culture_detail_screen.dart';
 import 'package:jawara_app/features/home/home_tab.dart';
@@ -370,11 +371,71 @@ void main() {
         await tester.tap(find.text('Lokasi'));
         await tester.pump(const Duration(milliseconds: 300));
 
+        expect(find.text('Buka di Google Maps'), findsOneWidget);
+        expect(find.text('Buka di Peta Budaya Jawa Tengah'), findsNothing);
         expect(tabBarErrors, isEmpty);
       } finally {
         tester.view.resetPhysicalSize();
         FlutterError.onError = originalOnError;
       }
+    },
+  );
+
+  test(
+    'buildGoogleMapsUrl and resolveCulturalMapsQuery map heritage sites accurately',
+    () {
+      final uri = buildGoogleMapsUrl('Kampung Batik Laweyan, Surakarta');
+      expect(uri.scheme, 'https');
+      expect(uri.host, 'www.google.com');
+      expect(uri.path, '/maps/search/');
+      expect(uri.queryParameters['api'], '1');
+      expect(uri.queryParameters['query'], 'Kampung Batik Laweyan, Surakarta');
+
+      expect(
+        resolveCulturalMapsQuery(
+          itemId: 'beskap_jawi_jangkep_solo',
+          title: 'Beskap Jawi Jangkep',
+          location: 'Keraton Kasunanan & Baluwarti, Surakarta',
+          region: 'Kota Surakarta',
+        ),
+        'Keraton Kasunanan Surakarta Hadiningrat, Surakarta',
+      );
+      expect(
+        resolveCulturalMapsQuery(
+          itemId: 'batik_tulis_solo',
+          title: 'Batik Tulis Parang Barong',
+          location: 'Kampung Batik Laweyan & Kauman, Surakarta',
+          region: 'Kota Surakarta',
+        ),
+        'Kampung Batik Laweyan, Surakarta',
+      );
+      expect(
+        resolveCulturalMapsQuery(
+          itemId: 'kebaya_kartini_rembang',
+          title: 'Kebaya Kartini Jawa Tengah',
+          location: 'Sentra Bordir & Kebaya Rembang - Jepara',
+          region: 'Kabupaten Rembang',
+        ),
+        'Museum R.A. Kartini Rembang, Jawa Tengah',
+      );
+      expect(
+        resolveCulturalMapsQuery(
+          itemId: 'batik_pekalongan',
+          title: 'Batik Pesisir Pekalongan',
+          location: 'Kampung Batik Pesindon & Kauman, Pekalongan',
+          region: 'Kota Pekalongan',
+        ),
+        'Museum Batik Pekalongan, Jawa Tengah',
+      );
+      expect(
+        resolveCulturalMapsQuery(
+          itemId: 'surjan_lurik_tradisi',
+          title: 'Surjan Lurik Tradisional',
+          location: 'Sentra Tenun Pedan Klaten & Solo',
+          region: 'Kota Surakarta',
+        ),
+        'Sentra Tenun Lurik Pedan, Klaten, Jawa Tengah',
+      );
     },
   );
 

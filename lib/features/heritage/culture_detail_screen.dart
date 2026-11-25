@@ -557,44 +557,78 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
                     size: 18,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    'Waktu Berkunjung Terbaik: 07.00 - 17.00 WIB',
-                    style: JText.serif(12.5, color: const Color(0xFF6E5B49)),
+                  Expanded(
+                    child: Text(
+                      'Waktu Berkunjung Terbaik: 07.00 - 17.00 WIB',
+                      style: JText.serif(12.5, color: const Color(0xFF6E5B49)),
+                    ),
                   ),
                 ],
               ),
-              if (widget.onOpenMap != null) ...[
-                const SizedBox(height: 14),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      widget.onOpenMap!();
-                    },
-                    icon: const Icon(
-                      Icons.map_rounded,
-                      size: 18,
-                      color: JColors.button,
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () async {
+                    HapticFeedback.lightImpact();
+                    final query = resolveCulturalMapsQuery(
+                      itemId: item.id,
+                      title: item.title,
+                      location: item.location,
+                      region: item.regency,
+                    );
+                    final launched = await launchGoogleMaps(query);
+                    if (!launched && mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Gagal membuka Google Maps.',
+                            style: JText.serif(13, color: Colors.white),
+                          ),
+                          backgroundColor: const Color(0xFF2E2019),
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: JColors.button, width: 1.2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    label: Text(
-                      'Buka di Peta Budaya Jawa Tengah',
-                      style: JText.serif(
-                        13,
-                        weight: FontWeight.w700,
-                        color: JColors.button,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: JColors.button, width: 1.2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
                     ),
                   ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          'Buka di Google Maps',
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: JText.serif(
+                            13,
+                            weight: FontWeight.w700,
+                            color: JColors.button,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(
+                        Icons.north_east,
+                        size: 16,
+                        color: JColors.button,
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
             ],
           ),
         ),
