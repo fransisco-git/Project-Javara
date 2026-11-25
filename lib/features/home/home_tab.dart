@@ -187,8 +187,9 @@ class _HomeTabState extends State<HomeTab> {
             (topPadding + 58) -
             heroHeight -
             categoriesRowHeight -
-            navClearance)
-        .clamp(180.0, 380.0);
+            navClearance -
+            90.0)
+        .clamp(120.0, 220.0);
 
     return MouseRegion(
       onHover: (e) =>
