@@ -219,39 +219,7 @@ class HomeTabSkeletonView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // 4. Banner Studio Wardrobe 3D Skeleton
-            Container(
-              height: 110,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1712),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0x33DFB76C), width: 0.8),
-              ),
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const ShimmerBox(width: 60, height: 60, borderRadius: 12),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        ShimmerBox(width: 90, height: 12, borderRadius: 4),
-                        SizedBox(height: 8),
-                        ShimmerBox(width: 160, height: 16, borderRadius: 6),
-                        SizedBox(height: 6),
-                        ShimmerBox(width: 120, height: 12, borderRadius: 4),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // 5. Tajuk Bagian & Carousel Kartu Busana Skeleton
+            // 4. Tajuk Bagian & Carousel Kartu Busana Skeleton
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [

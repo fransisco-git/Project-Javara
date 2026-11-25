@@ -201,7 +201,7 @@ void main() {
     expect(find.byIcon(Icons.bookmark_rounded), findsAtLeastNWidgets(1));
   });
 
-  testWidgets('HomeTab omits AI chatbot button while keeping AI Fashion Studio and Studio Wardrobe 3D', (
+  testWidgets('HomeTab omits AI chatbot button and removed wardrobe section while keeping featured outfit', (
     WidgetTester tester,
   ) async {
     tester.view.physicalSize = const Size(360 * 2, 800 * 2);
@@ -222,9 +222,9 @@ void main() {
     expect(find.byTooltip('Tanya Abdi Pakar'), findsNothing);
     expect(find.text('Tanya Abdi Pakar soal busana adat'), findsNothing);
 
-    // Scroll down to Studio Busana section below Warisan Populer
+    // Scroll down to Busana Pilihan Hari Ini below Warisan Populer
     await tester.scrollUntilVisible(
-      find.text('Studio Busana'),
+      find.text('BUSANA PILIHAN HARI INI'),
       400,
       scrollable: find.descendant(
         of: find.byType(ListView).first,
@@ -233,10 +233,13 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 400));
 
-    // Verify Studio Wardrobe 3D and AI Fashion Studio remain available
-    expect(find.text('Studio Busana'), findsOneWidget);
-    expect(find.text('Studio Wardrobe 3D'), findsOneWidget);
-    expect(find.text('AI Fashion Studio'), findsOneWidget);
+    // Verify Studio Busana / Wardrobe section has been removed from HomeTab
+    expect(find.text('Studio Busana'), findsNothing);
+    expect(find.text('Studio Wardrobe 3D'), findsNothing);
+    expect(find.text('AI Fashion Studio'), findsNothing);
+
+    // Verify featured outfit section remains intact
+    expect(find.text('BUSANA PILIHAN HARI INI'), findsOneWidget);
   });
 
   testWidgets('HomeTab renders 3 merged categories: Busana, Aksesoris, Batik', (

@@ -33,13 +33,17 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // 1. Verify Header and Fashion Identity
+    // 1. Verify Header and Fashion Identity (logged-in state)
     expect(find.text('Profil Pengguna'), findsOneWidget);
     expect(find.byIcon(Icons.edit_note_rounded), findsNothing);
     expect(find.byTooltip('Ubah Profil'), findsNothing);
     expect(find.text('Pelestari Wastra Jawa Tengah'), findsOneWidget);
     expect(find.text('Edit Profil'), findsOneWidget);
     expect(find.text('Alamat Kirim'), findsOneWidget);
+
+    // Guest banner and lock icons must be hidden when logged in
+    expect(find.text('Anda Menggunakan Akun Tamu'), findsNothing);
+    expect(find.byIcon(Icons.lock_outline_rounded), findsNothing);
 
     // 2. Verify Aktivitas Busana Saya section is removed
     expect(find.text('Aktivitas Busana Saya'), findsNothing);
@@ -109,5 +113,60 @@ void main() {
 
     // 4. Verify Logout Button label for Guest
     expect(find.text('Keluar dari Mode Tamu'), findsOneWidget);
+
+    // 5. Verify dummy size values are NOT shown; empty state 'Belum diatur' is displayed
+    expect(find.text('L (LD 98 cm)'), findsNothing);
+    expect(find.text('No. 7 (57 cm)'), findsNothing);
+    expect(find.text('Standar (220 cm)'), findsNothing);
+    expect(find.text('Belum diatur'), findsNWidgets(3));
+
+    // 6. Verify personalization buttons are locked with lock icon
+    expect(find.byIcon(Icons.lock_outline_rounded), findsNWidgets(3));
+
+    // 7. Tapping Edit Profil opens login-required bottom sheet instead of edit form
+    await tester.tap(find.text('Edit Profil'));
+    await tester.pumpAndSettle();
+    expect(find.text('Fitur Memerlukan Akun'), findsOneWidget);
+    expect(find.textContaining('Edit Profil'), findsAtLeastNWidgets(2));
+    await tester.tap(find.text('Nanti Saja'));
+    await tester.pumpAndSettle();
+
+    // 8. Tapping Ubah Ukuran Busana Saya opens login-required bottom sheet
+    await tester.tap(find.text('Ubah Ukuran Busana Saya'));
+    await tester.pumpAndSettle();
+    expect(find.text('Fitur Memerlukan Akun'), findsOneWidget);
+    expect(find.textContaining('Ubah Ukuran Busana Saya'), findsAtLeastNWidgets(2));
+  });
+
+  testWidgets('ProfileTab shows Belum diatur for logged-in user without saved sizes', (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'javara_pref_aksara': true,
+      'javara_pref_gamelan': true,
+      'javara_is_guest': false,
+      'javara_profile_name': 'Siti Rahayu',
+      'javara_profile_email': 'siti@javara.id',
+    });
+
+    tester.view.physicalSize = const Size(500, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: ProfileTab(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Anda Menggunakan Akun Tamu'), findsNothing);
+    expect(find.byIcon(Icons.lock_outline_rounded), findsNothing);
+    expect(find.text('Siti Rahayu'), findsOneWidget);
+    expect(find.text('siti@javara.id'), findsOneWidget);
+    expect(find.text('Belum diatur'), findsNWidgets(3));
   });
 }

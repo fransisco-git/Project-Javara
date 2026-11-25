@@ -24,10 +24,12 @@ class _ProfileTabState extends State<ProfileTab> {
   bool _showJavaneseScript = true;
   bool _ambientGamelan = true;
 
+  static const String _unsetSizeLabel = 'Belum diatur';
+
   // Ukuran Busana (My Size)
-  String _sizeTop = 'L (LD 98 cm)';
-  String _sizeHead = 'No. 7 (57 cm)';
-  String _sizeJarik = 'Standar (220 cm)';
+  String _sizeTop = _unsetSizeLabel;
+  String _sizeHead = _unsetSizeLabel;
+  String _sizeJarik = _unsetSizeLabel;
 
   // Data Pengguna
   bool _isGuest = false;
@@ -53,16 +55,21 @@ class _ProfileTabState extends State<ProfileTab> {
         _showJavaneseScript = prefs.getBool('javara_pref_aksara') ?? true;
         _ambientGamelan = prefs.getBool('javara_pref_gamelan') ?? true;
 
-        _sizeTop = prefs.getString('javara_size_top') ?? 'L (LD 98 cm)';
-        _sizeHead = prefs.getString('javara_size_head') ?? 'No. 7 (57 cm)';
-        _sizeJarik = prefs.getString('javara_size_jarik') ?? 'Standar (220 cm)';
-
         if (_isGuest) {
+          _sizeTop = _unsetSizeLabel;
+          _sizeHead = _unsetSizeLabel;
+          _sizeJarik = _unsetSizeLabel;
           _userName = prefs.getString('javara_profile_name') ?? 'Tamu JAVARA';
           _userEmail = prefs.getString('javara_profile_email') ?? 'tamu.budaya@javara.id';
           _userPhone = prefs.getString('javara_profile_phone') ?? '-';
           _userAddress = prefs.getString('javara_profile_address') ?? 'Mode Tamu (Belum ada alamat)';
         } else {
+          final savedTop = prefs.getString('javara_size_top')?.trim() ?? '';
+          final savedHead = prefs.getString('javara_size_head')?.trim() ?? '';
+          final savedJarik = prefs.getString('javara_size_jarik')?.trim() ?? '';
+          _sizeTop = savedTop.isNotEmpty ? savedTop : _unsetSizeLabel;
+          _sizeHead = savedHead.isNotEmpty ? savedHead : _unsetSizeLabel;
+          _sizeJarik = savedJarik.isNotEmpty ? savedJarik : _unsetSizeLabel;
           _userName = prefs.getString('javara_profile_name') ?? (authUser?.name ?? 'Raden Mas Aryo');
           _userEmail = prefs.getString('javara_profile_email') ?? (authUser?.email ?? 'aryo.kusumo@javara.id');
           _userPhone = prefs.getString('javara_profile_phone') ?? '+62 812-3456-7890';
@@ -304,16 +311,132 @@ class _ProfileTabState extends State<ProfileTab> {
     );
   }
 
+  Future<void> _openLoginScreen() async {
+    await Navigator.of(context).push(
+      fadeSlideRoute(const LoginScreen()),
+    );
+    if (mounted) {
+      _loadSavedPreferences();
+    }
+  }
+
+  /// Menampilkan Bottom Sheet pengingat bahwa fitur personalisasi memerlukan akun.
+  void _showLoginRequiredSheet(BuildContext context, {required String featureName}) {
+    HapticFeedback.lightImpact();
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.fromLTRB(22, 16, 22, 24),
+        decoration: const BoxDecoration(
+          color: Color(0xFFFAF6EE),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+          border: Border(top: BorderSide(color: Color(0x44B08D57), width: 1.2)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 44,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDFCCB2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0x22DFB76C),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0x55B08D57), width: 0.8),
+                  ),
+                  child: const Icon(
+                    Icons.lock_outline_rounded,
+                    color: Color(0xFF382315),
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Fitur Memerlukan Akun',
+                    style: JText.serif(
+                      18,
+                      weight: FontWeight.w700,
+                      color: const Color(0xFF382315),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 20, color: Color(0xFF7D6C5D)),
+                  onPressed: () => Navigator.of(ctx).pop(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Masuk atau daftar akun JAVARA untuk mengakses fitur $featureName dan menyimpan data personalisasi Anda secara permanen.',
+              style: JText.serif(13.5, color: const Color(0xFF5C4738), height: 1.5),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  _openLoginScreen();
+                },
+                icon: const Icon(Icons.login_rounded, size: 17, color: Color(0xFFFFDF9E)),
+                label: Text(
+                  'Masuk atau Daftar Akun',
+                  style: JText.serif(14, weight: FontWeight.w700, color: const Color(0xFFFFDF9E)),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF382315),
+                  foregroundColor: const Color(0xFFFFDF9E),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text(
+                  'Nanti Saja',
+                  style: JText.serif(13, weight: FontWeight.w600, color: const Color(0xFF7D6C5D)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Modal Edit Ukuran Busana Saya (My Size)
   void _openEditSizeModal(BuildContext context) {
     HapticFeedback.lightImpact();
-    String tempTop = _sizeTop;
-    String tempHead = _sizeHead;
-    String tempJarik = _sizeJarik;
-
     final topOptions = ['S (LD 90 cm)', 'M (LD 94 cm)', 'L (LD 98 cm)', 'XL (LD 104 cm)', 'XXL (LD 110 cm)'];
     final headOptions = ['No. 5 (55 cm)', 'No. 6 (56 cm)', 'No. 7 (57 cm)', 'No. 8 (58 cm)', 'No. 9 (59 cm)', 'No. 10 (60 cm)'];
     final jarikOptions = ['Standar (220 cm)', 'Panjang (250 cm)', 'Jumbo (280 cm)'];
+
+    String tempTop = topOptions.contains(_sizeTop) ? _sizeTop : topOptions[2];
+    String tempHead = headOptions.contains(_sizeHead) ? _sizeHead : headOptions[2];
+    String tempJarik = jarikOptions.contains(_sizeJarik) ? _sizeJarik : jarikOptions[0];
 
     showModalBottomSheet<void>(
       context: context,
@@ -890,28 +1013,22 @@ class _ProfileTabState extends State<ProfileTab> {
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _openEditProfileModal(context),
-                          icon: const Icon(Icons.person_outline_rounded, size: 15, color: Color(0xFF382315)),
-                          label: Text('Edit Profil', style: JText.serif(12, weight: FontWeight.w600, color: const Color(0xFF382315))),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFFEADBCA)),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                          ),
+                        child: _buildPersonalizationButton(
+                          label: 'Edit Profil',
+                          icon: Icons.person_outline_rounded,
+                          iconColor: const Color(0xFF382315),
+                          featureName: 'Edit Profil',
+                          onUnlockedTap: () => _openEditProfileModal(context),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _openEditProfileModal(context, isAddressOnly: true),
-                          icon: const Icon(Icons.location_on_outlined, size: 15, color: Color(0xFFB08D57)),
-                          label: Text('Alamat Kirim', style: JText.serif(12, weight: FontWeight.w600, color: const Color(0xFF382315))),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFFEADBCA)),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                          ),
+                        child: _buildPersonalizationButton(
+                          label: 'Alamat Kirim',
+                          icon: Icons.location_on_outlined,
+                          iconColor: const Color(0xFFB08D57),
+                          featureName: 'Alamat Kirim',
+                          onUnlockedTap: () => _openEditProfileModal(context, isAddressOnly: true),
                         ),
                       ),
                     ],
@@ -982,13 +1099,9 @@ class _ProfileTabState extends State<ProfileTab> {
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
-                      height: 38,
+                      height: 44,
                       child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            fadeSlideRoute(const LoginScreen()),
-                          );
-                        },
+                        onPressed: _openLoginScreen,
                         icon: const Icon(Icons.login_rounded, size: 16, color: Color(0xFF1E1712)),
                         label: Text(
                           'Masuk atau Daftar Akun',
@@ -1087,18 +1200,15 @@ class _ProfileTabState extends State<ProfileTab> {
                   const SizedBox(height: 14),
                   SizedBox(
                     width: double.infinity,
-                    height: 38,
-                    child: OutlinedButton.icon(
-                      onPressed: () => _openEditSizeModal(context),
-                      icon: const Icon(Icons.edit_outlined, size: 14, color: Color(0xFF382315)),
-                      label: Text(
-                        'Ubah Ukuran Busana Saya',
-                        style: JText.serif(12.5, weight: FontWeight.w600, color: const Color(0xFF382315)),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFFB08D57), width: 1.0),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
+                    height: 44,
+                    child: _buildPersonalizationButton(
+                      label: 'Ubah Ukuran Busana Saya',
+                      icon: Icons.edit_outlined,
+                      iconColor: const Color(0xFF382315),
+                      featureName: 'Ubah Ukuran Busana Saya',
+                      activeBorderSide: const BorderSide(color: Color(0xFFB08D57), width: 1.0),
+                      fontSize: 12.5,
+                      onUnlockedTap: () => _openEditSizeModal(context),
                     ),
                   ),
                 ],
@@ -1224,7 +1334,63 @@ class _ProfileTabState extends State<ProfileTab> {
     );
   }
 
+  Widget _buildPersonalizationButton({
+    required String label,
+    required IconData icon,
+    required Color iconColor,
+    required String featureName,
+    required VoidCallback onUnlockedTap,
+    BorderSide activeBorderSide = const BorderSide(color: Color(0xFFEADBCA)),
+    double fontSize = 12,
+  }) {
+    final isLocked = _isGuest;
+    const lockedColor = Color(0xFF8C7B6D);
+
+    final button = OutlinedButton(
+      onPressed: isLocked
+          ? () => _showLoginRequiredSheet(context, featureName: featureName)
+          : onUnlockedTap,
+      style: OutlinedButton.styleFrom(
+        side: isLocked
+            ? const BorderSide(color: Color(0xFFE6DAC9), width: 1.0)
+            : activeBorderSide,
+        backgroundColor: isLocked ? const Color(0xFFF6F0E6) : Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isLocked ? Icons.lock_outline_rounded : icon,
+            size: isLocked ? 14 : 15,
+            color: isLocked ? lockedColor : iconColor,
+          ),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              label,
+              style: JText.serif(
+                fontSize,
+                weight: FontWeight.w600,
+                color: isLocked ? lockedColor : const Color(0xFF382315),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (!isLocked) return button;
+    return Opacity(opacity: 0.68, child: button);
+  }
+
   Widget _buildSizePill({required String title, required String value, required IconData icon}) {
+    final isUnset = value == _unsetSizeLabel || value.trim().isEmpty || value.trim() == '-';
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
       decoration: BoxDecoration(
@@ -1234,7 +1400,11 @@ class _ProfileTabState extends State<ProfileTab> {
       ),
       child: Column(
         children: [
-          Icon(icon, size: 18, color: const Color(0xFFB08D57)),
+          Icon(
+            icon,
+            size: 18,
+            color: isUnset ? const Color(0xFFB5A492) : const Color(0xFFB08D57),
+          ),
           const SizedBox(height: 4),
           Text(
             title,
@@ -1244,7 +1414,11 @@ class _ProfileTabState extends State<ProfileTab> {
           const SizedBox(height: 2),
           Text(
             value,
-            style: JText.serif(11.5, weight: FontWeight.w700, color: const Color(0xFF382315)),
+            style: JText.serif(
+              11.5,
+              weight: isUnset ? FontWeight.w500 : FontWeight.w700,
+              color: isUnset ? const Color(0xFF8C7B6D) : const Color(0xFF382315),
+            ),
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

@@ -10,11 +10,9 @@ import '../../data/culture_items.dart';
 import '../../widgets/motion.dart';
 import '../heritage/culture_detail_screen.dart';
 import '../fashion/screens/clothing_detail_screen.dart';
-import '../fashion/screens/javanese_wardrobe_screen.dart';
 import '../fashion/screens/jelajahi_busana_screen.dart';
 import '../fashion/screens/clothing_catalog_screen.dart';
 import '../fashion/screens/batik_motif_gallery_screen.dart';
-import '../fashion/screens/ai_fashion_studio_screen.dart';
 import '../fashion/data/javanese_clothing_data.dart';
 import '../fashion/models/javanese_clothing_models.dart';
 import '../../services/saved_garments_service.dart';
@@ -318,29 +316,9 @@ class _HomeTabState extends State<HomeTab> {
                                       const SizedBox(height: 24),
                                     ],
 
-                                    // 4. Section Terpadu "Studio Busana" (Studio 3D & AI Fashion Studio)
+                                    // 4. Sorotan Kurasi "Busana Pilihan Hari Ini"
                                     StaggerIn(
                                       index: 3,
-                                      child: _HomeStudioAndAiSection(
-                                        onOpenWardrobe: () =>
-                                            Navigator.of(context).push(
-                                              fadeSlideRoute(
-                                                const JavaneseWardrobeScreen(),
-                                              ),
-                                            ),
-                                        onOpenAiStudio: () =>
-                                            Navigator.of(context).push(
-                                              fadeSlideRoute(
-                                                const AiFashionStudioScreen(),
-                                              ),
-                                            ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 24),
-
-                                    // 5. Sorotan Kurasi "Busana Pilihan Hari Ini"
-                                    StaggerIn(
-                                      index: 4,
                                       child: _FeaturedOutfitOfTheDayCard(
                                         onOpenExplore: () =>
                                             Navigator.of(context).push(
@@ -2083,153 +2061,6 @@ class _EditorialCultureCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Section Terpadu: Studio Busana
-/// Menggabungkan Studio Wardrobe 3D dan AI Fashion Studio
-/// dalam satu tampilan horizontal scrollable ramping yang tenang (#181614, border white 8%).
-class _HomeStudioAndAiSection extends StatelessWidget {
-  const _HomeStudioAndAiSection({
-    required this.onOpenWardrobe,
-    required this.onOpenAiStudio,
-  });
-
-  final VoidCallback onOpenWardrobe;
-  final VoidCallback onOpenAiStudio;
-
-  @override
-  Widget build(BuildContext context) {
-    final items = [
-      (
-        title: 'Studio Wardrobe 3D',
-        subtitle: 'Eksplorasi busana 360°',
-        icon: Icons.checkroom_rounded,
-        onTap: onOpenWardrobe,
-      ),
-      (
-        title: 'AI Fashion Studio',
-        subtitle: 'Peraga busana virtual',
-        icon: Icons.auto_awesome_rounded,
-        onTap: onOpenAiStudio,
-      ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Studio Busana',
-              style: JText.editorial(
-                18,
-                weight: FontWeight.w700,
-                color: const Color(0xFFFAF6F0),
-              ),
-            ),
-            Text(
-              'Inovasi Budaya',
-              style: JText.sans(
-                11,
-                color: const Color(0xFF8E8276),
-                weight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 72,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: items.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return InteractiveScale(
-                pressedScale: 0.96,
-                semanticLabel: item.title,
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  item.onTap();
-                },
-                child: Container(
-                  width: 220,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF181614),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0x14FFFFFF),
-                      width: 1.0,
-                    ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x33000000),
-                        blurRadius: 8,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: const Color(0x1AE4C590),
-                          borderRadius: BorderRadius.circular(11),
-                        ),
-                        child: Icon(
-                          item.icon,
-                          size: 21,
-                          color: const Color(0xFFE4C590),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              item.title,
-                              style: JText.serif(
-                                13,
-                                weight: FontWeight.w700,
-                                color: const Color(0xFFFAF6F0),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              item.subtitle,
-                              style: JText.sans(
-                                10.5,
-                                color: const Color(0xFF9E9286),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
     );
   }
 }
