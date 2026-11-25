@@ -420,6 +420,15 @@ void main() {
       );
       expect(
         resolveCulturalMapsQuery(
+          itemId: 'busana_pengantin_solo_basahan',
+          title: 'Solo Basahan Pengantin',
+          location: 'Sentra Busana Adat Laweyan, Surakarta',
+          region: 'Kota Surakarta',
+        ),
+        'BATIK PUTRA BENGAWAN batik kualitas premium-kampung batik Laweyan solo surakarta jawa tengah indonesia',
+      );
+      expect(
+        resolveCulturalMapsQuery(
           itemId: 'batik_pekalongan',
           title: 'Batik Pesisir Pekalongan',
           location: 'Kampung Batik Pesindon & Kauman, Pekalongan',

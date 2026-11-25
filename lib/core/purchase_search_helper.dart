@@ -37,6 +37,9 @@ String resolveCulturalMapsQuery({
   if (id == 'kebaya_kartini_rembang') {
     return 'ANF sewa kebaya & MUA';
   }
+  if (id == 'busana_pengantin_solo_basahan') {
+    return 'BATIK PUTRA BENGAWAN batik kualitas premium-kampung batik Laweyan solo surakarta jawa tengah indonesia';
+  }
   if (id == 'batik_tulis_solo' ||
       id == 'jarik_batik_parang_barong_solo' ||
       combined.contains('parang barong') ||
