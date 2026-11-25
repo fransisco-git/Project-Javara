@@ -58,7 +58,7 @@ const popularItems = <CultureItem>[
     meta: 'Busana Pengantin Adat · Surakarta, Jateng',
     price: 'Rp1.250.000',
     actionLabel: 'Sewa Busana',
-    image: 'model_solo_basahan_bride.jpg',
+    image: 'solo_basahan_couple.jpg',
     tag: 'BUSANA ADAT ADILUHUNG',
     category: 'Busana Tradisi',
     regency: 'Kota Surakarta',
