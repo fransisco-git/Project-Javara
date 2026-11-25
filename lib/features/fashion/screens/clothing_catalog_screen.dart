@@ -257,25 +257,20 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          CircleAvatar(
-            backgroundColor: const Color(0x20B08D57),
-            radius: 18,
-            child: widget.isTab
-                ? const Icon(
-                    Icons.auto_awesome_rounded,
-                    size: 16,
-                    color: Color(0xFF382315),
-                  )
-                : IconButton(
-                    padding: EdgeInsets.zero,
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 16,
-                      color: Color(0xFF382315),
-                    ),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-          ),
+          if (!widget.isTab)
+            CircleAvatar(
+              backgroundColor: const Color(0x20B08D57),
+              radius: 18,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                icon: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 16,
+                  color: Color(0xFF382315),
+                ),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
           Expanded(
             child: Column(
               children: [
@@ -302,24 +297,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
               ],
             ),
           ),
-          // Tombol Buka Lemari Virtual Wardrobe 3D
-          CircleAvatar(
-            backgroundColor: const Color(0x20B08D57),
-            radius: 18,
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              icon: const Icon(
-                Icons.checkroom_rounded,
-                size: 18,
-                color: Color(0xFF382315),
-              ),
-              onPressed: () {
-                Navigator.of(context).push(
-                  fadeSlideRoute(const JavaneseWardrobeScreen()),
-                );
-              },
-            ),
-          ),
+          if (!widget.isTab) const SizedBox(width: 36),
         ],
       ),
     );
