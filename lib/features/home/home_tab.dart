@@ -606,9 +606,9 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
       ..rotateY(rightHandYaw)
       ..rotateZ(rightHandRoll);
 
-    final handsOpacity = (0.78 - ((_smoothScroll - 600.0) / 450.0) * 0.78).clamp(
-      0.28,
-      0.78,
+    final handsOpacity = (0.86 - ((_smoothScroll - 600.0) / 450.0) * 0.86).clamp(
+      0.31,
+      0.86,
     );
 
     // DOLLY ZOOM SINEMATIK CANDI:
@@ -800,10 +800,10 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    const Color(0x55000000),
-                    const Color(0x4D07040B),
-                    const Color(0x8C07040B),
-                    const Color(0xF707040B),
+                    const Color(0x3A000000),
+                    const Color(0x2907040B),
+                    const Color(0x7507040B),
+                    const Color(0xF507040B),
                   ],
                   stops: const [0.0, 0.20, 0.60, 1.0],
                 ),
