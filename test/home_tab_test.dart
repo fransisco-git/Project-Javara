@@ -464,10 +464,10 @@ void main() {
       expect(find.text('LIHAT KOLEKSI'), findsOneWidget);
       expect(find.byIcon(Icons.auto_awesome), findsNothing);
 
-      // Categories row sits cleanly below the 48dp hero-to-category spacer above navbar
+      // Categories row sits cleanly below the 28dp hero-to-category spacer above navbar
       final busanaBottom = tester.getBottomLeft(find.text('Busana')).dy;
-      expect(busanaBottom, greaterThan(420.0));
-      expect(busanaBottom, lessThan(550.0));
+      expect(busanaBottom, greaterThan(400.0));
+      expect(busanaBottom, lessThan(520.0));
 
       // Swipe horizontally to Slide 2
       final pageViewFinder = find.byType(PageView);

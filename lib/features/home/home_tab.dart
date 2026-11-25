@@ -176,7 +176,7 @@ class _HomeTabState extends State<HomeTab> {
     final popular = _q.isEmpty ? popularItems : _filter(allItems);
     final empty = popular.isEmpty;
     final topPadding = MediaQuery.of(context).padding.top;
-    const heroToCategorySpace = 48.0;
+    const heroToCategorySpace = 28.0;
 
     return MouseRegion(
       onHover: (e) =>
