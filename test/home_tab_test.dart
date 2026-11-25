@@ -416,7 +416,7 @@ void main() {
           location: 'Sentra Bordir & Kebaya Rembang - Jepara',
           region: 'Kabupaten Rembang',
         ),
-        'Museum R.A. Kartini Rembang, Jawa Tengah',
+        'ANF sewa kebaya & MUA',
       );
       expect(
         resolveCulturalMapsQuery(

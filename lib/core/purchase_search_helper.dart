@@ -34,6 +34,9 @@ String resolveCulturalMapsQuery({
   final id = itemId.toLowerCase();
   final combined = '$id $title $location $region'.toLowerCase();
 
+  if (id == 'kebaya_kartini_rembang') {
+    return 'ANF sewa kebaya & MUA';
+  }
   if (id == 'batik_tulis_solo' ||
       id == 'jarik_batik_parang_barong_solo' ||
       combined.contains('parang barong') ||
