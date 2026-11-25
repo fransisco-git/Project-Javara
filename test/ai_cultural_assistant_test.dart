@@ -58,7 +58,7 @@ void main() {
       );
       expect(
         serviceEmpty.buildEndpointUrl().path,
-        equals('/v1beta/models/gemini-1.5-pro:generateContent'),
+        equals('/v1beta/models/gemini-2.5-flash:generateContent'),
       );
 
       final serviceBlank = AiCulturalAssistantService(
@@ -67,7 +67,7 @@ void main() {
       );
       expect(
         serviceBlank.buildEndpointUrl().path,
-        equals('/v1beta/models/gemini-1.5-pro:generateContent'),
+        equals('/v1beta/models/gemini-2.5-flash:generateContent'),
       );
     });
 
@@ -1060,6 +1060,220 @@ void main() {
 
       expect(calledGemini, isTrue);
       expect(find.textContaining('Jawi Jangkep cocok untuk upacara resmi keraton.'), findsOneWidget);
+    });
+
+    test('Provider auto-detection and runtime API key persistence', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      expect(
+        AiCulturalAssistantService.detectProviderFromKey('AIzaSyExampleKey'),
+        equals(AiProviderMode.gemini),
+      );
+      expect(
+        AiCulturalAssistantService.detectProviderFromKey('gsk_exampleGroqKey'),
+        equals(AiProviderMode.groq),
+      );
+      expect(
+        AiCulturalAssistantService.detectProviderFromKey('sk-or-v1-example'),
+        equals(AiProviderMode.openRouter),
+      );
+      expect(
+        AiCulturalAssistantService.detectProviderFromKey('pk_pollinationsKey'),
+        equals(AiProviderMode.pollinations),
+      );
+      expect(
+        AiCulturalAssistantService.detectProviderFromKey('sk-openaiKey'),
+        equals(AiProviderMode.openAi),
+      );
+
+      final service = AiCulturalAssistantService();
+      await service.initialize(force: true);
+      expect(service.isConfigured, isFalse);
+
+      await service.saveRuntimeConfig(
+        apiKey: 'gsk_test_saved_key',
+        provider: AiProviderMode.auto,
+      );
+      expect(service.isConfigured, isTrue);
+      expect(service.effectiveProvider, equals(AiProviderMode.groq));
+      expect(service.hasRuntimeApiKey, isTrue);
+
+      await service.clearRuntimeConfig();
+      expect(service.isConfigured, isFalse);
+      expect(service.hasRuntimeApiKey, isFalse);
+    });
+
+    test('Out-of-the-box keyless mode calls Pollinations openai-fast with RAG context', () async {
+      SharedPreferences.setMockInitialValues({});
+      late Uri capturedUrl;
+      late Map<String, dynamic> capturedBody;
+
+      final mockClient = MockClient((request) async {
+        capturedUrl = request.url;
+        capturedBody = jsonDecode(request.body) as Map<String, dynamic>;
+        return http.Response(
+          jsonEncode({
+            'choices': [
+              {
+                'message': {
+                  'role': 'assistant',
+                  'content': 'Surjan Ontrokusumo adalah busana kehormatan priyayi bersutra kembang emas.',
+                }
+              }
+            ]
+          }),
+          200,
+        );
+      });
+
+      final service = AiCulturalAssistantService(
+        httpClient: mockClient,
+        apiKey: '',
+      );
+
+      final reply = await service.sendMessage('Jelaskan filosofi Surjan Ontrokusumo');
+      expect(capturedUrl.host, equals('text.pollinations.ai'));
+      expect(capturedUrl.path, equals('/openai'));
+      expect(capturedBody['model'], equals('openai-fast'));
+
+      final messages = capturedBody['messages'] as List;
+      expect(messages.first['role'], equals('system'));
+      expect(messages.first['content'], contains('REFERENSI DATA JAVARA'));
+      expect(messages.first['content'], contains('Ontrokusumo'));
+      expect(reply.text, contains('Surjan Ontrokusumo'));
+      expect(reply.sourceReference, contains('Pollinations'));
+    });
+
+    test('HTTP 402 public cooldown gracefully falls back to Wikipedia ID + local RAG', () async {
+      SharedPreferences.setMockInitialValues({});
+      final mockClient = MockClient((request) async {
+        if (request.url.host == 'text.pollinations.ai') {
+          return http.Response(
+            '{"status":402,"error":{"code":"FREE_LIMIT","message":"Retry after 30s"}}',
+            402,
+          );
+        }
+        if (request.url.host == 'id.wikipedia.org' &&
+            request.url.path.contains('/w/api.php')) {
+          return http.Response(
+            jsonEncode({
+              'query': {
+                'search': [
+                  {'title': 'Sultan Agung'}
+                ]
+              }
+            }),
+            200,
+          );
+        }
+        if (request.url.host == 'id.wikipedia.org' &&
+            request.url.path.contains('/api/rest_v1/page/summary/')) {
+          return http.Response(
+            jsonEncode({
+              'title': 'Sultan Agung',
+              'extract': 'Sultan Agung Adi Prabu Hanyakrakusuma adalah Sultan Mataram ketiga.',
+            }),
+            200,
+          );
+        }
+        return http.Response('Not found', 404);
+      });
+
+      final service = AiCulturalAssistantService(
+        httpClient: mockClient,
+        apiKey: '',
+      );
+
+      final reply = await service.sendMessage('Siapa Sultan Agung?');
+      expect(service.publicCooldownRemainingSeconds, isNotNull);
+      expect(reply.text, contains('Sultan Agung'));
+      expect(reply.sourceReference, contains('Wikipedia Indonesia'));
+      expect(reply.sourceReference, contains('Jeda AI Publik'));
+    });
+
+    test('Gemini HTTP 404 automatically discovers active Gemini model and retries', () async {
+      final calledUrls = <String>[];
+      final mockClient = MockClient((request) async {
+        calledUrls.add(request.url.toString());
+        if (request.url.path.endsWith('/gemini-1.5-pro:generateContent')) {
+          return http.Response('{"error":{"code":404,"message":"Not found"}}', 404);
+        }
+        if (request.url.path == '/v1beta/models') {
+          return http.Response(
+            jsonEncode({
+              'models': [
+                {
+                  'name': 'models/gemini-3.8-flash',
+                  'supportedGenerationMethods': ['generateContent'],
+                }
+              ]
+            }),
+            200,
+          );
+        }
+        if (request.url.path.endsWith('/gemini-3.8-flash:generateContent')) {
+          return http.Response(
+            jsonEncode({
+              'candidates': [
+                {
+                  'content': {
+                    'parts': [
+                      {'text': 'Kebaya Kartini berasal dari tradisi ningrat Jepara.'}
+                    ]
+                  }
+                }
+              ]
+            }),
+            200,
+          );
+        }
+        return http.Response('Unexpected', 500);
+      });
+
+      final service = AiCulturalAssistantService(
+        httpClient: mockClient,
+        apiKey: 'AIzaSyDiscoveryTest',
+        model: 'gemini-1.5-pro',
+      );
+
+      final reply = await service.sendMessage('Asal Kebaya Kartini');
+      expect(reply.text, contains('Kebaya Kartini'));
+      expect(calledUrls.any((u) => u.contains('/v1beta/models?key=AIzaSyDiscoveryTest')), isTrue);
+      expect(calledUrls.any((u) => u.contains('gemini-3.8-flash:generateContent')), isTrue);
+    });
+
+    testWidgets('Config sheet opens from key icon and renders without overflow on 320dp screen', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      AiCulturalAssistantService.instance = AiCulturalAssistantService(apiKey: '');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: const TextScaler.linear(1.3),
+            ),
+            child: child!,
+          ),
+          home: const AiCulturalAssistantScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Atur Koneksi AI'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Koneksi Mesin AI JAVARA'), findsOneWidget);
+      expect(find.text('Uji & Hubungkan AI'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
   });
 }

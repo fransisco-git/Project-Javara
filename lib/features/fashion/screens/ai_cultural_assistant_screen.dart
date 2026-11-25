@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/theme.dart';
 import '../../../core/transitions.dart';
 import '../../../services/ai_cultural_assistant_service.dart';
+import '../widgets/ai_provider_config_sheet.dart';
 import 'ai_fashion_studio_screen.dart';
 import 'clothing_detail_screen.dart';
 import 'javanese_wardrobe_screen.dart';
@@ -39,20 +40,12 @@ class _AiCulturalAssistantScreenState extends State<AiCulturalAssistantScreen> {
   @override
   void initState() {
     super.initState();
-    // Sinkronisasi sesi baru
+    // Sinkronisasi sesi baru & muat konfigurasi runtime API Key bila tersimpan
     AiCulturalAssistantService.instance.clearSession();
+    _initRuntimeConfig();
 
     // Pesan Pembuka Hangat dari Abdi Pakar Busana
-    _messages.add(
-      AssistantChatMessage(
-        id: 'init_welcome',
-        role: AssistantRole.assistant,
-        text:
-            'Sugeng rawuh ing JAVARA. Kula Abdi Pakar Busana, siap mbiyantu panjenengan nyinau lan milih busana adat Jawa Tengah ingkang laras kaliyan tatakrama karaton.\n\nApa sing pengin panjenengan ngerteni dina iki? Panjenengan bisa takon babagan busana manten, pakem keris, utawa filosofi batik.',
-        timestamp: DateTime.now(),
-        sourceReference: 'Kurasi Karaton Surakarta Hadiningrat',
-      ),
-    );
+    _messages.add(_createWelcomeMessage());
 
     if (widget.initialQuery != null && widget.initialQuery!.trim().isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -60,6 +53,43 @@ class _AiCulturalAssistantScreenState extends State<AiCulturalAssistantScreen> {
           _handleSendMessage(widget.initialQuery!.trim());
         }
       });
+    }
+  }
+
+  Future<void> _initRuntimeConfig() async {
+    await AiCulturalAssistantService.instance.initialize();
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  AssistantChatMessage _createWelcomeMessage() {
+    return AssistantChatMessage(
+      id: 'init_welcome_${DateTime.now().millisecondsSinceEpoch}',
+      role: AssistantRole.assistant,
+      text:
+          'Sugeng rawuh ing JAVARA. Kula Abdi Pakar Busana, siap mbiyantu panjenengan nyinau lan milih busana adat Jawa Tengah ingkang laras kaliyan tatakrama karaton.\n\nApa sing pengin panjenengan ngerteni dina iki? Panjenengan bisa takon babagan busana manten, pakem keris, utawa filosofi batik.',
+      timestamp: DateTime.now(),
+      sourceReference: 'Kurasi Karaton Surakarta Hadiningrat',
+    );
+  }
+
+  void _resetConversation() {
+    if (_isTyping) return;
+    HapticFeedback.lightImpact();
+    AiCulturalAssistantService.instance.clearSession();
+    setState(() {
+      _messages
+        ..clear()
+        ..add(_createWelcomeMessage());
+    });
+  }
+
+  Future<void> _openConfigSheet() async {
+    HapticFeedback.lightImpact();
+    final updated = await showAiProviderConfigSheet(context);
+    if (updated == true && mounted) {
+      setState(() {});
     }
   }
 
@@ -139,6 +169,9 @@ class _AiCulturalAssistantScreenState extends State<AiCulturalAssistantScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final service = AiCulturalAssistantService.instance;
+    final hasCustomKey = service.isConfigured;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
@@ -150,24 +183,93 @@ class _AiCulturalAssistantScreenState extends State<AiCulturalAssistantScreen> {
               color: Color(0xFFE4C590), size: 18),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Column(
-          children: [
-            const Text(
-              'Abdi Pakar Busana JAVARA',
-              style: TextStyle(
-                  fontSize: 16,
+        title: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _openConfigSheet,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Abdi Pakar Busana JAVARA',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 15.5,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFFFAF6F0)),
-            ),
-            Text(
-              'ꦥꦏꦂꦧꦸꦱꦤꦗꦮꦠꦼꦔꦃ · AI Cultural Guide',
-              style: TextStyle(
-                  fontSize: 10,
-                  color: const Color(0xFFE4C590).withValues(alpha: 0.8)),
-            ),
-          ],
+                  color: Color(0xFFFAF6F0),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: hasCustomKey
+                          ? const Color(0xFF4ADE80)
+                          : const Color(0xFFDFB76C),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      service.activeEngineStatusLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color:
+                            const Color(0xFFE4C590).withValues(alpha: 0.88),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            tooltip: 'Atur Koneksi AI',
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(
+                  Icons.vpn_key_outlined,
+                  color: Color(0xFFE4C590),
+                  size: 20,
+                ),
+                if (hasCustomKey)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      width: 7,
+                      height: 7,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF4ADE80),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            onPressed: _openConfigSheet,
+          ),
+          IconButton(
+            tooltip: 'Mulai Sesi Baru',
+            icon: const Icon(
+              Icons.refresh_rounded,
+              color: Color(0xFFE4C590),
+              size: 20,
+            ),
+            onPressed: _isTyping ? null : _resetConversation,
+          ),
+        ],
       ),
       body: JBackground(
         variant: HeritageBackgroundVariant.kuis,

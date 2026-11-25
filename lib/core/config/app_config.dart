@@ -1,8 +1,9 @@
 /// Konfigurasi Global & Integrasi API JAVARA
 ///
 /// Seluruh kredensial API eksternal (FASHN AI, Supabase, LLM) dibaca secara aman
-/// melalui environment variables compile-time (`--dart-define`), tidak pernah
-/// ditulis langsung (hardcoded) dalam kode sumber sesuai standar keamanan OWASP.
+/// melalui environment variables compile-time (`--dart-define`) atau konfigurasi
+/// runtime pengguna yang disimpan secara lokal di perangkat, tidak pernah
+/// ditulis langsung (hardcoded) dalam kode sumber.
 class AppConfig {
   AppConfig._();
 
@@ -37,25 +38,60 @@ class AppConfig {
     defaultValue: '',
   );
 
-  /// LLM API Key (alias kompatibilitas)
+  /// LLM API Key (alias kompatibilitas umum)
   /// Jalankan dengan: `flutter run --dart-define=LLM_API_KEY=your_llm_key`
   static const String _llmApiKey = String.fromEnvironment(
     'LLM_API_KEY',
     defaultValue: '',
   );
 
-  /// Model Google Gemini yang digunakan (default: 'gemini-1.5-pro')
-  /// Jalankan dengan: `flutter run --dart-define=GEMINI_MODEL=gemini-1.5-pro`
-  static const String geminiModel = String.fromEnvironment(
-    'GEMINI_MODEL',
-    defaultValue: 'gemini-1.5-pro',
+  /// Groq API Key (opsional, gratis & cepat dengan model Llama 3.3)
+  static const String groqApiKey = String.fromEnvironment(
+    'GROQ_API_KEY',
+    defaultValue: '',
   );
 
-  /// Kredensial aktif untuk Google Gemini Pro API
-  /// Membaca LLM_API_KEY atau GEMINI_API_KEY
+  /// OpenRouter API Key (opsional, mendukung model `:free`)
+  static const String openRouterApiKey = String.fromEnvironment(
+    'OPENROUTER_API_KEY',
+    defaultValue: '',
+  );
+
+  /// OpenAI API Key (opsional)
+  static const String openAiApiKey = String.fromEnvironment(
+    'OPENAI_API_KEY',
+    defaultValue: '',
+  );
+
+  /// Pollinations API Key (opsional untuk kuota tanpa jeda)
+  static const String pollinationsApiKey = String.fromEnvironment(
+    'POLLINATIONS_API_KEY',
+    defaultValue: '',
+  );
+
+  /// Model Google Gemini yang digunakan (default aktif: 'gemini-2.5-flash')
+  /// Jalankan dengan: `flutter run --dart-define=GEMINI_MODEL=gemini-2.5-flash`
+  static const String geminiModel = String.fromEnvironment(
+    'GEMINI_MODEL',
+    defaultValue: 'gemini-2.5-flash',
+  );
+
+  /// Kredensial aktif compile-time untuk AI Assistant
+  /// Membaca LLM_API_KEY, GEMINI_API_KEY, GROQ_API_KEY, OPENROUTER_API_KEY, OPENAI_API_KEY, atau POLLINATIONS_API_KEY.
   static String get llmApiKey {
-    if (_llmApiKey.trim().isNotEmpty) return _llmApiKey.trim();
-    return geminiApiKey.trim();
+    final candidates = [
+      _llmApiKey,
+      geminiApiKey,
+      groqApiKey,
+      openRouterApiKey,
+      openAiApiKey,
+      pollinationsApiKey,
+    ];
+    for (final candidate in candidates) {
+      final trimmed = candidate.trim();
+      if (trimmed.isNotEmpty) return trimmed;
+    }
+    return '';
   }
 
   /// Cek apakah kredensial FASHN AI telah dikonfigurasi
@@ -65,6 +101,6 @@ class AppConfig {
   static bool get isSupabaseConfigured =>
       supabaseAnonKey.trim().isNotEmpty && supabaseUrl.trim().isNotEmpty;
 
-  /// Cek apakah kredensial LLM Assistant (Gemini Pro) telah dikonfigurasi
+  /// Cek apakah kredensial LLM Assistant compile-time telah dikonfigurasi
   static bool get isLlmConfigured => llmApiKey.isNotEmpty;
 }
