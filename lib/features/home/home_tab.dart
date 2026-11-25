@@ -176,6 +176,19 @@ class _HomeTabState extends State<HomeTab> {
     final popular = _q.isEmpty ? popularItems : _filter(allItems);
     final empty = popular.isEmpty;
     final topPadding = MediaQuery.of(context).padding.top;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final heroHeight = (screenHeight * 0.32).clamp(240.0, 300.0);
+    final navClearance = JavaraBottomNav.contentBottomPadding(
+      context,
+      extra: 14.0,
+    );
+    const categoriesRowHeight = 86.0;
+    final heroToCategorySpace = (screenHeight -
+            (topPadding + 58) -
+            heroHeight -
+            categoriesRowHeight -
+            navClearance)
+        .clamp(180.0, 380.0);
 
     return MouseRegion(
       onHover: (e) =>
@@ -274,7 +287,7 @@ class _HomeTabState extends State<HomeTab> {
                                       index: 1,
                                       child: _HeroCard(),
                                     ),
-                                    const SizedBox(height: 24),
+                                    SizedBox(height: heroToCategorySpace),
 
                                     // 2. 3 Kategori Utama
                                     Padding(

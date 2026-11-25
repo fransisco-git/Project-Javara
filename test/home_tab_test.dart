@@ -167,12 +167,12 @@ void main() {
       // Allow loading delay to finish
       await tester.pump(const Duration(milliseconds: 1200));
 
+      // Scroll down to bring Warisan Populer and its cards into viewport
+      await tester.drag(find.byType(ListView), const Offset(0, -600));
+      await tester.pump(const Duration(milliseconds: 300));
+
       // Verify Warisan Populer section header
       expect(find.text('Warisan Populer'), findsOneWidget);
-
-      // Scroll down to bring Warisan Populer into viewport
-      await tester.drag(find.byType(ListView), const Offset(0, -350));
-      await tester.pump(const Duration(milliseconds: 300));
 
       // Verify editorial category & origin labels (uppercase, concise, not truncated)
       expect(find.text('SURAKARTA · PRIA'), findsOneWidget);
@@ -299,12 +299,15 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 500));
 
-      expect(find.text('Pakem & Etika'), findsOneWidget);
-      expect(find.textContaining('Solo Basahan'), findsAtLeastNWidgets(1));
-      expect(find.text('Untuk mempelai'), findsNWidgets(2));
-      expect(find.text('Untuk orang tua pengantin'), findsOneWidget);
-      expect(find.text('Kain Jarik Batik Sidomukti Pengantin'), findsOneWidget);
-      expect(find.text('Kain Jarik Batik Truntum'), findsOneWidget);
+        expect(find.text('Pakem & Etika'), findsOneWidget);
+        expect(find.textContaining('Solo Basahan'), findsAtLeastNWidgets(1));
+        expect(find.text('Untuk mempelai'), findsNWidgets(2));
+        expect(find.text('Untuk orang tua pengantin'), findsOneWidget);
+        expect(
+          find.text('Kain Jarik Batik Sidomukti Pengantin'),
+          findsOneWidget,
+        );
+        expect(find.text('Kain Jarik Batik Truntum'), findsOneWidget);
 
         final overflowErrors = errors
             .where((e) => e.toString().contains('overflowed'))
@@ -322,57 +325,58 @@ void main() {
     },
   );
 
-  testWidgets('CultureDetailScreen tabs Sejarah, Sorotan, Lokasi render without clipping at 360dp and 1.3 text scale', (
-    WidgetTester tester,
-  ) async {
-    final originalOnError = FlutterError.onError;
-    final tabBarErrors = <FlutterErrorDetails>[];
-    FlutterError.onError = (details) {
-      if (details.toString().contains('TabBar') ||
-          details.toString().contains('culture_detail_screen.dart:2')) {
-        tabBarErrors.add(details);
-      }
-    };
+  testWidgets(
+    'CultureDetailScreen tabs Sejarah, Sorotan, Lokasi render without clipping at 360dp and 1.3 text scale',
+    (WidgetTester tester) async {
+      final originalOnError = FlutterError.onError;
+      final tabBarErrors = <FlutterErrorDetails>[];
+      FlutterError.onError = (details) {
+        if (details.toString().contains('TabBar') ||
+            details.toString().contains('culture_detail_screen.dart:2')) {
+          tabBarErrors.add(details);
+        }
+      };
 
-    try {
-      tester.view.physicalSize = const Size(360 * 2, 800 * 2);
-      tester.view.devicePixelRatio = 2.0;
+      try {
+        tester.view.physicalSize = const Size(360 * 2, 800 * 2);
+        tester.view.devicePixelRatio = 2.0;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MediaQuery(
-            data: const MediaQueryData(
-              size: Size(360, 800),
-              textScaler: TextScaler.linear(1.3),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(
+                size: Size(360, 800),
+                textScaler: TextScaler.linear(1.3),
+              ),
+              child: CultureDetailScreen(item: popularItems.first),
             ),
-            child: CultureDetailScreen(item: popularItems.first),
           ),
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 400));
+        );
+        await tester.pump(const Duration(milliseconds: 400));
 
-      final tabBarRect = tester.getRect(find.byType(TabBar));
-      for (final label in ['Sejarah', 'Sorotan', 'Lokasi']) {
-        final labelFinder = find.text(label);
-        expect(labelFinder, findsOneWidget);
-        final rect = tester.getRect(labelFinder);
-        expect(rect.left, greaterThanOrEqualTo(tabBarRect.left));
-        expect(rect.right, lessThanOrEqualTo(tabBarRect.right));
-        expect(rect.top, greaterThanOrEqualTo(tabBarRect.top));
-        expect(rect.bottom, lessThanOrEqualTo(tabBarRect.bottom));
+        final tabBarRect = tester.getRect(find.byType(TabBar));
+        for (final label in ['Sejarah', 'Sorotan', 'Lokasi']) {
+          final labelFinder = find.text(label);
+          expect(labelFinder, findsOneWidget);
+          final rect = tester.getRect(labelFinder);
+          expect(rect.left, greaterThanOrEqualTo(tabBarRect.left));
+          expect(rect.right, lessThanOrEqualTo(tabBarRect.right));
+          expect(rect.top, greaterThanOrEqualTo(tabBarRect.top));
+          expect(rect.bottom, lessThanOrEqualTo(tabBarRect.bottom));
+        }
+
+        await tester.tap(find.text('Sorotan'));
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.tap(find.text('Lokasi'));
+        await tester.pump(const Duration(milliseconds: 300));
+
+        expect(tabBarErrors, isEmpty);
+      } finally {
+        tester.view.resetPhysicalSize();
+        FlutterError.onError = originalOnError;
       }
-
-      await tester.tap(find.text('Sorotan'));
-      await tester.pump(const Duration(milliseconds: 300));
-      await tester.tap(find.text('Lokasi'));
-      await tester.pump(const Duration(milliseconds: 300));
-
-      expect(tabBarErrors, isEmpty);
-    } finally {
-      tester.view.resetPhysicalSize();
-      FlutterError.onError = originalOnError;
-    }
-  });
+    },
+  );
 
   testWidgets('HomeTab renders 3 merged categories: Busana, Aksesoris, Batik', (
     WidgetTester tester,
@@ -460,12 +464,11 @@ void main() {
       expect(find.text('LIHAT KOLEKSI'), findsOneWidget);
       expect(find.byIcon(Icons.auto_awesome), findsNothing);
 
-      // Categories row & Warisan Populer header are visible on the first viewport above navbar
-      expect(tester.getBottomLeft(find.text('Busana')).dy, lessThan(760.0));
-      expect(
-        tester.getBottomLeft(find.text('Warisan Populer')).dy,
-        lessThan(760.0),
-      );
+      // Categories row sits pushed down near the bottom of the first viewport above navbar,
+      // leaving open vertical space below the hero carousel for the temple background
+      final busanaBottom = tester.getBottomLeft(find.text('Busana')).dy;
+      expect(busanaBottom, greaterThan(550.0));
+      expect(busanaBottom, lessThan(760.0));
 
       // Swipe horizontally to Slide 2
       final pageViewFinder = find.byType(PageView);
