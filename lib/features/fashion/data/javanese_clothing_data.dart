@@ -317,6 +317,7 @@ class JavaneseClothingData {
       references: 'Batik Pengaruh Keraton Surakarta, K.R.T. Hardjonagoro (Go Tik Swan).',
       primaryColor: Color(0xFF332216),
       accentColor: Color(0xFFE4C590),
+      assetImagePath: 'assets/images/batik/batik_parang_barong.jpg',
     ),
     ClothingItem(
       id: 'jarik_batik_sidomukti_solo',
@@ -340,6 +341,7 @@ class JavaneseClothingData {
       references: 'Makna Simbolik Motif Batik Klasik Jawa, Nian S. Djoemena.',
       primaryColor: Color(0xFF3B2718),
       accentColor: Color(0xFFDFC08E),
+      assetImagePath: 'assets/images/batik/batik_sidomukti.jpg',
     ),
     ClothingItem(
       id: 'jarik_batik_truntum_solo',
@@ -363,6 +365,7 @@ class JavaneseClothingData {
       references: 'Kisah Penciptaan Batik Truntum, Balai Pelestarian Nilai Budaya D.I. Yogyakarta & Jateng.',
       primaryColor: Color(0xFF2E1F14),
       accentColor: Color(0xFFE8D3B0),
+      assetImagePath: 'assets/images/batik/batik_truntum.jpg',
     ),
     ClothingItem(
       id: 'jarik_batik_kawung_picis',
@@ -386,6 +389,7 @@ class JavaneseClothingData {
       references: 'Ragam Hias Batik Jawa Kuno, P.K. Ojong.',
       primaryColor: Color(0xFF302015),
       accentColor: Color(0xFFD6B57E),
+      assetImagePath: 'assets/images/batik/batik_kawung_picis.jpg',
     ),
     ClothingItem(
       id: 'jarik_batik_buketan_pekalongan',
@@ -409,6 +413,7 @@ class JavaneseClothingData {
       references: 'Batik Belanda 1840-1940: Dutch Influence in Batik from Java, Harmen Veldhuisen.',
       primaryColor: Color(0xFF5A1C1C),
       accentColor: Color(0xFFE8B244),
+      assetImagePath: 'assets/images/batik/batik_buketan_pekalongan.jpg',
     ),
   ];
 

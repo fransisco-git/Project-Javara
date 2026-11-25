@@ -125,79 +125,124 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Latar Belakang Gradasi Hangat Studio
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: RadialGradient(
-                        center: const Alignment(0, -0.2),
-                        radius: 0.9,
-                        colors: [
-                          item.primaryColor.withValues(alpha: 0.65),
-                          const Color(0xFF14100D),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Pola Geometris Tenun Halus Melayang
-                  Positioned.fill(
-                    child: Opacity(
-                      opacity: 0.08,
-                      child: CustomPaint(
-                        painter: _BatikPatternBackdropPainter(
-                          color: item.accentColor,
+                  if (item.category == ClothingCategory.lowerBody &&
+                      item.assetImagePath != null &&
+                      item.assetImagePath!.isNotEmpty) ...[
+                    // Foto Kain Batik Penuh di Header untuk Busana Bawahan / Jarik
+                    Positioned.fill(
+                      child: Hero(
+                        tag: 'garment_${item.id}',
+                        child: Image.asset(
+                          item.assetImagePath!,
+                          fit: BoxFit.cover,
+                          filterQuality: FilterQuality.high,
+                          errorBuilder: (_, _, _) => Container(
+                            color: item.primaryColor,
+                            child: Center(
+                              child: Icon(
+                                item.category.icon,
+                                size: 80,
+                                color: item.accentColor,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-
-                  // Showcase Siluet Busana Tengah (Foto Autentik / Ikon)
-                  Center(
-                    child: Hero(
-                      tag: 'garment_${item.id}',
+                    // Scrim Atas Tipis agar Tombol Kembali & Bookmark Tetap Kontras
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: 110,
                       child: Container(
-                        width: 180,
-                        height: 180,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFF1C1612),
-                          border: Border.all(
-                            color: item.accentColor.withValues(alpha: 0.6),
-                            width: 2,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0xAA14100D),
+                              Colors.transparent,
+                            ],
                           ),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x33000000),
-                              blurRadius: 8,
-                              offset: Offset(0, 3),
-                            ),
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    // Latar Belakang Gradasi Hangat Studio
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          center: const Alignment(0, -0.2),
+                          radius: 0.9,
+                          colors: [
+                            item.primaryColor.withValues(alpha: 0.65),
+                            const Color(0xFF14100D),
                           ],
                         ),
-                        child: ClipOval(
-                          child: item.assetImagePath != null &&
-                                  item.assetImagePath!.isNotEmpty
-                              ? Image.asset(
-                                  item.assetImagePath!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) => Center(
+                      ),
+                    ),
+
+                    // Pola Geometris Tenun Halus Melayang
+                    Positioned.fill(
+                      child: Opacity(
+                        opacity: 0.08,
+                        child: CustomPaint(
+                          painter: _BatikPatternBackdropPainter(
+                            color: item.accentColor,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Showcase Siluet Busana Tengah (Foto Autentik / Ikon)
+                    Center(
+                      child: Hero(
+                        tag: 'garment_${item.id}',
+                        child: Container(
+                          width: 180,
+                          height: 180,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFF1C1612),
+                            border: Border.all(
+                              color: item.accentColor.withValues(alpha: 0.6),
+                              width: 2,
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x33000000),
+                                blurRadius: 8,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: ClipOval(
+                            child: item.assetImagePath != null &&
+                                    item.assetImagePath!.isNotEmpty
+                                ? Image.asset(
+                                    item.assetImagePath!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => Center(
+                                      child: Icon(
+                                        item.category.icon,
+                                        size: 80,
+                                        color: item.accentColor,
+                                      ),
+                                    ),
+                                  )
+                                : Center(
                                     child: Icon(
                                       item.category.icon,
                                       size: 80,
                                       color: item.accentColor,
                                     ),
                                   ),
-                                )
-                              : Center(
-                                  child: Icon(
-                                    item.category.icon,
-                                    size: 80,
-                                    color: item.accentColor,
-                                  ),
-                                ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
 
                   // Bayangan Bawah
                   Positioned(

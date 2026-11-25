@@ -13,8 +13,16 @@ class BatikMotifGalleryScreen extends StatefulWidget {
 }
 
 class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
+  final TransformationController _transformationController =
+      TransformationController();
   int _selectedMotifIndex = 0;
   double _zoomScale = 1.0;
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
 
   // Extended Database Motif Batik & Wastra Adat Jawa Tengah
   final List<_ExtendedBatikData> _motifs = [
@@ -35,6 +43,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
           'Diciptakan pada masa Sultan Agung Hanyakrakusuma di Mataram Islam abad ke-17 saat bermeditasi di pesisir Pantai Parangkusumo.',
       primaryColor: const Color(0xFF382315),
       accentColor: const Color(0xFFE4C590),
+      imagePath: 'assets/images/batik/batik_parang_barong.jpg',
       relatedGarmentId: 'jarik_batik_parang_barong_solo',
     ),
     _ExtendedBatikData(
@@ -54,6 +63,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
           'Salah satu motif tertua di Nusantara yang telah terpahat pada relief candi zaman Singhasari dan Majapahit abad ke-13.',
       primaryColor: const Color(0xFF2C1E14),
       accentColor: const Color(0xFFD6B57E),
+      imagePath: 'assets/images/batik/batik_kawung_picis.jpg',
       relatedGarmentId: 'jarik_batik_kawung_picis',
     ),
     _ExtendedBatikData(
@@ -73,6 +83,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
           'Dikembangkan pada masa Susuhunan Paku Buwono IV di Kasunanan Surakarta pada akhir abad ke-18.',
       primaryColor: const Color(0xFF422C1A),
       accentColor: const Color(0xFFDFC08E),
+      imagePath: 'assets/images/batik/batik_sidomukti.jpg',
       relatedGarmentId: 'jarik_batik_sidomukti_solo',
     ),
     _ExtendedBatikData(
@@ -92,6 +103,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
           'Diciptakan oleh Kanjeng Ratu Beruk (permaisuri Paku Buwono III) saat menatap bintang gemerlap di langit malam Keraton Solo.',
       primaryColor: const Color(0xFF281A10),
       accentColor: const Color(0xFFE8D3B0),
+      imagePath: 'assets/images/batik/batik_truntum.jpg',
       relatedGarmentId: 'jarik_batik_truntum_solo',
     ),
     _ExtendedBatikData(
@@ -111,6 +123,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
           'Akulturasi budaya pesisir Pekalongan dengan perajin Indo-Eropa dan Tionghoa pada awal abad ke-20.',
       primaryColor: const Color(0xFF5A1C1C),
       accentColor: const Color(0xFFE8B244),
+      imagePath: 'assets/images/batik/batik_buketan_pekalongan.jpg',
       relatedGarmentId: 'jarik_batik_buketan_pekalongan',
     ),
     _ExtendedBatikData(
@@ -130,6 +143,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
           'Lahir dari akulturasi Kesultanan Cirebon dengan permaisuri Putri Ong Tien asal Tiongkok pada masa Sunan Gunung Jati.',
       primaryColor: const Color(0xFF162D4A),
       accentColor: const Color(0xFF78B4E8),
+      imagePath: 'assets/images/batik/batik_mega_mendung.jpg',
     ),
   ];
 
@@ -200,21 +214,25 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
                 borderRadius: BorderRadius.circular(16),
                 child: Stack(
                   children: [
-                    // Kanvas Lukis Pattern Real-Time
-                    InteractiveViewer(
-                      minScale: 0.8,
-                      maxScale: 3.5,
-                      onInteractionUpdate: (details) {
-                        setState(() => _zoomScale = details.scale);
-                      },
-                      child: Center(
-                        child: CustomPaint(
-                          size: const Size(double.infinity, double.infinity),
-                          painter: _BatikCanvasPainter(
-                            motifId: activeMotif.id,
-                            primaryColor: activeMotif.primaryColor,
-                            accentColor: activeMotif.accentColor,
-                          ),
+                    // Foto Kain Batik Asli (Zoomable 0.8x–4.0x)
+                    Positioned.fill(
+                      child: InteractiveViewer(
+                        transformationController: _transformationController,
+                        minScale: 0.8,
+                        maxScale: 4.0,
+                        onInteractionUpdate: (_) {
+                          final scale = _transformationController.value
+                              .getMaxScaleOnAxis();
+                          if ((scale - _zoomScale).abs() > 0.01) {
+                            setState(() => _zoomScale = scale);
+                          }
+                        },
+                        child: Image.asset(
+                          activeMotif.imagePath,
+                          width: double.infinity,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
+                          filterQuality: FilterQuality.high,
                         ),
                       ),
                     ),
@@ -223,7 +241,10 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
                     Positioned(
                       top: 14,
                       left: 14,
-                      child: Row(
+                      right: 14,
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
                         children: [
                           if (activeMotif.isLarangan)
                             Container(
@@ -232,10 +253,15 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF8B2518),
+                                color: const Color(0xE68B2518),
                                 borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: const Color(0x66FAF6F0),
+                                  width: 0.6,
+                                ),
                               ),
                               child: const Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
                                     Icons.shield_rounded,
@@ -255,18 +281,16 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
                                 ],
                               ),
                             ),
-                          if (activeMotif.isLarangan)
-                            const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xCC1A1410),
+                              color: const Color(0xD914100D),
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                color: const Color(0x66E4C590),
+                                color: const Color(0x88E4C590),
                                 width: 0.8,
                               ),
                             ),
@@ -293,8 +317,12 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xAA000000),
+                          color: const Color(0xCC14100D),
                           borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0x44E4C590),
+                            width: 0.6,
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -324,7 +352,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
 
           // 2. PILIHAN MOTIF HORISONTAL CAROUSEL
           Container(
-            height: 80,
+            height: 86,
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
@@ -339,17 +367,15 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
                 return InkWell(
                   borderRadius: BorderRadius.circular(14),
                   onTap: () {
+                    _transformationController.value = Matrix4.identity();
                     setState(() {
                       _selectedMotifIndex = index;
                       _zoomScale = 1.0;
                     });
                   },
                   child: Container(
-                    width: 130,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 8,
-                    ),
+                    width: 164,
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? const Color(0xFF281E17)
@@ -362,32 +388,60 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
                         width: isSelected ? 1.5 : 0.8,
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Row(
                       children: [
-                        Text(
-                          motif.name,
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w700,
-                            color: isSelected
-                                ? const Color(0xFFFAF6F0)
-                                : const Color(0xFFAFA295),
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isSelected
+                                  ? const Color(0xFFE4C590)
+                                  : const Color(0x33E4C590),
+                              width: isSelected ? 1.2 : 0.7,
+                            ),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(9),
+                            child: Image.asset(
+                              motif.imagePath,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          motif.javaneseScript,
-                          style: TextStyle(
-                            fontSize: 9.5,
-                            color: isSelected
-                                ? const Color(0xFFDFC08E)
-                                : const Color(0xFF7A6D60),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                motif.name,
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: isSelected
+                                      ? const Color(0xFFFAF6F0)
+                                      : const Color(0xFFAFA295),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                motif.javaneseScript,
+                                style: TextStyle(
+                                  fontSize: 9.5,
+                                  color: isSelected
+                                      ? const Color(0xFFDFC08E)
+                                      : const Color(0xFF7A6D60),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
-                          maxLines: 1,
                         ),
                       ],
                     ),
@@ -571,6 +625,7 @@ class _ExtendedBatikData {
     required this.historicalOrigin,
     required this.primaryColor,
     required this.accentColor,
+    required this.imagePath,
     this.relatedGarmentId,
   });
 
@@ -586,110 +641,6 @@ class _ExtendedBatikData {
   final String historicalOrigin;
   final Color primaryColor;
   final Color accentColor;
+  final String imagePath;
   final String? relatedGarmentId;
-}
-
-class _BatikCanvasPainter extends CustomPainter {
-  const _BatikCanvasPainter({
-    required this.motifId,
-    required this.primaryColor,
-    required this.accentColor,
-  });
-
-  final String motifId;
-  final Color primaryColor;
-  final Color accentColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final bgPaint = Paint()..color = primaryColor;
-    canvas.drawRect(Offset.zero & size, bgPaint);
-
-    final linePaint = Paint()
-      ..color = accentColor.withValues(alpha: 0.85)
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.stroke;
-
-    final fillPaint = Paint()
-      ..color = accentColor.withValues(alpha: 0.25)
-      ..style = PaintingStyle.fill;
-
-    if (motifId.contains('parang')) {
-      // Pola Lereng Parang Barong 45 Derajat
-      const step = 40.0;
-      for (double d = -size.height; d < size.width + size.height; d += step) {
-        final path = Path();
-        path.moveTo(d, 0);
-        path.lineTo(d + size.height, size.height);
-        canvas.drawPath(path, linePaint);
-
-        // Mlinjon lidah parang
-        for (double y = 0; y < size.height; y += step * 0.8) {
-          final x = d + y;
-          if (x >= 0 && x <= size.width) {
-            final oval = Rect.fromCenter(
-              center: Offset(x, y),
-              width: 16,
-              height: 24,
-            );
-            canvas.drawOval(oval, fillPaint);
-            canvas.drawOval(oval, linePaint);
-          }
-        }
-      }
-    } else if (motifId.contains('kawung')) {
-      // Pola Empat Elips Kawung Picis
-      const step = 50.0;
-      for (double x = 0; x <= size.width + step; x += step) {
-        for (double y = 0; y <= size.height + step; y += step) {
-          // Lingkaran elips horizontal & vertikal
-          final hOval = Rect.fromCenter(center: Offset(x, y), width: 34, height: 16);
-          final vOval = Rect.fromCenter(center: Offset(x, y), width: 16, height: 34);
-          canvas.drawOval(hOval, fillPaint);
-          canvas.drawOval(hOval, linePaint);
-          canvas.drawOval(vOval, fillPaint);
-          canvas.drawOval(vOval, linePaint);
-          canvas.drawCircle(Offset(x, y), 3, linePaint);
-        }
-      }
-    } else if (motifId.contains('truntum')) {
-      // Pola Bintang Melati Truntum
-      const step = 38.0;
-      for (double x = 0; x <= size.width; x += step) {
-        for (double y = 0; y <= size.height; y += step) {
-          canvas.drawCircle(Offset(x, y), 4, fillPaint);
-          canvas.drawCircle(Offset(x, y), 2, linePaint);
-
-          // 4 kelopak bintang
-          canvas.drawLine(Offset(x - 9, y), Offset(x + 9, y), linePaint);
-          canvas.drawLine(Offset(x, y - 9), Offset(x, y + 9), linePaint);
-          canvas.drawLine(Offset(x - 6, y - 6), Offset(x + 6, y + 6), linePaint);
-          canvas.drawLine(Offset(x - 6, y + 6), Offset(x + 6, y - 6), linePaint);
-        }
-      }
-    } else {
-      // Pola Ceplok Gurda / Buketan Klasik
-      const step = 60.0;
-      for (double x = 0; x <= size.width; x += step) {
-        for (double y = 0; y <= size.height; y += step) {
-          final rect = Rect.fromCenter(center: Offset(x, y), width: 36, height: 36);
-          canvas.drawRRect(
-            RRect.fromRectAndRadius(rect, const Radius.circular(8)),
-            fillPaint,
-          );
-          canvas.drawRRect(
-            RRect.fromRectAndRadius(rect, const Radius.circular(8)),
-            linePaint,
-          );
-          canvas.drawCircle(Offset(x, y), 6, linePaint);
-        }
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _BatikCanvasPainter oldDelegate) =>
-      oldDelegate.motifId != motifId ||
-      oldDelegate.primaryColor != primaryColor ||
-      oldDelegate.accentColor != accentColor;
 }

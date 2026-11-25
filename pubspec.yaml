@@ -71,6 +71,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/batik/
     - assets/audio/
     - assets/videos/
     - assets/garments/
