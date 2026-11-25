@@ -23,11 +23,20 @@ class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
 
   static Widget _buildBerandaIcon(BuildContext context, bool isSelected) {
-    return NavIconWardrobe(isActive: isSelected);
+    return NavIconWardrobe(
+      isActive: isSelected,
+      activeColor: JavaraBottomNav.activeColor,
+      inactiveColor: JavaraBottomNav.inactiveColor,
+      cutoutColor: JavaraBottomNav.surfaceColor,
+    );
   }
 
   static Widget _buildKoleksiIcon(BuildContext context, bool isSelected) {
-    return NavIconHanger(isActive: isSelected);
+    return NavIconHanger(
+      isActive: isSelected,
+      activeColor: JavaraBottomNav.activeColor,
+      inactiveColor: JavaraBottomNav.inactiveColor,
+    );
   }
 
   static const _items = [

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jawara_app/features/fashion/models/javanese_clothing_models.dart';
 import 'package:jawara_app/features/fashion/screens/wardrobe_tab.dart';
 import 'package:jawara_app/features/home/home_screen.dart';
+import 'package:jawara_app/features/home/javara_bottom_nav.dart';
 import 'package:jawara_app/services/saved_garments_service.dart';
 import 'package:jawara_app/widgets/navigation/nav_icon_hanger.dart';
 import 'package:jawara_app/widgets/navigation/nav_icon_wardrobe.dart';
@@ -45,8 +46,27 @@ void main() {
       expect(hangerIconFinder, findsOneWidget);
       expect(tester.getSize(wardrobeIconFinder), const Size(24, 24));
       expect(tester.getSize(hangerIconFinder), const Size(24, 24));
-      expect(tester.widget<NavIconWardrobe>(wardrobeIconFinder).isActive, isTrue);
-      expect(tester.widget<NavIconHanger>(hangerIconFinder).isActive, isFalse);
+      final wardrobeIcon = tester.widget<NavIconWardrobe>(wardrobeIconFinder);
+      final hangerIcon = tester.widget<NavIconHanger>(hangerIconFinder);
+      expect(wardrobeIcon.isActive, isTrue);
+      expect(hangerIcon.isActive, isFalse);
+      expect(wardrobeIcon.activeColor, JavaraBottomNav.activeColor);
+      expect(hangerIcon.activeColor, JavaraBottomNav.activeColor);
+      expect(wardrobeIcon.activeColor, isNot(Colors.white));
+      expect(hangerIcon.activeColor, isNot(Colors.white));
+
+      // Verifikasi titik indikator aktif bawah sudah dihapus & semua baseline label sejajar
+      expect(
+        find.descendant(
+          of: find.byType(JavaraBottomNav),
+          matching: find.byType(AnimatedAlign),
+        ),
+        findsNothing,
+      );
+      final berandaDy = tester.getBottomLeft(find.text('Beranda')).dy;
+      expect(tester.getBottomLeft(find.text('Koleksi')).dy, berandaDy);
+      expect(tester.getBottomLeft(find.text('Tersimpan')).dy, berandaDy);
+      expect(tester.getBottomLeft(find.text('Profil')).dy, berandaDy);
 
       // Verifikasi tombol Wardrobe pill di navbar sudah dihapus
       expect(find.text('Wardrobe'), findsNothing);

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme.dart';
 import '../../../services/saved_garments_service.dart';
+import '../../home/javara_bottom_nav.dart';
 import '../models/javanese_clothing_models.dart';
 
 /// Tab Koleksi Tersimpan - Halaman terpisah khusus untuk melihat dan mengelola
@@ -192,7 +193,7 @@ class _TersimpanTabState extends State<TersimpanTab> {
             20,
             12,
             20,
-            MediaQuery.of(context).padding.bottom + 90,
+            JavaraBottomNav.contentBottomPadding(context),
           ),
           physics: const BouncingScrollPhysics(),
           itemCount: items.length,

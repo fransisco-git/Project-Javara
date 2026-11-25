@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/theme.dart';
 import '../../../core/transitions.dart';
 import '../../../services/saved_garments_service.dart';
+import '../../home/javara_bottom_nav.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
 import 'clothing_detail_screen.dart';
@@ -611,7 +612,14 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
   /// Tampilan Grid Editorial 2 Kolom (ZARA Editorial Layout)
   Widget _buildItemsGrid(List<ClothingItem> items) {
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        8,
+        16,
+        widget.isTab
+            ? JavaraBottomNav.contentBottomPadding(context)
+            : MediaQuery.paddingOf(context).bottom + 24,
+      ),
       physics: const BouncingScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -819,7 +827,14 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
   /// Tampilan List Detail (UNIQLO Technical Specs View)
   Widget _buildItemsList(List<ClothingItem> items) {
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        8,
+        16,
+        widget.isTab
+            ? JavaraBottomNav.contentBottomPadding(context)
+            : MediaQuery.paddingOf(context).bottom + 24,
+      ),
       physics: const BouncingScrollPhysics(),
       itemCount: items.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
@@ -956,7 +971,14 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
   /// Tampilan Setelan Lengkap Tradisional (Curated Outfits)
   Widget _buildOutfitsList(List<TraditionalOutfit> outfits) {
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        8,
+        16,
+        widget.isTab
+            ? JavaraBottomNav.contentBottomPadding(context)
+            : MediaQuery.paddingOf(context).bottom + 24,
+      ),
       physics: const BouncingScrollPhysics(),
       itemCount: outfits.length,
       separatorBuilder: (_, _) => const SizedBox(height: 14),

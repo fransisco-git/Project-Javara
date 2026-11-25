@@ -18,6 +18,7 @@ import '../fashion/models/javanese_clothing_models.dart';
 import '../../services/saved_garments_service.dart';
 import '../../widgets/skeleton_shimmer.dart';
 import '../../widgets/interactive_feedback.dart';
+import 'javara_bottom_nav.dart';
 import 'widgets/category_theme_icons.dart';
 
 /// Halaman Beranda JAVARA - Menampilkan khasanah budaya Jawa Tengah.
@@ -260,7 +261,7 @@ class _HomeTabState extends State<HomeTab> {
                                   20,
                                   topPadding + 62,
                                   20,
-                                  110,
+                                  JavaraBottomNav.contentBottomPadding(context),
                                 ),
                                 keyboardDismissBehavior:
                                     ScrollViewKeyboardDismissBehavior.onDrag,

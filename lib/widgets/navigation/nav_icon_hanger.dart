@@ -7,7 +7,7 @@ class NavIconHanger extends StatelessWidget {
     required this.isActive,
     this.size = 24.0,
     this.inactiveColor = const Color(0xFFB8B0A6),
-    this.activeColor = Colors.white,
+    this.activeColor = const Color(0xFFFED897),
   });
 
   final bool isActive;

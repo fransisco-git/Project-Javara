@@ -22,18 +22,16 @@ class NavItemData {
 
 /// Floating Frosted Glass Capsule Bottom Navigation Bar khas JAVARA.
 ///
-/// Karakteristik Desain & Interaktivitas:
-/// 1. Frosted Obsidian Glassmorphism: Latar belakang kaca gelap translusen mewah
-///    (`BackdropFilter` blur sigma 18) dengan gradien obsidian, specular hairline gold border,
-///    dan bayangan elevasi bertingkat.
-/// 2. Fluid Sliding Active Indicator: Titik emas adiluhung (`#FED897`) dan pendaran aura hangat
-///    meluncur mulus (`AnimatedAlign` curve `easeOutCubic`) di atas permukaan kaca saat berpindah tab.
-/// 3. Tactile Spring Feedback: Efek pegas elastis pada ikon saat ditekan (`0.92x` squash -> `1.08x` bounce)
-///    disertai respon haptic getaran halus.
-/// 4. Animated Icon & Typography Morph: Transisi crossfade mulus antara ikon outline dan solid,
-///    serta transisi warna tipografi emas soga dinamis.
-/// 5. 100% Bebas RenderFlex Overflow: Terproteksi dengan `FittedBox` dan `Flexible` untuk
-///    layar sekecil 300px hingga skala teks 2.0x.
+/// Karakteristik Desain:
+/// 1. Frosted Obsidian Glassmorphism: Latar gelap beropasitas tinggi dengan
+///    `BackdropFilter` blur sigma 18 dan border emas sangat tipis agar label
+///    tetap terbaca jelas di atas foto terang.
+/// 2. Struktur Identik di Semua Tab: Setiap tab memiliki ikon tetap 24×24 dalam
+///    `SizedBox`, jarak tetap 4 px, dan label teks dengan baseline sejajar.
+/// 3. Warna Aksen Seragam: State aktif memakai krem emas `#FED897` pada ikon
+///    terisi maupun label (tanpa titik indikator bawah).
+/// 4. 100% Bebas RenderFlex Overflow: Terproteksi `FittedBox` dan `Flexible`
+///    untuk layar 300px hingga skala teks 2.0x.
 class JavaraBottomNav extends StatelessWidget {
   const JavaraBottomNav({
     super.key,
@@ -46,43 +44,50 @@ class JavaraBottomNav extends StatelessWidget {
   final ValueChanged<int> onChanged;
   final List<NavItemData> items;
 
-  static const double _barHeight = 64.0;
+  static const double barHeight = 64.0;
+  static const double bottomMargin = 8.0;
+  static const Color activeColor = Color(0xFFFED897);
+  static const Color inactiveColor = Color(0xFFB8B0A6);
+  static const Color surfaceColor = Color(0xFF16110D);
+
+  /// Padding bawah standar untuk konten scrollable agar item terakhir
+  /// tidak tertutup pil navbar mengambang.
+  static double contentBottomPadding(
+    BuildContext context, {
+    double extra = 20.0,
+  }) {
+    return MediaQuery.paddingOf(context).bottom +
+        barHeight +
+        bottomMargin +
+        extra;
+  }
 
   @override
   Widget build(BuildContext context) {
-    const activeColor = Color(0xFFFED897);
-    const inactiveColor = Color(0xFF8F857B);
-
-    // Hitung posisi horizontal alignment tepat di tengah masing-masing slot tab
-    final double slidingAlignmentX = items.isNotEmpty
-        ? ((2 * index + 1) - items.length) / items.length
-        : 0.0;
-
     return SafeArea(
       top: false,
       bottom: true,
       child: Container(
-        height: _barHeight,
-        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+        height: barHeight,
+        margin: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: bottomMargin,
+        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(36.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.50),
+              color: Colors.black.withValues(alpha: 0.48),
               blurRadius: 24,
               offset: const Offset(0, 8),
-            ),
-            BoxShadow(
-              color: const Color(0xFFDFB76C).withValues(alpha: 0.06),
-              blurRadius: 12,
-              offset: const Offset(0, -1),
             ),
           ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(36.0),
           child: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            filter: ui.ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(36.0),
@@ -90,62 +95,33 @@ class JavaraBottomNav extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    const Color(0xFF1E1712).withValues(alpha: 0.88),
-                    const Color(0xFF120E0B).withValues(alpha: 0.82),
+                    const Color(0xFF1B1511).withValues(alpha: 0.94),
+                    const Color(0xFF120E0B).withValues(alpha: 0.92),
                   ],
                 ),
-                border: Border.all(color: const Color(0x38DFB76C), width: 1.0),
+                border: Border.all(
+                  color: const Color(0x18DFB76C),
+                  width: 0.6,
+                ),
               ),
-              child: Stack(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  IgnorePointer(
-                    child: AnimatedAlign(
-                      duration: const Duration(milliseconds: 280),
-                      curve: Curves.easeOutCubic,
-                      alignment: Alignment(slidingAlignmentX, 0.62),
-                      child: Container(
-                        width: 22,
-                        height: 6,
-                        alignment: Alignment.center,
-                        child: Container(
-                          width: 4.5,
-                          height: 4.5,
-                          decoration: BoxDecoration(
-                            color: activeColor,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: activeColor.withValues(alpha: 0.85),
-                                blurRadius: 5,
-                                spreadRadius: 0.5,
-                              ),
-                            ],
-                          ),
-                        ),
+                  for (var i = 0; i < items.length; i++)
+                    Expanded(
+                      child: _InteractiveNavItem(
+                        item: items[i],
+                        isSelected: i == index,
+                        activeColor: activeColor,
+                        inactiveColor: inactiveColor,
+                        onTap: () {
+                          if (i != index) {
+                            HapticFeedback.selectionClick();
+                            onChanged(i);
+                          }
+                        },
                       ),
                     ),
-                  ),
-
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (var i = 0; i < items.length; i++)
-                        Expanded(
-                          child: _InteractiveNavItem(
-                            item: items[i],
-                            isSelected: i == index,
-                            activeColor: activeColor,
-                            inactiveColor: inactiveColor,
-                            onTap: () {
-                              if (i != index) {
-                                HapticFeedback.selectionClick();
-                                onChanged(i);
-                              }
-                            },
-                          ),
-                        ),
-                    ],
-                  ),
                 ],
               ),
             ),
@@ -156,8 +132,8 @@ class JavaraBottomNav extends StatelessWidget {
   }
 }
 
-/// Item Navigasi Standar Interaktif dengan Efek Pegas & Transisi Mulus
-class _InteractiveNavItem extends StatefulWidget {
+/// Item Navigasi Standar dengan Struktur Identik di Semua Tab
+class _InteractiveNavItem extends StatelessWidget {
   const _InteractiveNavItem({
     required this.item,
     required this.isSelected,
@@ -173,102 +149,74 @@ class _InteractiveNavItem extends StatefulWidget {
   final VoidCallback onTap;
 
   @override
-  State<_InteractiveNavItem> createState() => _InteractiveNavItemState();
-}
-
-class _InteractiveNavItemState extends State<_InteractiveNavItem> {
-  bool _isPressed = false;
-
-  @override
   Widget build(BuildContext context) {
-    final hasCustomIcon = widget.item.iconBuilder != null;
-
-    final itemContent = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (hasCustomIcon)
-            widget.item.iconBuilder!(context, widget.isSelected)
-          else
-            // Ikon Navigasi standar dengan efek skala & transisi
-            AnimatedScale(
-              scale: widget.isSelected ? 1.08 : 1.0,
-              duration: const Duration(milliseconds: 240),
-              curve: Curves.easeOutBack,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                transitionBuilder: (child, anim) => FadeTransition(
-                  opacity: anim,
-                  child: ScaleTransition(scale: anim, child: child),
-                ),
-                child: Icon(
-                  widget.isSelected
-                      ? widget.item.activeIcon
-                      : widget.item.inactiveIcon,
-                  key: ValueKey(
-                    '${widget.item.label}_${widget.isSelected}',
-                  ),
-                  size: 21,
-                  color: widget.isSelected
-                      ? widget.activeColor
-                      : widget.inactiveColor,
-                ),
-              ),
-            ),
-          const SizedBox(height: 2),
-
-          // Label Teks: Inter 11sp, semi-bold saat aktif, terproteksi FittedBox
-          Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: JText.sans(
-                  11.0,
-                  weight: widget.isSelected
-                      ? FontWeight.w600
-                      : FontWeight.w500,
-                  color: widget.isSelected
-                      ? widget.activeColor
-                      : widget.inactiveColor,
-                  letterSpacing: 0.1,
-                ),
-                child: Text(widget.item.label, maxLines: 1),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8.0),
-        ],
-      ),
-    );
-
     return Semantics(
       button: true,
-      selected: widget.isSelected,
-      label: widget.item.label,
+      selected: isSelected,
+      label: item.label,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTapDown: (_) {
-          setState(() => _isPressed = true);
-          HapticFeedback.lightImpact();
-        },
-        onTapUp: (_) {
-          setState(() => _isPressed = false);
-          widget.onTap();
-        },
-        onTapCancel: () {
-          setState(() => _isPressed = false);
-        },
-        child: hasCustomIcon
-            ? itemContent
-            : AnimatedScale(
-                scale: _isPressed ? 0.90 : (widget.isSelected ? 1.04 : 1.0),
-                duration: const Duration(milliseconds: 180),
-                curve: Curves.easeOutBack,
-                child: itemContent,
+        onTapDown: (_) => HapticFeedback.lightImpact(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox.square(
+                dimension: 24,
+                child: Center(
+                  child: item.iconBuilder != null
+                      ? item.iconBuilder!(context, isSelected)
+                      : AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          switchInCurve: Curves.easeOut,
+                          switchOutCurve: Curves.easeOut,
+                          transitionBuilder: (child, anim) {
+                            final scale = Tween<double>(
+                              begin: 0.9,
+                              end: 1.0,
+                            ).animate(anim);
+                            return FadeTransition(
+                              opacity: anim,
+                              child: ScaleTransition(
+                                scale: scale,
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: Icon(
+                            isSelected ? item.activeIcon : item.inactiveIcon,
+                            key: ValueKey('${item.label}_$isSelected'),
+                            size: 24,
+                            color: isSelected ? activeColor : inactiveColor,
+                          ),
+                        ),
+                ),
               ),
+              const SizedBox(height: 4),
+              SizedBox(
+                height: 15,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.bottomCenter,
+                  child: AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOut,
+                    style: JText.sans(
+                      11.0,
+                      weight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color: isSelected ? activeColor : inactiveColor,
+                      letterSpacing: 0.1,
+                    ),
+                    child: Text(item.label, maxLines: 1),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

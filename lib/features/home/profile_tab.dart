@@ -6,6 +6,7 @@ import '../../core/theme.dart';
 import '../../core/transitions.dart';
 import '../../services/auth_service.dart';
 import '../auth/login_screen.dart';
+import 'javara_bottom_nav.dart';
 
 /// Tab Profil JAVARA - Pengalaman Profil Terpadu Busana Adat Jawa Tengah.
 /// Fokus 100% pada busana adat: identitas pengguna, aktivitas sewa & pesanan,
@@ -877,7 +878,12 @@ class _ProfileTabState extends State<ProfileTab> {
         constraints: const BoxConstraints(maxWidth: 540),
         child: ListView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
+          padding: EdgeInsets.fromLTRB(
+            20,
+            16,
+            20,
+            JavaraBottomNav.contentBottomPadding(context),
+          ),
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
