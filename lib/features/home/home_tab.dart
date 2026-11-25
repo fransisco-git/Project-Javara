@@ -176,6 +176,14 @@ class _HomeTabState extends State<HomeTab> {
     final popular = _q.isEmpty ? popularItems : _filter(allItems);
     final empty = popular.isEmpty;
     final topPadding = MediaQuery.of(context).padding.top;
+    final mediaBottom = MediaQuery.paddingOf(context).bottom;
+    const navbarReserve =
+        JavaraBottomNav.barHeight + JavaraBottomNav.bottomMargin;
+    final bottomClearance =
+        (mediaBottom >= navbarReserve
+            ? mediaBottom
+            : mediaBottom + navbarReserve) +
+        28.0;
     const heroToCategorySpace = 28.0;
 
     return MouseRegion(
@@ -263,7 +271,7 @@ class _HomeTabState extends State<HomeTab> {
                                   0,
                                   topPadding + 58,
                                   0,
-                                  JavaraBottomNav.contentBottomPadding(context),
+                                  bottomClearance,
                                 ),
                                 keyboardDismissBehavior:
                                     ScrollViewKeyboardDismissBehavior.onDrag,
@@ -338,7 +346,6 @@ class _HomeTabState extends State<HomeTab> {
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(height: 26),
                                   ],
 
                                   // --- MODE HASIL PENCARIAN ---

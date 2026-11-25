@@ -4,7 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jawara_app/core/purchase_search_helper.dart';
 import 'package:jawara_app/data/culture_items.dart';
 import 'package:jawara_app/features/heritage/culture_detail_screen.dart';
+import 'package:jawara_app/features/home/home_screen.dart';
 import 'package:jawara_app/features/home/home_tab.dart';
+import 'package:jawara_app/features/home/javara_bottom_nav.dart';
 import 'package:jawara_app/features/home/widgets/category_theme_icons.dart';
 import 'package:jawara_app/features/home/widgets/hero_slide.dart';
 import 'package:jawara_app/services/saved_garments_service.dart';
@@ -555,6 +557,65 @@ void main() {
       expect(find.text('ARSIP 03 · BUSANA PENGANTIN'), findsOneWidget);
       expect(find.text('Solo Basahan Kampuhan'), findsOneWidget);
       expect(find.text('LIHAT KOLEKSI'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'HomeScreen Beranda bottom breathing room below Panduan Acara is 24-32dp above navbar at 360dp and 1.3 text scale',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(360 * 2, 800 * 2);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.reset);
+
+      final errors = <FlutterErrorDetails>[];
+      final prevOnError = FlutterError.onError;
+      FlutterError.onError = (details) {
+        errors.add(details);
+      };
+
+      try {
+        await tester.pumpWidget(
+          MaterialApp(
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: const TextScaler.linear(1.3),
+              ),
+              child: child!,
+            ),
+            home: const HomeScreen(),
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 1200));
+
+        // Scroll HomeTab ListView all the way to the bottom
+        final listViewFinder = find.descendant(
+          of: find.byType(HomeTab),
+          matching: find.byType(ListView),
+        );
+        final controller = tester.widget<ListView>(listViewFinder).controller!;
+        controller.jumpTo(controller.position.maxScrollExtent);
+        await tester.pump();
+        controller.jumpTo(controller.position.maxScrollExtent);
+        await tester.pump(const Duration(milliseconds: 500));
+        await tester.pump(const Duration(milliseconds: 800));
+
+        final panduanCardFinder = find.ancestor(
+          of: find.text('PANDUAN ACARA'),
+          matching: find.byType(Container),
+        );
+        final cardBottom = tester.getBottomLeft(panduanCardFinder.first).dy;
+        final navTop = tester.getTopLeft(find.byType(JavaraBottomNav)).dy;
+        final gapAboveNavbar = navTop - cardBottom;
+
+        expect(gapAboveNavbar, inInclusiveRange(24.0, 32.0));
+      } finally {
+        FlutterError.onError = prevOnError;
+      }
+
+      final overflowErrors = errors
+          .where((e) => e.exceptionAsString().contains('overflowed'))
+          .toList();
+      expect(overflowErrors, isEmpty);
     },
   );
 }
