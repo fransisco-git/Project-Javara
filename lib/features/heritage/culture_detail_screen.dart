@@ -335,8 +335,8 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
                       launchPurchaseSearch(item.title);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: JColors.accentGold,
-                      foregroundColor: JColors.ink,
+                      backgroundColor: const Color(0xFF3A261D),
+                      foregroundColor: const Color(0xFFFFDF9E),
                       elevation: 0,
                       shadowColor: Colors.transparent,
                       shape: RoundedRectangleBorder(
@@ -351,13 +351,13 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
                           style: JText.serif(
                             14.5,
                             weight: FontWeight.w700,
-                            color: JColors.ink,
+                            color: const Color(0xFFFFDF9E),
                           ),
                         ),
                         const SizedBox(width: 6),
                         const Icon(
                           Icons.north_east,
-                          color: JColors.ink,
+                          color: Color(0xFFFFDF9E),
                           size: 16,
                         ),
                       ],
