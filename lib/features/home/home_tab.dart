@@ -599,9 +599,9 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
       ..rotateY(rightHandYaw)
       ..rotateZ(rightHandRoll);
 
-    final handsOpacity = (1.0 - ((_smoothScroll - 600.0) / 450.0)).clamp(
-      0.35,
-      1.0,
+    final handsOpacity = (0.78 - ((_smoothScroll - 600.0) / 450.0) * 0.78).clamp(
+      0.28,
+      0.78,
     );
 
     // DOLLY ZOOM SINEMATIK CANDI:
@@ -784,7 +784,7 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           ),
         ),
 
-        // --- 10. VIGNETTE PEREDUP BAWAH (MEMASTIKAN KONTEN TERBACA JELAS) ---
+        // --- 10. VIGNETTE PEREDUP (MENJAGA KONTRAST KONTEN & MENENANGKAN LATAR) ---
         Positioned.fill(
           child: IgnorePointer(
             child: DecoratedBox(
@@ -793,10 +793,10 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    const Color(0x22000000),
-                    Colors.transparent,
-                    const Color(0x6607040B),
-                    const Color(0xF507040B),
+                    const Color(0x55000000),
+                    const Color(0x4D07040B),
+                    const Color(0x8C07040B),
+                    const Color(0xF707040B),
                   ],
                   stops: const [0.0, 0.20, 0.60, 1.0],
                 ),
