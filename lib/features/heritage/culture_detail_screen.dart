@@ -220,30 +220,65 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
 
                         // --- TAB BAR EDITORIAL ---
                         Container(
+                          padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
                             color: const Color(0xFFEFE6D6),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: TabBar(
                             controller: _tabController,
+                            indicatorSize: TabBarIndicatorSize.tab,
+                            dividerColor: Colors.transparent,
+                            labelPadding:
+                                const EdgeInsets.symmetric(horizontal: 6),
                             indicator: BoxDecoration(
                               color: const Color(0xFF3A261D),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(9),
                             ),
                             labelColor: const Color(0xFFFFDF9E),
                             unselectedLabelColor: const Color(0xFF6E5B49),
                             labelStyle: JText.serif(
-                              12,
+                              12.5,
                               weight: FontWeight.w700,
                             ),
                             unselectedLabelStyle: JText.serif(
-                              12,
+                              12.5,
                               weight: FontWeight.w500,
                             ),
                             tabs: const [
-                              Tab(text: 'Sejarah & Filosofi'),
-                              Tab(text: 'Sorotan Luhur'),
-                              Tab(text: 'Lokasi & Panduan'),
+                              Tab(
+                                height: 38,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    'Sejarah',
+                                    maxLines: 1,
+                                    softWrap: false,
+                                  ),
+                                ),
+                              ),
+                              Tab(
+                                height: 38,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    'Sorotan',
+                                    maxLines: 1,
+                                    softWrap: false,
+                                  ),
+                                ),
+                              ),
+                              Tab(
+                                height: 38,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    'Lokasi',
+                                    maxLines: 1,
+                                    softWrap: false,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),

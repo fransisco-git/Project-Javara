@@ -2,6 +2,14 @@ import '../../data/culture_items.dart';
 import '../fashion/data/javanese_clothing_data.dart';
 import '../fashion/models/javanese_clothing_models.dart';
 
+/// Entri rekomendasi busana untuk sebuah acara, beserta peran opsionalnya.
+class EventRecommendationEntry {
+  const EventRecommendationEntry(this.itemId, {this.peran});
+
+  final String itemId;
+  final String? peran;
+}
+
 /// Data konstanta Panduan Acara (teks Pakem & Etika + pemetaan ID busana).
 /// Disimpan terpisah agar mudah disunting tanpa menyentuh kode UI Beranda.
 class EventGuideItem {
@@ -9,13 +17,13 @@ class EventGuideItem {
     required this.id,
     required this.title,
     required this.pakemText,
-    required this.itemIds,
+    required this.recommendations,
   });
 
   final String id;
   final String title;
   final String pakemText;
-  final List<String> itemIds;
+  final List<EventRecommendationEntry> recommendations;
 }
 
 const List<EventGuideItem> eventGuideItems = [
@@ -24,10 +32,19 @@ const List<EventGuideItem> eventGuideItems = [
     title: 'Pernikahan',
     pakemText:
         'Mempelai umumnya memakai busana pengantin pakem seperti Solo Basahan. Motif Sido Mukti lazim dikenakan kedua mempelai, sedangkan Truntum dikenakan orang tua pengantin.',
-    itemIds: [
-      'busana_pengantin_solo_basahan',
-      'jarik_batik_sidomukti_solo',
-      'jarik_batik_truntum_solo',
+    recommendations: [
+      EventRecommendationEntry(
+        'busana_pengantin_solo_basahan',
+        peran: 'Untuk mempelai',
+      ),
+      EventRecommendationEntry(
+        'jarik_batik_sidomukti_solo',
+        peran: 'Untuk mempelai',
+      ),
+      EventRecommendationEntry(
+        'jarik_batik_truntum_solo',
+        peran: 'Untuk orang tua pengantin',
+      ),
     ],
   ),
   EventGuideItem(
@@ -35,9 +52,9 @@ const List<EventGuideItem> eventGuideItems = [
     title: 'Kondangan',
     pakemText:
         'Pilih kebaya atau beskap yang sopan dengan kain batik klasik. Hindari motif larangan keraton seperti Parang Barong.',
-    itemIds: [
-      'kebaya_kutubaru_solo',
-      'beskap_landhung_solo',
+    recommendations: [
+      EventRecommendationEntry('kebaya_kutubaru_solo'),
+      EventRecommendationEntry('beskap_landhung_solo'),
     ],
   ),
   EventGuideItem(
@@ -45,9 +62,9 @@ const List<EventGuideItem> eventGuideItems = [
     title: 'Wisuda',
     pakemText:
         'Kebaya Kartini atau Kutu Baru, atau beskap yang rapi, dipadukan dengan kain batik klasik. Hindari motif larangan keraton.',
-    itemIds: [
-      'kebaya_kartini_rembang',
-      'beskap_landhung_solo',
+    recommendations: [
+      EventRecommendationEntry('kebaya_kartini_rembang'),
+      EventRecommendationEntry('beskap_landhung_solo'),
     ],
   ),
   EventGuideItem(
@@ -55,8 +72,8 @@ const List<EventGuideItem> eventGuideItems = [
     title: 'Upacara Adat',
     pakemText:
         'Kenakan busana Jawi Jangkep lengkap dengan ricikan adat (blangkon, keris, sabuk), mengikuti pakem keraton setempat.',
-    itemIds: [
-      'beskap_jawi_jangkep_solo',
+    recommendations: [
+      EventRecommendationEntry('beskap_jawi_jangkep_solo'),
     ],
   ),
 ];
@@ -68,6 +85,7 @@ class ResolvedEventRecommendation {
     required this.title,
     required this.subtitle,
     required this.imagePath,
+    this.peran,
     this.cultureItem,
     this.clothingItem,
   });
@@ -76,18 +94,20 @@ class ResolvedEventRecommendation {
   final String title;
   final String subtitle;
   final String imagePath;
+  final String? peran;
   final CultureItem? cultureItem;
   final ClothingItem? clothingItem;
 }
 
-/// Menyelesaikan daftar ID item menjadi rekomendasi nyata dari data yang sudah ada.
+/// Menyelesaikan daftar entri rekomendasi menjadi data nyata dari item yang sudah ada.
 List<ResolvedEventRecommendation> resolveEventRecommendations(
   EventGuideItem guide,
 ) {
   final allCultureItems = [...popularItems, ...pickedItems];
   final results = <ResolvedEventRecommendation>[];
 
-  for (final id in guide.itemIds) {
+  for (final entry in guide.recommendations) {
+    final id = entry.itemId;
     CultureItem? matchedCulture;
     for (final item in allCultureItems) {
       if (item.id == id) {
@@ -102,6 +122,7 @@ List<ResolvedEventRecommendation> resolveEventRecommendations(
           title: matchedCulture.title,
           subtitle: matchedCulture.meta,
           imagePath: 'assets/images/${matchedCulture.image}',
+          peran: entry.peran,
           cultureItem: matchedCulture,
         ),
       );
@@ -117,6 +138,7 @@ List<ResolvedEventRecommendation> resolveEventRecommendations(
           subtitle:
               '${matchedClothing.region.title} · ${matchedClothing.category.label}',
           imagePath: matchedClothing.imageAsset,
+          peran: entry.peran,
           clothingItem: matchedClothing,
         ),
       );

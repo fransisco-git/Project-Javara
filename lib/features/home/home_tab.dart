@@ -2157,7 +2157,10 @@ class _EventRecommendationTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      recommendation.subtitle,
+                      (recommendation.peran != null &&
+                              recommendation.peran!.isNotEmpty)
+                          ? recommendation.peran!
+                          : recommendation.subtitle,
                       style: JText.sans(
                         11,
                         weight: FontWeight.w400,
