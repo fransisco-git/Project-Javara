@@ -284,14 +284,14 @@ class _HomeTabState extends State<HomeTab> {
                                     ),
                                     const SizedBox(height: 24),
 
-                                    // 2. 4 Kategori Utama
+                                    // 2. 3 Kategori Utama
                                     StaggerIn(
                                       index: 2,
                                       child: _Categories(
                                         onTap: _onCategoryTapped,
                                       ),
                                     ),
-                                    const SizedBox(height: 52),
+                                    const SizedBox(height: 24),
 
                                     // 3. Grid "Warisan Populer" (Dinaikkan agar koleksi busana langsung terlihat)
                                     if (popular.isNotEmpty) ...[
