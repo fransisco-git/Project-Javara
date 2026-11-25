@@ -20,6 +20,7 @@ import '../fashion/models/javanese_clothing_models.dart';
 import '../../services/saved_garments_service.dart';
 import '../../widgets/skeleton_shimmer.dart';
 import '../../widgets/interactive_feedback.dart';
+import 'widgets/category_theme_icons.dart';
 
 /// Halaman Beranda JAVARA - Menampilkan khasanah budaya Jawa Tengah.
 /// Menghadirkan model Candi Borobudur 3D fotorealistik (cutout transparan)
@@ -1733,19 +1734,19 @@ class _Categories extends StatelessWidget {
 
   static const _items = [
     (
-      icon: Icons.checkroom_rounded,
+      iconType: JavaraCategoryIconType.busana,
       title: 'Busana',
       subtitle: 'Pria & Wanita',
       actionKey: 'Busana',
     ),
     (
-      icon: Icons.military_tech_rounded,
+      iconType: JavaraCategoryIconType.aksesoris,
       title: 'Aksesoris',
       subtitle: 'Ricikan Adat',
       actionKey: 'Aksesoris',
     ),
     (
-      icon: Icons.texture_rounded,
+      iconType: JavaraCategoryIconType.batik,
       title: 'Batik',
       subtitle: 'Motif Pakem',
       actionKey: 'Batik',
@@ -1783,10 +1784,12 @@ class _Categories extends StatelessWidget {
                             colors: [Color(0x35DFB76C), Color(0x05DFB76C)],
                           ),
                         ),
-                        child: Icon(
-                          item.icon,
-                          size: 24,
-                          color: const Color(0xFFDFB76C),
+                        child: ExcludeSemantics(
+                          child: JavaraCategoryThemeIcon(
+                            key: ValueKey('category_icon_${item.actionKey.toLowerCase()}'),
+                            type: item.iconType,
+                            size: 28,
+                          ),
                         ),
                       ),
                     ),

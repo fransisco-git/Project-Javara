@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jawara_app/features/home/home_tab.dart';
+import 'package:jawara_app/features/home/widgets/category_theme_icons.dart';
 import 'package:jawara_app/services/saved_garments_service.dart';
 
 void main() {
@@ -280,5 +281,13 @@ void main() {
     expect(find.text('Pria & Wanita'), findsOneWidget);
     expect(find.text('Ricikan Adat'), findsOneWidget);
     expect(find.text('Motif Pakem'), findsOneWidget);
+
+    // Verify bespoke themed Javanese vector icons are rendered instead of generic Material icons
+    expect(find.byKey(const ValueKey('category_icon_busana')), findsOneWidget);
+    expect(find.byKey(const ValueKey('category_icon_aksesoris')), findsOneWidget);
+    expect(find.byKey(const ValueKey('category_icon_batik')), findsOneWidget);
+    expect(find.byType(JavaraCategoryThemeIcon), findsNWidgets(3));
+    expect(find.byIcon(Icons.military_tech_rounded), findsNothing);
+    expect(find.byIcon(Icons.texture_rounded), findsNothing);
   });
 }
