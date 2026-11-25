@@ -1505,12 +1505,12 @@ class _Categories extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 50,
-                      height: 50,
+                      width: 58,
+                      height: 58,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: const Color(0xCC18130F),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: const Color(0x28DFB76C),
                           width: 0.9,
@@ -1520,11 +1520,11 @@ class _Categories extends StatelessWidget {
                         child: JavaraCategoryThemeIcon(
                           key: ValueKey('category_icon_${item.actionKey.toLowerCase()}'),
                           type: item.iconType,
-                          size: 26,
+                          size: 31,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 7),
+                    const SizedBox(height: 8),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: FittedBox(
@@ -1535,7 +1535,7 @@ class _Categories extends StatelessWidget {
                             Text(
                               item.title,
                               style: JText.serif(
-                                11.5,
+                                12.5,
                                 weight: FontWeight.w700,
                                 color: const Color(0xFFFFF0D0),
                               ),
@@ -1546,7 +1546,7 @@ class _Categories extends StatelessWidget {
                             Text(
                               item.subtitle,
                               style: JText.sans(
-                                9.5,
+                                10.0,
                                 weight: FontWeight.w500,
                                 color: const Color(0xFFAFA08F),
                               ),
