@@ -127,23 +127,23 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
       relatedGarmentId: 'jarik_batik_buketan_pekalongan',
     ),
     _ExtendedBatikData(
-      id: 'motif_mega_mendung',
-      name: 'Mega Mendung (Komparasi Budaya Cirebon)',
-      javaneseScript: 'ꦩꦺꦒꦩꦼꦤ꧀ꦢꦸꦁ',
-      category: 'Komparasi Wilayah Pesisir Pasundan-Jawa',
-      region: 'Cirebon (Bukan Jawa Tengah, Pengaruh Pesisiran)',
+      id: 'motif_lasem_tiga_negeri',
+      name: 'Batik Tiga Negeri Lasem',
+      javaneseScript: 'ꦧꦠꦶꦏ꧀ꦭꦱꦼꦩ꧀',
+      category: 'PESISIRAN · AKULTURASI',
+      region: 'Lasem, Rembang · Jawa Tengah',
       isLarangan: false,
       philosophy:
-          'Awan mendung yang meredam terik matahari menyimbolkan kesabaran, kepala dingin, dan hati yang teduh dalam menghadapi amarah duniawi.',
+          'Melambangkan keharmonisan lintas budaya Jawa dan Tionghoa di pesisir utara Jawa Tengah. Tiga warna utamanya mencerminkan tiga daerah pewarnaan klasik—merah darah ayam (getih pitik) khas Lasem sebagai simbol keberanian dan kebahagiaan, biru nila khas pesisir sebagai keteduhan, serta cokelat sogan khas Surakarta sebagai kebijaksanaan.',
       usageContext:
-          'Busana adat Cirebon. Dicantumkan di JAVARA sebagai edukasi komparatif pembeda agar pengguna tidak salah mengira Mega Mendung berasal dari Jawa Tengah.',
+          'Umumnya dikenakan pada acara perayaan, jamuan resmi, dan busana kebaya encim atau busana adat pesisir Jawa Tengah.',
       technicalDetails:
-          'Garis awan berlapis 7 gradasi warna biru gelap hingga putih, melambangkan tujuh lapis langit.',
+          'Pewarnaan tiga tahap lintas daerah: merah mengkudu (getih pitik) khas Lasem, biru nila khas pesisir utara, dan cokelat sogan khas Surakarta di atas kain mori primissima halus.',
       historicalOrigin:
-          'Lahir dari akulturasi Kesultanan Cirebon dengan permaisuri Putri Ong Tien asal Tiongkok pada masa Sunan Gunung Jati.',
-      primaryColor: const Color(0xFF162D4A),
-      accentColor: const Color(0xFF78B4E8),
-      imagePath: 'assets/images/batik/batik_mega_mendung.jpg',
+          'Berkembang sejak abad ke-19 di pesisir Lasem, Rembang, Jawa Tengah melalui akulturasi pembatik Jawa dan peranakan Tionghoa yang melahirkan warna merah darah ayam legendaris.',
+      primaryColor: const Color(0xFF4A1818),
+      accentColor: const Color(0xFFE4C590),
+      imagePath: 'assets/images/batik/batik_lasem_tiga_negeri.jpg',
     ),
   ];
 
