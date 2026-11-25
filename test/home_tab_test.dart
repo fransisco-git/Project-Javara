@@ -312,9 +312,16 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1200));
 
     // Slide 1: full-width HeroSlide, height clamped 240-300 (32% of 844 = 270.08),
-    // exact eyebrow, title, and 40 dp LIHAT KOLEKSI button
+    // exact eyebrow, title, Alignment(0,-0.6), scale 1.0, and 40 dp LIHAT KOLEKSI button
     final heroSlideFinder = find.byType(HeroSlide);
     expect(heroSlideFinder, findsOneWidget);
+    final heroSlide = tester.widget<HeroSlide>(heroSlideFinder);
+    expect(heroSlide.data.imageAlignment, const Alignment(0, -0.6));
+    expect(heroSlide.data.imageScale, 1.0);
+    expect(
+      find.descendant(of: heroSlideFinder, matching: find.byType(ClipRect)),
+      findsOneWidget,
+    );
     final heroSize = tester.getSize(heroSlideFinder);
     expect(heroSize.width, 390.0);
     expect(heroSize.height, inInclusiveRange(240.0, 300.0));

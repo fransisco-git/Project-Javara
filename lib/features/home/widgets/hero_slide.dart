@@ -11,6 +11,7 @@ class HeroSlideData {
     required this.imagePath,
     required this.routeBuilder,
     this.imageAlignment = const Alignment(0, -0.6),
+    this.imageScale = 1.0,
   });
 
   final String eyebrow;
@@ -18,6 +19,7 @@ class HeroSlideData {
   final String imagePath;
   final Widget Function() routeBuilder;
   final Alignment imageAlignment;
+  final double imageScale;
 }
 
 /// Shared editorial hero slide template used across all 3 slides on the home screen.
@@ -42,13 +44,20 @@ class HeroSlide extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // 1. Full-bleed garment photography aligned upward to keep face & upper garment clear
-        Image.asset(
-          data.imagePath,
-          fit: BoxFit.cover,
-          alignment: data.imageAlignment,
-          filterQuality: FilterQuality.high,
-          errorBuilder: (_, _, _) => const ColoredBox(color: Color(0xFF14100D)),
+        // 1. Full-bleed garment photography with per-slide alignment & scale inside ClipRect
+        ClipRect(
+          child: Transform.scale(
+            scale: data.imageScale,
+            alignment: data.imageAlignment,
+            child: Image.asset(
+              data.imagePath,
+              fit: BoxFit.cover,
+              alignment: data.imageAlignment,
+              filterQuality: FilterQuality.high,
+              errorBuilder: (_, _, _) =>
+                  const ColoredBox(color: Color(0xFF14100D)),
+            ),
+          ),
         ),
 
         // 2. Bottom readability scrim (transparent up to 40% -> ~85% black at bottom)

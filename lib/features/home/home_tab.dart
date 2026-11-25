@@ -1331,6 +1331,7 @@ class _HeroCardState extends State<_HeroCard> {
       title: 'Kebaya Kartini Solo Sutra',
       imagePath: 'assets/images/model_kebaya_kartini_solo.jpg',
       imageAlignment: const Alignment(0, -0.6),
+      imageScale: 1.0,
       routeBuilder: () =>
           const ClothingCatalogScreen(initialGender: GenderTarget.wanita),
     ),
@@ -1339,6 +1340,7 @@ class _HeroCardState extends State<_HeroCard> {
       title: 'Jawi Jangkep Keprabon',
       imagePath: 'assets/images/model_jawi_jangkep_solo.jpg',
       imageAlignment: const Alignment(0, -0.6),
+      imageScale: 1.0,
       routeBuilder: () =>
           const ClothingCatalogScreen(initialGender: GenderTarget.pria),
     ),
@@ -1347,6 +1349,7 @@ class _HeroCardState extends State<_HeroCard> {
       title: 'Solo Basahan Kampuhan',
       imagePath: 'assets/images/model_solo_basahan_bride.jpg',
       imageAlignment: const Alignment(0, -0.6),
+      imageScale: 1.0,
       routeBuilder: () => const ClothingCatalogScreen(),
     ),
   ];
