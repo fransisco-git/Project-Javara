@@ -87,9 +87,9 @@ void main() {
           // Kuluk Kanigaran renamed cleanly and loads its HD photo
           expect(find.text('Kuluk Kanigaran'), findsOneWidget);
 
-          // Scroll down to an item without a photo (Sabuk Cinde & Epek Timang Sepuh Emas) -> flat GarmentTypographyFallback (no icons)
+          // Scroll down to an item without a photo (Kalung Ulur Tiga Tingkat & Bros Rodha) -> flat GarmentTypographyFallback (no icons)
           await tester.dragUntilVisible(
-            find.text('Sabuk Cinde & Epek Timang Sepuh Emas'),
+            find.text('Kalung Ulur Tiga Tingkat & Bros Rodha'),
             find.byType(GridView),
             const Offset(0, -400),
           );
@@ -106,10 +106,10 @@ void main() {
               matching: find.byType(ColoredBox),
             ),
           );
-          final sabuk = JavaneseClothingData.getItemById(
-            'sabuk_cinde_epek_timang_emas',
+          final kalung = JavaneseClothingData.getItemById(
+            'bros_rodha_kalung_ulur_putri',
           )!;
-          expect(fallbackBox.color, sabuk.primaryColor);
+          expect(fallbackBox.color, kalung.primaryColor);
 
           // Switch to List View and verify category badge contrast (#6E5019) & fallback
           await tester.tap(find.byIcon(Icons.view_agenda_outlined));
@@ -121,7 +121,7 @@ void main() {
               .toList();
           expect(penutupKepalaLabels, isNotEmpty);
           await tester.dragUntilVisible(
-            find.text('Sabuk Cinde & Epek Timang Sepuh Emas'),
+            find.text('Kalung Ulur Tiga Tingkat & Bros Rodha'),
             find.byType(ListView).last,
             const Offset(0, -400),
           );
@@ -187,6 +187,9 @@ void main() {
         final sabuk = JavaneseClothingData.getItemById(
           'sabuk_cinde_epek_timang_emas',
         )!;
+        final kalung = JavaneseClothingData.getItemById(
+          'bros_rodha_kalung_ulur_putri',
+        )!;
         expect(kuluk.name, 'Kuluk Kanigaran');
 
         final errors = <FlutterErrorDetails>[];
@@ -196,7 +199,7 @@ void main() {
         };
 
         try {
-          // All 13 photographed items load their real HD photos from assets/koleksi/
+          // All 14 photographed items load their real HD photos from assets/koleksi/
           for (final photoItem in [
             blangkon,
             jogjaBlangkon,
@@ -211,6 +214,7 @@ void main() {
             kutubaru,
             dodot,
             keris,
+            sabuk,
           ]) {
             await tester.pumpWidget(
               MaterialApp(
@@ -240,8 +244,8 @@ void main() {
                 child: child!,
               ),
               home: ClothingDetailScreen(
-                key: ValueKey(sabuk.id),
-                item: sabuk,
+                key: ValueKey(kalung.id),
+                item: kalung,
               ),
             ),
           );
@@ -258,18 +262,18 @@ void main() {
 
           // Contrast checks on cream background
           final titleWidget = tester.widget<Text>(
-            find.text(sabuk.name),
+            find.text(kalung.name),
           );
           expect(titleWidget.style?.color, const Color(0xFF2C2219));
 
           final scriptTexts = tester
-              .widgetList<Text>(find.text(sabuk.javaneseScript))
+              .widgetList<Text>(find.text(kalung.javaneseScript))
               .where((t) => t.style?.color == const Color(0xFF5C4632))
               .toList();
           expect(scriptTexts, isNotEmpty);
 
           final periodWidget = tester.widget<Text>(
-            find.text('Periode: ${sabuk.period}'),
+            find.text('Periode: ${kalung.period}'),
           );
           expect(periodWidget.style?.color, const Color(0xFF5C4632));
           expect(periodWidget.style?.fontStyle, isNot(FontStyle.italic));
