@@ -7,6 +7,7 @@ import '../../../services/saved_garments_service.dart';
 import '../../home/javara_bottom_nav.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
+import '../widgets/garment_visual.dart';
 import 'clothing_detail_screen.dart';
 
 /// Screen 02 — Katalog Busana Tradisional Jawa Tengah (UNIQLO x ZARA Editorial)
@@ -451,8 +452,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                   'Menampilkan $resultCount warisan busana adat',
                   style: const TextStyle(
                     fontSize: 11,
-                    color: Color(0xFFC7B7A6),
-                    fontStyle: FontStyle.italic,
+                    color: Color(0xFF5C4632),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -466,7 +466,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFFDFB76C),
+                      color: Color(0xFF6E5019),
                     ),
                   ),
                 ),
@@ -616,7 +616,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
 
   /// Kartu Grid Busana Editorial
   Widget _buildGarmentGridCard(ClothingItem item, bool isFav) {
-    final imagePath = item.assetImagePath;
+    final genderShort = item.gender.label.split('(').first.trim();
 
     return GestureDetector(
       onTap: () {
@@ -643,33 +643,39 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Gambar / Foto Busana Hero
+            // Gambar / Foto Busana atau Tile Tipografi Aksara Jawa
             Expanded(
               flex: 11,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-                    child: imagePath != null && imagePath.isNotEmpty
-                        ? Image.asset(
-                            imagePath,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => _fallbackGarmentVisual(item),
-                          )
-                        : _fallbackGarmentVisual(item),
-                  ),
-                  // Gradasi Bawah Gambar
-                  Positioned.fill(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withValues(alpha: 0.65),
-                          ],
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(15),
+                    ),
+                    child: GarmentPhotoVisual(
+                      item: item,
+                      alignment: Alignment.topCenter,
+                      fallbackFontSize: 26,
+                      fallbackPadding: const EdgeInsets.fromLTRB(
+                        12,
+                        36,
+                        12,
+                        12,
+                      ),
+                      photoOverlay: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withValues(alpha: 0.28),
+                              Colors.transparent,
+                              Colors.transparent,
+                              Colors.black.withValues(alpha: 0.32),
+                            ],
+                            stops: const [0.0, 0.28, 0.72, 1.0],
+                          ),
                         ),
                       ),
                     ),
@@ -678,22 +684,31 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                   Positioned(
                     top: 8,
                     left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: const Color(0xCC14100D),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: const Color(0x66DFB76C),
-                          width: 0.6,
+                    right: 40,
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3,
                         ),
-                      ),
-                      child: Text(
-                        item.region.title.split('(').first.trim(),
-                        style: const TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFFFFDF9E),
+                        decoration: BoxDecoration(
+                          color: const Color(0xCC14100D),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: const Color(0x66DFB76C),
+                            width: 0.6,
+                          ),
+                        ),
+                        child: Text(
+                          item.region.title.split('(').first.trim(),
+                          style: const TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFFFFDF9E),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
@@ -719,77 +734,38 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                       ),
                     ),
                   ),
-                  // Aksara Jawa di Kaki Gambar
-                  Positioned(
-                    bottom: 6,
-                    left: 8,
-                    right: 8,
-                    child: Text(
-                      item.javaneseScript,
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Color(0xFFE4C590),
-                        letterSpacing: 0.6,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
                 ],
               ),
             ),
 
-            // Metadata & Deskripsi Busana
+            // Metadata Ringkas Busana
             Expanded(
-              flex: 8,
+              flex: 7,
               child: Padding(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.name,
-                          style: JText.serif(
-                            12.5,
-                            weight: FontWeight.w800,
-                            color: const Color(0xFF382315),
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          item.socialContext.label,
-                          style: const TextStyle(
-                            fontSize: 9.5,
-                            color: Color(0xFF7D6C5D),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                    Text(
+                      item.name,
+                      style: JText.serif(
+                        12.5,
+                        weight: FontWeight.w800,
+                        color: const Color(0xFF2C2219),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          item.gender.label.split('(').first.trim(),
-                          style: const TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFFB08D57),
-                          ),
-                        ),
-                        const Icon(
-                          Icons.arrow_forward_rounded,
-                          size: 14,
-                          color: Color(0xFFB08D57),
-                        ),
-                      ],
+                    const SizedBox(height: 4),
+                    Text(
+                      '$genderShort · ${item.socialContext.label}',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF5C4632),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -844,22 +820,21 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
             ),
             child: Row(
               children: [
-                // Thumbnail Gambar
+                // Thumbnail Gambar / Tipografi Aksara Jawa
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Container(
+                  child: SizedBox(
                     width: 76,
                     height: 76,
-                    color: const Color(0xFF261D16),
-                    child: item.assetImagePath != null &&
-                            item.assetImagePath!.isNotEmpty
-                        ? Image.asset(
-                            item.assetImagePath!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) =>
-                                _fallbackGarmentVisual(item),
-                          )
-                        : _fallbackGarmentVisual(item),
+                    child: GarmentPhotoVisual(
+                      item: item,
+                      alignment: Alignment.topCenter,
+                      fallbackFontSize: 15,
+                      fallbackPadding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 4,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -872,24 +847,29 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0x22DFB76C),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              item.category.label.split('(').first.trim(),
-                              style: const TextStyle(
-                                fontSize: 8.5,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFFFFDF9E),
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0x1F6E5019),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                item.category.label.split('(').first.trim(),
+                                style: const TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF6E5019),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ),
+                          const SizedBox(width: 6),
                           IconButton(
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
@@ -899,8 +879,8 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                                   : Icons.bookmark_border_rounded,
                               size: 18,
                               color: isFav
-                                  ? const Color(0xFFDFB76C)
-                                  : const Color(0xFFC7B7A6),
+                                  ? const Color(0xFF7A5B21)
+                                  : const Color(0xFF7D6C5D),
                             ),
                             onPressed: () => _toggleFavorite(item.id),
                           ),
@@ -912,7 +892,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                         style: JText.serif(
                           13.5,
                           weight: FontWeight.w800,
-                          color: const Color(0xFF382315),
+                          color: const Color(0xFF2C2219),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -920,16 +900,18 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
                       Text(
                         item.javaneseScript,
                         style: const TextStyle(
-                          fontSize: 9.5,
-                          color: Color(0xFFB08D57),
+                          fontSize: 10,
+                          color: Color(0xFF5C4632),
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '${item.region.title} · ${item.socialContext.label}',
                         style: const TextStyle(
                           fontSize: 10,
-                          color: Color(0xFF7D6C5D),
+                          color: Color(0xFF5C4632),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -1081,20 +1063,6 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
     );
   }
 
-  /// Visual Fallback dengan Ikon Warisan jika Foto Aset belum dimuat
-  Widget _fallbackGarmentVisual(ClothingItem item) {
-    return Container(
-      color: const Color(0xFF261D16),
-      child: Center(
-        child: Icon(
-          item.category.icon,
-          size: 40,
-          color: const Color(0x66DFB76C),
-        ),
-      ),
-    );
-  }
-
   /// Tampilan Kosong Ketika Pencarian / Filter Tidak Menemukan Hasil
   Widget _buildEmptyState() {
     return Center(
@@ -1106,7 +1074,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
             const Icon(
               Icons.search_off_rounded,
               size: 56,
-              color: Color(0x66DFB76C),
+              color: Color(0xFF7A5B21),
             ),
             const SizedBox(height: 16),
             Text(
@@ -1114,7 +1082,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
               style: JText.serif(
                 16,
                 weight: FontWeight.w700,
-                color: const Color(0xFFFAF6F0),
+                color: const Color(0xFF2C2219),
               ),
             ),
             const SizedBox(height: 6),
@@ -1123,7 +1091,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
-                color: Color(0xFF9E8D7F),
+                color: Color(0xFF5C4632),
                 height: 1.4,
               ),
             ),

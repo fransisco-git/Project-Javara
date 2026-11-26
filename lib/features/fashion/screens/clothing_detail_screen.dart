@@ -6,6 +6,7 @@ import '../../../core/transitions.dart';
 import '../../../services/saved_garments_service.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
+import '../widgets/garment_visual.dart';
 
 /// Screen 03 — Detail Pakaian (Halaman Ensiklopedia Busana Adat Jawa Tengah)
 class ClothingDetailScreen extends StatefulWidget {
@@ -147,150 +148,58 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (item.category == ClothingCategory.lowerBody &&
-                      item.assetImagePath != null &&
-                      item.assetImagePath!.isNotEmpty) ...[
-                    // Foto Kain Batik Penuh di Header untuk Busana Bawahan / Jarik
-                    Positioned.fill(
-                      child: Hero(
-                        tag: 'garment_${item.id}',
-                        child: Image.asset(
-                          item.assetImagePath!,
-                          fit: BoxFit.cover,
-                          alignment: Alignment.topCenter,
-                          filterQuality: FilterQuality.high,
-                          errorBuilder: (_, _, _) => Container(
-                            color: item.primaryColor,
-                            child: Center(
-                              child: Icon(
-                                item.category.icon,
-                                size: 80,
-                                color: item.accentColor,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Scrim Atas Tipis agar Tombol Kembali & Bookmark Tetap Kontras
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: 110,
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0xAA14100D),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ] else ...[
-                    // Latar Belakang Gradasi Hangat Studio
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: RadialGradient(
-                          center: const Alignment(0, -0.2),
-                          radius: 0.9,
-                          colors: [
-                            item.primaryColor.withValues(alpha: 0.65),
-                            const Color(0xFF14100D),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Pola Geometris Tenun Halus Melayang
-                    Positioned.fill(
-                      child: Opacity(
-                        opacity: 0.08,
-                        child: CustomPaint(
-                          painter: _BatikPatternBackdropPainter(
-                            color: item.accentColor,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Showcase Siluet Busana Tengah (Foto Autentik / Ikon)
-                    Center(
-                      child: Hero(
-                        tag: 'garment_${item.id}',
+              background: Hero(
+                tag: 'garment_${item.id}',
+                child: GarmentPhotoVisual(
+                  item: item,
+                  alignment: Alignment.topCenter,
+                  filterQuality: FilterQuality.high,
+                  fallbackFontSize: 40,
+                  fallbackPadding: const EdgeInsets.fromLTRB(28, 72, 28, 28),
+                  photoOverlay: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Scrim Atas Tipis agar Tombol Kembali & Bookmark Tetap Kontras
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: 110,
                         child: Container(
-                          width: 180,
-                          height: 180,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFF1C1612),
-                            border: Border.all(
-                              color: item.accentColor.withValues(alpha: 0.6),
-                              width: 2,
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Color(0x9914100D),
+                                Colors.transparent,
+                              ],
                             ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x33000000),
-                                blurRadius: 8,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: ClipOval(
-                            child: item.assetImagePath != null &&
-                                    item.assetImagePath!.isNotEmpty
-                                ? Image.asset(
-                                    item.assetImagePath!,
-                                    fit: BoxFit.cover,
-                                    alignment: Alignment.topCenter,
-                                    errorBuilder: (_, _, _) => Center(
-                                      child: Icon(
-                                        item.category.icon,
-                                        size: 80,
-                                        color: item.accentColor,
-                                      ),
-                                    ),
-                                  )
-                                : Center(
-                                    child: Icon(
-                                      item.category.icon,
-                                      size: 80,
-                                      color: item.accentColor,
-                                    ),
-                                  ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-
-                  // Bayangan Bawah
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: 90,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Color(0xFF14100D),
-                          ],
+                      // Scrim Bawah Tipis pada Foto
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: 90,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Color(0x8814100D),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -370,7 +279,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                     style: const TextStyle(
                       fontFamily: 'serif',
                       fontSize: 16,
-                      color: Color(0xFFDFC08E),
+                      color: Color(0xFF5C4632),
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -383,7 +292,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                     style: JText.serif(
                       24,
                       weight: FontWeight.w800,
-                      color: const Color(0xFFFAF6F0),
+                      color: const Color(0xFF2C2219),
                     ),
                   ),
 
@@ -394,8 +303,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                     'Periode: ${item.period}',
                     style: const TextStyle(
                       fontSize: 12.5,
-                      color: Color(0xFFB09F8F),
-                      fontStyle: FontStyle.italic,
+                      color: Color(0xFF5C4632),
                     ),
                   ),
 
@@ -674,7 +582,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w800,
-            color: Color(0xFFFAF6F0),
+            color: Color(0xFF2C2219),
           ),
         ),
         const SizedBox(height: 4),
@@ -682,7 +590,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
           'Padanan busana yang selaras menurut tatakrama tradisi',
           style: TextStyle(
             fontSize: 11.5,
-            color: Color(0xFFA69383),
+            color: Color(0xFF5C4632),
           ),
         ),
         const SizedBox(height: 14),
@@ -846,28 +754,4 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
       ),
     );
   }
-}
-
-class _BatikPatternBackdropPainter extends CustomPainter {
-  const _BatikPatternBackdropPainter({required this.color});
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-
-    const step = 32.0;
-    for (double x = 0; x < size.width; x += step) {
-      for (double y = 0; y < size.height; y += step) {
-        canvas.drawCircle(Offset(x, y), 8, paint);
-        canvas.drawCircle(Offset(x, y), 14, paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

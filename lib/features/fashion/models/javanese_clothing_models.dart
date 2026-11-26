@@ -96,6 +96,8 @@ class ClothingItem {
   final Color accentColor;
   final String? assetImagePath;
 
+  String get photoAsset => 'assets/koleksi/$id.jpg';
+
   String get imageAsset {
     if (assetImagePath != null && assetImagePath!.isNotEmpty) return assetImagePath!;
     if (category == ClothingCategory.upperBody) {
