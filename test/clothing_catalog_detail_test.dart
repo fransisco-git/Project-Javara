@@ -84,7 +84,12 @@ void main() {
             findsNothing,
           );
 
-          // Items without a photo (e.g. Kuluk Kanigaran Karaton Solo) render flat GarmentTypographyFallback (no icons)
+          // Kuluk Kanigaran renamed cleanly and loads its HD photo
+          expect(find.text('Kuluk Kanigaran'), findsOneWidget);
+
+          // Scroll down to an item without a photo (Sanggul Tekuk & Ronce Melati) -> flat GarmentTypographyFallback (no icons)
+          await tester.drag(find.byType(GridView), const Offset(0, -350));
+          await tester.pumpAndSettle();
           expect(find.byType(GarmentTypographyFallback), findsAtLeastNWidgets(1));
           final fallbackVisual = find.byType(GarmentTypographyFallback).first;
           expect(
@@ -97,10 +102,10 @@ void main() {
               matching: find.byType(ColoredBox),
             ),
           );
-          final kuluk = JavaneseClothingData.getItemById(
-            'kuluk_kanigaran_solo',
+          final sanggul = JavaneseClothingData.getItemById(
+            'sanggul_tekuk_ronce_melati',
           )!;
-          expect(fallbackBox.color, kuluk.primaryColor);
+          expect(fallbackBox.color, sanggul.primaryColor);
 
           // Switch to List View and verify category badge contrast (#6E5019) & fallback
           await tester.tap(find.byIcon(Icons.view_agenda_outlined));
@@ -111,6 +116,8 @@ void main() {
               .where((t) => t.style?.color == const Color(0xFF6E5019))
               .toList();
           expect(penutupKepalaLabels, isNotEmpty);
+          await tester.drag(find.byType(ListView).last, const Offset(0, -350));
+          await tester.pumpAndSettle();
           expect(find.byType(GarmentTypographyFallback), findsAtLeastNWidgets(1));
         } finally {
           FlutterError.onError = prevOnError;
@@ -142,6 +149,10 @@ void main() {
         final kuluk = JavaneseClothingData.getItemById(
           'kuluk_kanigaran_solo',
         )!;
+        final sanggul = JavaneseClothingData.getItemById(
+          'sanggul_tekuk_ronce_melati',
+        )!;
+        expect(kuluk.name, 'Kuluk Kanigaran');
 
         final errors = <FlutterErrorDetails>[];
         final prevOnError = FlutterError.onError;
@@ -150,8 +161,13 @@ void main() {
         };
 
         try {
-          // All 3 Blangkon items load their real HD photos from assets/koleksi/
-          for (final photoItem in [blangkon, jogjaBlangkon, banyumasBlangkon]) {
+          // All 4 photographed headwear items load their real HD photos from assets/koleksi/
+          for (final photoItem in [
+            blangkon,
+            jogjaBlangkon,
+            banyumasBlangkon,
+            kuluk,
+          ]) {
             await tester.pumpWidget(
               MaterialApp(
                 builder: (context, child) => MediaQuery(
@@ -180,8 +196,8 @@ void main() {
                 child: child!,
               ),
               home: ClothingDetailScreen(
-                key: ValueKey(kuluk.id),
-                item: kuluk,
+                key: ValueKey(sanggul.id),
+                item: sanggul,
               ),
             ),
           );
@@ -198,18 +214,18 @@ void main() {
 
           // Contrast checks on cream background
           final titleWidget = tester.widget<Text>(
-            find.text(kuluk.name),
+            find.text(sanggul.name),
           );
           expect(titleWidget.style?.color, const Color(0xFF2C2219));
 
           final scriptTexts = tester
-              .widgetList<Text>(find.text(kuluk.javaneseScript))
+              .widgetList<Text>(find.text(sanggul.javaneseScript))
               .where((t) => t.style?.color == const Color(0xFF5C4632))
               .toList();
           expect(scriptTexts, isNotEmpty);
 
           final periodWidget = tester.widget<Text>(
-            find.text('Periode: ${kuluk.period}'),
+            find.text('Periode: ${sanggul.period}'),
           );
           expect(periodWidget.style?.color, const Color(0xFF5C4632));
           expect(periodWidget.style?.fontStyle, isNot(FontStyle.italic));

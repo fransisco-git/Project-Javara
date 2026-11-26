@@ -78,7 +78,7 @@ class JavaneseClothingData {
     ),
     ClothingItem(
       id: 'kuluk_kanigaran_solo',
-      name: 'Kuluk Kanigaran Karaton Solo',
+      name: 'Kuluk Kanigaran',
       javaneseScript: 'ꦏꦸꦭꦸꦏ꧀ꦏꦤꦶꦒꦫꦤ꧀',
       category: ClothingCategory.headwear,
       gender: GenderTarget.pria,
