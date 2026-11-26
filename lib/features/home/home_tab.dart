@@ -183,7 +183,7 @@ class _HomeTabState extends State<HomeTab> {
         (mediaBottom >= navbarReserve
             ? mediaBottom
             : mediaBottom + navbarReserve) +
-        28.0;
+        24.0;
     const heroToCategorySpace = 28.0;
 
     return MouseRegion(

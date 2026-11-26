@@ -573,44 +573,56 @@ void main() {
         errors.add(details);
       };
 
-      try {
-        await tester.pumpWidget(
-          MaterialApp(
-            builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaler: const TextScaler.linear(1.3),
+      for (final safeBottom in [0.0, 24.0, 48.0]) {
+        try {
+          await tester.pumpWidget(
+            MaterialApp(
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: const TextScaler.linear(1.3),
+                  padding: EdgeInsets.only(bottom: safeBottom),
+                  viewPadding: EdgeInsets.only(bottom: safeBottom),
+                ),
+                child: child!,
               ),
-              child: child!,
+              home: const HomeScreen(),
             ),
-            home: const HomeScreen(),
-          ),
-        );
-        await tester.pump(const Duration(milliseconds: 1200));
+          );
+          await tester.pump(const Duration(milliseconds: 1200));
 
-        // Scroll HomeTab ListView all the way to the bottom
-        final listViewFinder = find.descendant(
-          of: find.byType(HomeTab),
-          matching: find.byType(ListView),
-        );
-        final controller = tester.widget<ListView>(listViewFinder).controller!;
-        controller.jumpTo(controller.position.maxScrollExtent);
-        await tester.pump();
-        controller.jumpTo(controller.position.maxScrollExtent);
-        await tester.pump(const Duration(milliseconds: 500));
-        await tester.pump(const Duration(milliseconds: 800));
+          // Scroll HomeTab ListView all the way to the bottom
+          final listViewFinder = find.descendant(
+            of: find.byType(HomeTab),
+            matching: find.byType(ListView),
+          );
+          final controller = tester.widget<ListView>(listViewFinder).controller!;
+          controller.jumpTo(controller.position.maxScrollExtent);
+          await tester.pump();
+          controller.jumpTo(controller.position.maxScrollExtent);
+          await tester.pump(const Duration(milliseconds: 500));
+          await tester.pump(const Duration(milliseconds: 800));
 
-        final panduanCardFinder = find.ancestor(
-          of: find.text('PANDUAN ACARA'),
-          matching: find.byType(Container),
-        );
-        final cardBottom = tester.getBottomLeft(panduanCardFinder.first).dy;
-        final navTop = tester.getTopLeft(find.byType(JavaraBottomNav)).dy;
-        final gapAboveNavbar = navTop - cardBottom;
+          final panduanCardFinder = find.ancestor(
+            of: find.text('PANDUAN ACARA'),
+            matching: find.byType(Container),
+          );
+          final cardBottom = tester.getBottomLeft(panduanCardFinder.first).dy;
+          final navTop = tester.getTopLeft(find.byType(JavaraBottomNav)).dy;
+          final gapAboveNavbar = navTop - cardBottom;
 
-        expect(gapAboveNavbar, inInclusiveRange(24.0, 32.0));
-      } finally {
-        FlutterError.onError = prevOnError;
+          expect(
+            gapAboveNavbar,
+            inInclusiveRange(24.0, 32.0),
+            reason: 'Expected 24-32dp gap for safeBottom=$safeBottom, got $gapAboveNavbar',
+          );
+        } finally {
+          FlutterError.onError = prevOnError;
+        }
+        FlutterError.onError = (details) {
+          errors.add(details);
+        };
       }
+      FlutterError.onError = prevOnError;
 
       final overflowErrors = errors
           .where((e) => e.exceptionAsString().contains('overflowed'))
