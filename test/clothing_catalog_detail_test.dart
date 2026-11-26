@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jawara_app/features/fashion/data/javanese_clothing_data.dart';
+import 'package:jawara_app/features/fashion/models/javanese_clothing_models.dart';
 import 'package:jawara_app/features/fashion/screens/clothing_catalog_screen.dart';
 import 'package:jawara_app/features/fashion/screens/clothing_detail_screen.dart';
 import 'package:jawara_app/features/fashion/widgets/garment_visual.dart';
@@ -87,31 +88,16 @@ void main() {
           // Kuluk Kanigaran renamed cleanly and loads its HD photo
           expect(find.text('Kuluk Kanigaran'), findsOneWidget);
 
-          // Scroll down to the remaining item without a photo (Selop Beludru Berpayet Benang Emas) -> flat GarmentTypographyFallback (no icons)
+          // Scroll down to Selop Beludru Berpayet Benang Emas (now has HD photo, no fallback)
           await tester.dragUntilVisible(
             find.text('Selop Beludru Berpayet Benang Emas'),
             find.byType(GridView),
             const Offset(0, -400),
           );
           await tester.pumpAndSettle();
-          expect(find.byType(GarmentTypographyFallback), findsAtLeastNWidgets(1));
-          final fallbackVisual = find.byType(GarmentTypographyFallback).first;
-          expect(
-            find.descendant(of: fallbackVisual, matching: find.byType(Icon)),
-            findsNothing,
-          );
-          final fallbackBox = tester.widget<ColoredBox>(
-            find.descendant(
-              of: fallbackVisual,
-              matching: find.byType(ColoredBox),
-            ),
-          );
-          final selop = JavaneseClothingData.getItemById(
-            'selop_beludru_sulam_emas',
-          )!;
-          expect(fallbackBox.color, selop.primaryColor);
+          expect(find.byType(GarmentTypographyFallback), findsNothing);
 
-          // Switch to List View and verify category badge contrast (#6E5019) & fallback
+          // Switch to List View and verify category badge contrast (#6E5019) & Selop HD photo
           await tester.tap(find.byIcon(Icons.view_agenda_outlined));
           await tester.pumpAndSettle();
 
@@ -126,7 +112,57 @@ void main() {
             const Offset(0, -400),
           );
           await tester.pumpAndSettle();
-          expect(find.byType(GarmentTypographyFallback), findsAtLeastNWidgets(1));
+          expect(find.byType(GarmentTypographyFallback), findsNothing);
+
+          // Verify GarmentTypographyFallback behavior (flat primaryColor, no icons) for an item without a photo asset
+          final selop = JavaneseClothingData.getItemById(
+            'selop_beludru_sulam_emas',
+          )!;
+          final missingSample = ClothingItem(
+            id: 'uji_tanpa_foto',
+            name: 'Busana Uji Tanpa Foto',
+            javaneseScript: selop.javaneseScript,
+            category: selop.category,
+            gender: selop.gender,
+            region: selop.region,
+            period: selop.period,
+            socialContext: selop.socialContext,
+            material: selop.material,
+            philosophicalMeaning: selop.philosophicalMeaning,
+            cuttingAndConstruction: selop.cuttingAndConstruction,
+            compatibilityKeys: selop.compatibilityKeys,
+            colorPalette: selop.colorPalette,
+            textureMotif: selop.textureMotif,
+            historicalNotes: selop.historicalNotes,
+            references: selop.references,
+            primaryColor: selop.primaryColor,
+            accentColor: selop.accentColor,
+          );
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(
+                body: SizedBox(
+                  width: 160,
+                  height: 200,
+                  child: GarmentPhotoVisual(item: missingSample),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(find.byType(GarmentTypographyFallback), findsOneWidget);
+          final fallbackVisual = find.byType(GarmentTypographyFallback).first;
+          expect(
+            find.descendant(of: fallbackVisual, matching: find.byType(Icon)),
+            findsNothing,
+          );
+          final fallbackBox = tester.widget<ColoredBox>(
+            find.descendant(
+              of: fallbackVisual,
+              matching: find.byType(ColoredBox),
+            ),
+          );
+          expect(fallbackBox.color, missingSample.primaryColor);
         } finally {
           FlutterError.onError = prevOnError;
         }
@@ -202,7 +238,7 @@ void main() {
         };
 
         try {
-          // All 15 photographed items load their real HD photos from assets/koleksi/
+          // All 16 photographed items load their real HD photos from assets/koleksi/
           for (final photoItem in [
             blangkon,
             jogjaBlangkon,
@@ -219,6 +255,7 @@ void main() {
             keris,
             sabuk,
             kalung,
+            selop,
           ]) {
             await tester.pumpWidget(
               MaterialApp(
@@ -239,6 +276,26 @@ void main() {
           }
 
           // Item without photo shows typographic fallback with no category icon
+          final missingItem = ClothingItem(
+            id: 'uji_koleksi_tanpa_foto',
+            name: selop.name,
+            javaneseScript: selop.javaneseScript,
+            category: selop.category,
+            gender: selop.gender,
+            region: selop.region,
+            period: selop.period,
+            socialContext: selop.socialContext,
+            material: selop.material,
+            philosophicalMeaning: selop.philosophicalMeaning,
+            cuttingAndConstruction: selop.cuttingAndConstruction,
+            compatibilityKeys: selop.compatibilityKeys,
+            colorPalette: selop.colorPalette,
+            textureMotif: selop.textureMotif,
+            historicalNotes: selop.historicalNotes,
+            references: selop.references,
+            primaryColor: selop.primaryColor,
+            accentColor: selop.accentColor,
+          );
           await tester.pumpWidget(
             MaterialApp(
               builder: (context, child) => MediaQuery(
@@ -248,8 +305,8 @@ void main() {
                 child: child!,
               ),
               home: ClothingDetailScreen(
-                key: ValueKey(selop.id),
-                item: selop,
+                key: ValueKey(missingItem.id),
+                item: missingItem,
               ),
             ),
           );
