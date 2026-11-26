@@ -87,8 +87,8 @@ void main() {
           // Kuluk Kanigaran renamed cleanly and loads its HD photo
           expect(find.text('Kuluk Kanigaran'), findsOneWidget);
 
-          // Scroll down to an item without a photo (Kebaya Kartini Sutra Bordir Jepara) -> flat GarmentTypographyFallback (no icons)
-          await tester.drag(find.byType(GridView), const Offset(0, -1050));
+          // Scroll down to an item without a photo (Kebaya Kutubaru Beludru Solo) -> flat GarmentTypographyFallback (no icons)
+          await tester.drag(find.byType(GridView), const Offset(0, -1150));
           await tester.pumpAndSettle();
           expect(find.byType(GarmentTypographyFallback), findsAtLeastNWidgets(1));
           final fallbackVisual = find.byType(GarmentTypographyFallback).first;
@@ -102,10 +102,10 @@ void main() {
               matching: find.byType(ColoredBox),
             ),
           );
-          final kebayaKartini = JavaneseClothingData.getItemById(
-            'kebaya_kartini_beludru_jepara',
+          final kutubaru = JavaneseClothingData.getItemById(
+            'kebaya_kutubaru_beludru_solo',
           )!;
-          expect(fallbackBox.color, kebayaKartini.primaryColor);
+          expect(fallbackBox.color, kutubaru.primaryColor);
 
           // Switch to List View and verify category badge contrast (#6E5019) & fallback
           await tester.tap(find.byIcon(Icons.view_agenda_outlined));
@@ -116,7 +116,7 @@ void main() {
               .where((t) => t.style?.color == const Color(0xFF6E5019))
               .toList();
           expect(penutupKepalaLabels, isNotEmpty);
-          await tester.drag(find.byType(ListView).last, const Offset(0, -1100));
+          await tester.drag(find.byType(ListView).last, const Offset(0, -1200));
           await tester.pumpAndSettle();
           expect(find.byType(GarmentTypographyFallback), findsAtLeastNWidgets(1));
         } finally {
@@ -167,6 +167,9 @@ void main() {
         final kebayaKartini = JavaneseClothingData.getItemById(
           'kebaya_kartini_beludru_jepara',
         )!;
+        final kutubaru = JavaneseClothingData.getItemById(
+          'kebaya_kutubaru_beludru_solo',
+        )!;
         expect(kuluk.name, 'Kuluk Kanigaran');
 
         final errors = <FlutterErrorDetails>[];
@@ -176,7 +179,7 @@ void main() {
         };
 
         try {
-          // All 9 photographed items load their real HD photos from assets/koleksi/
+          // All 10 photographed items load their real HD photos from assets/koleksi/
           for (final photoItem in [
             blangkon,
             jogjaBlangkon,
@@ -187,6 +190,7 @@ void main() {
             sikepan,
             surjan,
             lurik,
+            kebayaKartini,
           ]) {
             await tester.pumpWidget(
               MaterialApp(
@@ -216,8 +220,8 @@ void main() {
                 child: child!,
               ),
               home: ClothingDetailScreen(
-                key: ValueKey(kebayaKartini.id),
-                item: kebayaKartini,
+                key: ValueKey(kutubaru.id),
+                item: kutubaru,
               ),
             ),
           );
@@ -234,18 +238,18 @@ void main() {
 
           // Contrast checks on cream background
           final titleWidget = tester.widget<Text>(
-            find.text(kebayaKartini.name),
+            find.text(kutubaru.name),
           );
           expect(titleWidget.style?.color, const Color(0xFF2C2219));
 
           final scriptTexts = tester
-              .widgetList<Text>(find.text(kebayaKartini.javaneseScript))
+              .widgetList<Text>(find.text(kutubaru.javaneseScript))
               .where((t) => t.style?.color == const Color(0xFF5C4632))
               .toList();
           expect(scriptTexts, isNotEmpty);
 
           final periodWidget = tester.widget<Text>(
-            find.text('Periode: ${kebayaKartini.period}'),
+            find.text('Periode: ${kutubaru.period}'),
           );
           expect(periodWidget.style?.color, const Color(0xFF5C4632));
           expect(periodWidget.style?.fontStyle, isNot(FontStyle.italic));
