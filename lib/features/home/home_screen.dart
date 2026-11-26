@@ -87,21 +87,33 @@ class _HomeScreenState extends State<HomeScreen> {
           body: IndexedStack(
             index: _index,
             children: [
-              HomeTab(
-                onOpenTab: (i) =>
-                    setState(() => _index = i.clamp(0, _items.length - 1)),
+              TickerMode(
+                enabled: _index == 0,
+                child: HomeTab(
+                  onOpenTab: (i) =>
+                      setState(() => _index = i.clamp(0, _items.length - 1)),
+                ),
               ),
-              const ClothingCatalogScreen(isTab: true),
-              TersimpanTab(
-                onOpenCatalog: () => setState(() => _index = 1),
+              TickerMode(
+                enabled: _index == 1,
+                child: const ClothingCatalogScreen(isTab: true),
               ),
-              JBackground(
-                variant: HeritageBackgroundVariant.profile,
-                child: SafeArea(
-                  bottom: false,
-                  child: ProfileTab(
-                    onOpenTab: (i) =>
-                        setState(() => _index = i.clamp(0, _items.length - 1)),
+              TickerMode(
+                enabled: _index == 2,
+                child: TersimpanTab(
+                  onOpenCatalog: () => setState(() => _index = 1),
+                ),
+              ),
+              TickerMode(
+                enabled: _index == 3,
+                child: JBackground(
+                  variant: HeritageBackgroundVariant.profile,
+                  child: SafeArea(
+                    bottom: false,
+                    child: ProfileTab(
+                      onOpenTab: (i) =>
+                          setState(() => _index = i.clamp(0, _items.length - 1)),
+                    ),
                   ),
                 ),
               ),

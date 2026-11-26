@@ -26,40 +26,54 @@ class AssetPhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dpr = MediaQuery.devicePixelRatioOf(context);
     Widget img = ClipRRect(
       borderRadius: BorderRadius.circular(radius),
-      child: Image.asset(
-        'assets/images/$file',
-        fit: BoxFit.cover,
-        alignment: alignment,
-        filterQuality: FilterQuality.medium,
-        width: width,
-        height: height,
-        semanticLabel: semanticLabel,
-        excludeFromSemantics: semanticLabel == null,
-        frameBuilder: (_, child, frame, sync) => AnimatedOpacity(
-          opacity: (sync || frame != null) ? 1 : 0,
-          duration: const Duration(milliseconds: 400),
-          child: child,
-        ),
-        errorBuilder: (_, _, _) => Container(
-          width: width,
-          height: height,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFFD9C3A0), Color(0xFF9C7B57)],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final targetW = width ??
+              (constraints.hasBoundedWidth && constraints.maxWidth.isFinite
+                  ? constraints.maxWidth
+                  : null);
+          final int? decodeWidth =
+              targetW != null ? (targetW * dpr).round().clamp(120, 1200) : null;
+          return Image.asset(
+            'assets/images/$file',
+            fit: BoxFit.cover,
+            alignment: alignment,
+            cacheWidth: decodeWidth,
+            gaplessPlayback: true,
+            filterQuality: FilterQuality.medium,
+            width: width,
+            height: height,
+            semanticLabel: semanticLabel,
+            excludeFromSemantics: semanticLabel == null,
+            frameBuilder: (_, child, frame, sync) => AnimatedOpacity(
+              opacity: (sync || frame != null) ? 1 : 0,
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeOutCubic,
+              child: child,
             ),
-          ),
-          child: const Center(
-            child: Icon(
-              Icons.image_outlined,
-              color: Color(0x88FFFBF4),
-              size: 28,
+            errorBuilder: (_, _, _) => Container(
+              width: width,
+              height: height,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFFD9C3A0), Color(0xFF9C7B57)],
+                ),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.image_outlined,
+                  color: Color(0x88FFFBF4),
+                  size: 28,
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
     if (aspectRatio != null) {

@@ -41,6 +41,10 @@ class HeroSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final decodeWidth = (MediaQuery.sizeOf(context).width * dpr * data.imageScale)
+        .round()
+        .clamp(360, 1440);
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -53,7 +57,9 @@ class HeroSlide extends StatelessWidget {
               data.imagePath,
               fit: BoxFit.cover,
               alignment: data.imageAlignment,
-              filterQuality: FilterQuality.high,
+              cacheWidth: decodeWidth,
+              gaplessPlayback: true,
+              filterQuality: FilterQuality.medium,
               errorBuilder: (_, _, _) =>
                   const ColoredBox(color: Color(0xFF14100D)),
             ),

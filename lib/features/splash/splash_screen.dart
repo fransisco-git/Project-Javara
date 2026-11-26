@@ -149,13 +149,15 @@ class _SplashScreenState extends State<SplashScreen>
             fit: StackFit.expand,
             children: [
               Positioned.fill(
-                child: AnimatedBuilder(
-                  animation: _auraAnim,
-                  builder: (context, _) {
-                    return CustomPaint(
-                      painter: _SplashMandalaPainter(_auraAnim.value),
-                    );
-                  },
+                child: RepaintBoundary(
+                  child: AnimatedBuilder(
+                    animation: _auraAnim,
+                    builder: (context, _) {
+                      return CustomPaint(
+                        painter: _SplashMandalaPainter(_auraAnim.value),
+                      );
+                    },
+                  ),
                 ),
               ),
 
@@ -182,7 +184,9 @@ class _SplashScreenState extends State<SplashScreen>
                               ),
                             ],
                           ),
-                          child: const JavaraLogo(size: 190),
+                          child: const RepaintBoundary(
+                            child: JavaraLogo(size: 190),
+                          ),
                         ),
                       ),
                     ),

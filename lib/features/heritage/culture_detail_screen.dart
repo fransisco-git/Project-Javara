@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/purchase_search_helper.dart';
@@ -74,6 +75,7 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
               ),
             ),
             CustomScrollView(
+              scrollCacheExtent: const ScrollCacheExtent.pixels(600),
               physics: const BouncingScrollPhysics(),
               slivers: [
                 // 1. SLIVER APP BAR DENGAN FOTO MEWAH

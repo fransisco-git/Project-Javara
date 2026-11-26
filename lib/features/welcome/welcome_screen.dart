@@ -45,6 +45,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   late final Animation<double> _subtitleAnim;
   late final Animation<double> _primaryCtaAnim;
   late final Animation<double> _secondaryCtaAnim;
+  bool _didPrecache = false;
 
   @override
   void initState() {
@@ -79,7 +80,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Pra-muat foto latar welcome screen
+    if (_didPrecache) return;
+    _didPrecache = true;
+    // Pra-muat foto latar welcome screen sekali saja
     precacheImage(
       const AssetImage(kWelcomeHeroAsset),
       context,
@@ -159,13 +162,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           children: [
             // 1. Foto Latar Pasangan Berbusana Adat Jawa di Pendopo (HD, tanpa zoom)
             Positioned.fill(
-              child: Image.asset(
-                kWelcomeHeroAsset,
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
-                filterQuality: FilterQuality.high,
-                isAntiAlias: true,
-                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+              child: RepaintBoundary(
+                child: Image.asset(
+                  kWelcomeHeroAsset,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                  filterQuality: FilterQuality.medium,
+                  gaplessPlayback: true,
+                  isAntiAlias: true,
+                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                ),
               ),
             ),
 

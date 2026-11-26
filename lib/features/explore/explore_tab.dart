@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme.dart';
@@ -67,6 +68,7 @@ class _ExploreTabState extends State<ExploreTab> {
                 if (mounted) setState(() {});
               },
               child: ListView(
+              scrollCacheExtent: const ScrollCacheExtent.pixels(600),
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 110),
               children: [
@@ -523,6 +525,7 @@ class _ExploreTabState extends State<ExploreTab> {
           height: 165,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
+            scrollCacheExtent: const ScrollCacheExtent.pixels(400),
             physics: const BouncingScrollPhysics(),
             itemCount: curatedCulturalRoutes.length,
             separatorBuilder: (_, _) => const SizedBox(width: 12),

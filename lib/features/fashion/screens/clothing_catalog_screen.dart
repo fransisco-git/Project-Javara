@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/theme.dart';
@@ -589,6 +590,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
   /// Tampilan Grid Editorial 2 Kolom (ZARA Editorial Layout)
   Widget _buildItemsGrid(List<ClothingItem> items) {
     return GridView.builder(
+      scrollCacheExtent: const ScrollCacheExtent.pixels(600),
       padding: EdgeInsets.fromLTRB(
         16,
         8,
@@ -609,7 +611,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
         final item = items[index];
         final isFav = _favoriteIds.contains(item.id);
 
-        return _buildGarmentGridCard(item, isFav);
+        return RepaintBoundary(child: _buildGarmentGridCard(item, isFav));
       },
     );
   }
@@ -780,6 +782,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
   /// Tampilan List Detail (UNIQLO Technical Specs View)
   Widget _buildItemsList(List<ClothingItem> items) {
     return ListView.separated(
+      scrollCacheExtent: const ScrollCacheExtent.pixels(600),
       padding: EdgeInsets.fromLTRB(
         16,
         8,
@@ -795,7 +798,8 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
         final item = items[index];
         final isFav = _favoriteIds.contains(item.id);
 
-        return GestureDetector(
+        return RepaintBoundary(
+          child: GestureDetector(
           onTap: () {
             Navigator.of(context).push(
               fadeSlideRoute(ClothingDetailScreen(item: item)),
@@ -922,6 +926,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
               ],
             ),
           ),
+        ),
         );
       },
     );
@@ -929,7 +934,12 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
 
   /// Tampilan Setelan Lengkap Tradisional (Curated Outfits)
   Widget _buildOutfitsList(List<TraditionalOutfit> outfits) {
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final outfitCacheWidth = (MediaQuery.sizeOf(context).width * dpr)
+        .round()
+        .clamp(320, 1200);
     return ListView.separated(
+      scrollCacheExtent: const ScrollCacheExtent.pixels(600),
       padding: EdgeInsets.fromLTRB(
         16,
         8,
@@ -944,39 +954,42 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
       itemBuilder: (context, index) {
         final outfit = outfits[index];
 
-        return Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E1712),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: const Color(0x66DFB76C),
-              width: 1.0,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x40000000),
-                blurRadius: 8,
-                offset: Offset(0, 3),
+        return RepaintBoundary(
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E1712),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: const Color(0x66DFB76C),
+                width: 1.0,
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Gambar Header Model Busana Lengkap
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-                child: Container(
-                  height: 160,
-                  width: double.infinity,
-                  color: const Color(0xFF261D16),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.asset(
-                        outfit.imageAsset,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Container(
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x40000000),
+                  blurRadius: 8,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Gambar Header Model Busana Lengkap
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                  child: Container(
+                    height: 160,
+                    width: double.infinity,
+                    color: const Color(0xFF261D16),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.asset(
+                          outfit.imageAsset,
+                          fit: BoxFit.cover,
+                          cacheWidth: outfitCacheWidth,
+                          gaplessPlayback: true,
+                          errorBuilder: (_, _, _) => Container(
                           color: const Color(0xFF2A2018),
                           child: const Center(
                             child: Icon(
@@ -1058,6 +1071,7 @@ class _ClothingCatalogScreenState extends State<ClothingCatalogScreen> {
               ),
             ],
           ),
+        ),
         );
       },
     );

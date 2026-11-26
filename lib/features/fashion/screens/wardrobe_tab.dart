@@ -1000,6 +1000,7 @@ class _WardrobeTabState extends State<WardrobeTab> {
             height: 190,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: items.length,
               itemBuilder: (context, index) {
@@ -1008,12 +1009,14 @@ class _WardrobeTabState extends State<WardrobeTab> {
                     _activeLowerBody?.id == item.id ||
                     _activeAccessory?.id == item.id;
 
-                return Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: _buildGarmentCard(
-                    item: item,
-                    isEquipped: isEquipped,
-                    onTap: () => _equipGarment(item),
+                return RepaintBoundary(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: _buildGarmentCard(
+                      item: item,
+                      isEquipped: isEquipped,
+                      onTap: () => _equipGarment(item),
+                    ),
                   ),
                 );
               },

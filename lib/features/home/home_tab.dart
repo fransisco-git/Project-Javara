@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme.dart';
@@ -44,37 +45,76 @@ class _HomeTabState extends State<HomeTab> {
   String _q = '';
   bool _isLoading = true;
   bool _isSearchOpen = false;
+  bool _didPrecache = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Pra-decode & cache tekstur visual utama ke VRAM agar mulus tanpa stutter
+    if (_didPrecache) return;
+    _didPrecache = true;
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final screenW = MediaQuery.sizeOf(context).width;
+    final bgCacheWidth = (screenW * 1.24 * dpr).round().clamp(360, 1280);
+    final handCacheWidth = ((screenW * 0.98).clamp(360.0, 480.0) * dpr)
+        .round()
+        .clamp(320, 1100);
+    final heroCacheWidth = (screenW * dpr).round().clamp(360, 1440);
+
+    // Pra-decode & cache tekstur visual utama ke VRAM sesuai ukuran layar agar mulus tanpa flicker
     precacheImage(
-      const AssetImage('assets/images/buddha_hand_left.png'),
+      ResizeImage.resizeIfNeeded(
+        handCacheWidth,
+        null,
+        const AssetImage('assets/images/buddha_hand_left.png'),
+      ),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/buddha_hand_right.png'),
+      ResizeImage.resizeIfNeeded(
+        handCacheWidth,
+        null,
+        const AssetImage('assets/images/buddha_hand_right.png'),
+      ),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/candi_3d_cinema.jpg'),
+      ResizeImage.resizeIfNeeded(
+        bgCacheWidth,
+        null,
+        const AssetImage('assets/images/candi_3d_cinema.jpg'),
+      ),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/candi_3d_cutout.png'),
+      ResizeImage.resizeIfNeeded(
+        bgCacheWidth,
+        null,
+        const AssetImage('assets/images/candi_3d_cutout.png'),
+      ),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/model_kebaya_kartini_solo.jpg'),
+      ResizeImage.resizeIfNeeded(
+        heroCacheWidth,
+        null,
+        const AssetImage('assets/images/model_kebaya_kartini_solo.jpg'),
+      ),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/hero_beskap_surakarta.jpg'),
+      ResizeImage.resizeIfNeeded(
+        heroCacheWidth,
+        null,
+        const AssetImage('assets/images/hero_beskap_surakarta.jpg'),
+      ),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/model_solo_basahan_bride.jpg'),
+      ResizeImage.resizeIfNeeded(
+        heroCacheWidth,
+        null,
+        const AssetImage('assets/images/model_solo_basahan_bride.jpg'),
+      ),
       context,
     );
   }
@@ -266,6 +306,8 @@ class _HomeTabState extends State<HomeTab> {
                               },
                               child: ListView(
                                 controller: _scrollController,
+                                scrollCacheExtent:
+                                    const ScrollCacheExtent.pixels(600),
                                 physics: const BouncingScrollPhysics(),
                                 padding: EdgeInsets.fromLTRB(
                                   0,
@@ -279,9 +321,11 @@ class _HomeTabState extends State<HomeTab> {
                                   // --- MODE TAMPILAN UTAMA (EDITORIAL BERANDA) ---
                                   if (_q.isEmpty) ...[
                                     // 1. Hero Carousel Selebar Layar (indikator 3 segmen di dalam hero)
-                                    const StaggerIn(
-                                      index: 1,
-                                      child: _HeroCard(),
+                                    const RepaintBoundary(
+                                      child: StaggerIn(
+                                        index: 1,
+                                        child: _HeroCard(),
+                                      ),
                                     ),
                                     SizedBox(height: heroToCategorySpace),
 
@@ -641,23 +685,30 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
       ..rotateY(yaw)
       ..rotateZ(roll);
 
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final bgCacheWidth = (w * 1.24 * dpr).round().clamp(360, 1280);
+    final handCacheWidth = (handHeight * dpr).round().clamp(320, 1100);
+    final handModulateColor = Colors.white.withValues(alpha: handsOpacity);
+
     return Stack(
       fit: StackFit.expand,
       children: [
         // --- 1. LANGIT OBSIDIAN DUSK MISTIS (THREEUI KAGE STYLE) ---
-        Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF040206), // Puncak langit malam obsidian
-                Color(0xFF0D0814),
-                Color(0xFF1B0E1E), // Atmospheric dusk
-                Color(0xFF2E1715), // Warm volcanic sunset horizon
-                Color(0xFF07040B), // Deep ground
-              ],
-              stops: [0.0, 0.25, 0.55, 0.82, 1.0],
+        const RepaintBoundary(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF040206), // Puncak langit malam obsidian
+                  Color(0xFF0D0814),
+                  Color(0xFF1B0E1E), // Atmospheric dusk
+                  Color(0xFF2E1715), // Warm volcanic sunset horizon
+                  Color(0xFF07040B), // Deep ground
+                ],
+                stops: [0.0, 0.25, 0.55, 0.82, 1.0],
+              ),
             ),
           ),
         ),
@@ -672,11 +723,13 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
 
         // --- 3. SURYA MANDALA AKASA (GOD RAYS & RADIANT GOLD CORONA) ---
         Positioned.fill(
-          child: CustomPaint(
-            painter: _JavaraSuryaMandalaPainter(
-              scrollOffset: _smoothScroll,
-              elapsedTime: _elapsedTime,
-              pointerX: _smoothPointerX,
+          child: RepaintBoundary(
+            child: CustomPaint(
+              painter: _JavaraSuryaMandalaPainter(
+                scrollOffset: _smoothScroll,
+                elapsedTime: _elapsedTime,
+                pointerX: _smoothPointerX,
+              ),
             ),
           ),
         ),
@@ -697,12 +750,16 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
                   Image.asset(
                     'assets/images/candi_3d_cinema.jpg',
                     fit: BoxFit.cover,
+                    cacheWidth: bgCacheWidth,
+                    gaplessPlayback: true,
                     filterQuality: FilterQuality.medium,
                     excludeFromSemantics: true,
                   ),
                   Image.asset(
                     'assets/images/candi_3d_cutout.png',
                     fit: BoxFit.cover,
+                    cacheWidth: bgCacheWidth,
+                    gaplessPlayback: true,
                     filterQuality: FilterQuality.medium,
                     excludeFromSemantics: true,
                   ),
@@ -715,14 +772,16 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
         // --- 5. AURA ENERGI SUCI ANJALI MUDRA (BLOOM & SACRED RIPPLES SAAT TELAPAK BERTEMU DI TENGAH) ---
         Positioned.fill(
           child: IgnorePointer(
-            child: CustomPaint(
-              painter: _AnjaliMudraEnergyPainter(
-                contactPoint: Offset(
-                  centerX + (_smoothPointerX * 8.0),
-                  handsY + (handHeight * 0.44),
+            child: RepaintBoundary(
+              child: CustomPaint(
+                painter: _AnjaliMudraEnergyPainter(
+                  contactPoint: Offset(
+                    centerX + (_smoothPointerX * 8.0),
+                    handsY + (handHeight * 0.44),
+                  ),
+                  openCurve: openCurve,
+                  elapsedTime: _elapsedTime,
                 ),
-                openCurve: openCurve,
-                elapsedTime: _elapsedTime,
               ),
             ),
           ),
@@ -736,17 +795,18 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           height: handHeight,
           child: RepaintBoundary(
             child: IgnorePointer(
-              child: Opacity(
-                opacity: handsOpacity,
-                child: Transform(
-                  transform: leftHandMatrix,
-                  alignment: Alignment.center,
-                  child: Image.asset(
-                    'assets/images/buddha_hand_left.png',
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.medium,
-                    excludeFromSemantics: true,
-                  ),
+              child: Transform(
+                transform: leftHandMatrix,
+                alignment: Alignment.center,
+                child: Image.asset(
+                  'assets/images/buddha_hand_left.png',
+                  fit: BoxFit.contain,
+                  cacheWidth: handCacheWidth,
+                  gaplessPlayback: true,
+                  color: handModulateColor,
+                  colorBlendMode: BlendMode.modulate,
+                  filterQuality: FilterQuality.medium,
+                  excludeFromSemantics: true,
                 ),
               ),
             ),
@@ -761,17 +821,18 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           height: handHeight,
           child: RepaintBoundary(
             child: IgnorePointer(
-              child: Opacity(
-                opacity: handsOpacity,
-                child: Transform(
-                  transform: rightHandMatrix,
-                  alignment: Alignment.center,
-                  child: Image.asset(
-                    'assets/images/buddha_hand_right.png',
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.medium,
-                    excludeFromSemantics: true,
-                  ),
+              child: Transform(
+                transform: rightHandMatrix,
+                alignment: Alignment.center,
+                child: Image.asset(
+                  'assets/images/buddha_hand_right.png',
+                  fit: BoxFit.contain,
+                  cacheWidth: handCacheWidth,
+                  gaplessPlayback: true,
+                  color: handModulateColor,
+                  colorBlendMode: BlendMode.modulate,
+                  filterQuality: FilterQuality.medium,
+                  excludeFromSemantics: true,
                 ),
               ),
             ),
@@ -781,31 +842,35 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
         // --- 8. KABUT VOLUMETRIK & 32 PARTIKEL KUNANG-KUNANG EMAS ---
         Positioned.fill(
           child: IgnorePointer(
-            child: CustomPaint(
-              painter: _JavaraAtmospherePainter(
-                scrollOffset: _smoothScroll,
-                elapsedTime: _elapsedTime,
-                pointerX: _smoothPointerX,
+            child: RepaintBoundary(
+              child: CustomPaint(
+                painter: _JavaraAtmospherePainter(
+                  scrollOffset: _smoothScroll,
+                  elapsedTime: _elapsedTime,
+                  pointerX: _smoothPointerX,
+                ),
               ),
             ),
           ),
         ),
 
         // --- 10. VIGNETTE PEREDUP (MENJAGA KONTRAST KONTEN & MENENANGKAN LATAR) ---
-        Positioned.fill(
+        const Positioned.fill(
           child: IgnorePointer(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    const Color(0x3A000000),
-                    const Color(0x2907040B),
-                    const Color(0x7507040B),
-                    const Color(0xF507040B),
-                  ],
-                  stops: const [0.0, 0.20, 0.60, 1.0],
+            child: RepaintBoundary(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0x3A000000),
+                      Color(0x2907040B),
+                      Color(0x7507040B),
+                      Color(0xF507040B),
+                    ],
+                    stops: [0.0, 0.20, 0.60, 1.0],
+                  ),
                 ),
               ),
             ),
@@ -826,6 +891,12 @@ class _JavaraArchitecturalWatermark extends StatelessWidget {
   final double scrollOffset;
   final double pointerX;
 
+  static final TextStyle _watermarkTitleStyle = JText.serif(
+    82,
+    weight: FontWeight.w900,
+    color: const Color(0x18FFDF9E),
+  ).copyWith(letterSpacing: 14);
+
   @override
   Widget build(BuildContext context) {
     final parallaxY = -scrollOffset * 0.15;
@@ -840,13 +911,11 @@ class _JavaraArchitecturalWatermark extends StatelessWidget {
           child: Center(
             child: Transform.translate(
               offset: Offset(parallaxX, 0),
-              child: Text(
-                'JAVARA',
-                style: JText.serif(
-                  82,
-                  weight: FontWeight.w900,
-                  color: const Color(0x18FFDF9E),
-                ).copyWith(letterSpacing: 14),
+              child: RepaintBoundary(
+                child: Text(
+                  'JAVARA',
+                  style: _watermarkTitleStyle,
+                ),
               ),
             ),
           ),
@@ -858,13 +927,15 @@ class _JavaraArchitecturalWatermark extends StatelessWidget {
           child: Center(
             child: Transform.translate(
               offset: Offset(-parallaxX * 0.5, 0),
-              child: const Text(
-                'ꦗ ꦮ ꦫ',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Color(0x26DFB76C),
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 16,
+              child: const RepaintBoundary(
+                child: Text(
+                  'ꦗ ꦮ ꦫ',
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Color(0x26DFB76C),
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 16,
+                  ),
                 ),
               ),
             ),
@@ -1326,8 +1397,8 @@ class _HeroCard extends StatefulWidget {
 
 class _HeroCardState extends State<_HeroCard> {
   late final PageController _pageController;
+  final ValueNotifier<int> _currentPageNotifier = ValueNotifier<int>(0);
   Timer? _autoSlideTimer;
-  int _currentPage = 0;
   bool _isUserDragging = false;
 
   static const Duration _autoSlideInterval = Duration(seconds: 4);
@@ -1372,7 +1443,7 @@ class _HeroCardState extends State<_HeroCard> {
     _autoSlideTimer?.cancel();
     _autoSlideTimer = Timer.periodic(_autoSlideInterval, (_) {
       if (!mounted || _isUserDragging || !_pageController.hasClients) return;
-      final nextPage = (_currentPage + 1) % _slides.length;
+      final nextPage = (_currentPageNotifier.value + 1) % _slides.length;
       _pageController.animateToPage(
         nextPage,
         duration: const Duration(milliseconds: 520),
@@ -1384,6 +1455,7 @@ class _HeroCardState extends State<_HeroCard> {
   @override
   void dispose() {
     _autoSlideTimer?.cancel();
+    _currentPageNotifier.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -1416,20 +1488,23 @@ class _HeroCardState extends State<_HeroCard> {
             // Full-width edge-to-edge hero PageView (auto-slide setiap 4 detik, pause saat digeser)
             PageView.builder(
               controller: _pageController,
+              allowImplicitScrolling: true,
               physics: const PageScrollPhysics(),
               itemCount: _slides.length,
               onPageChanged: (index) {
-                setState(() => _currentPage = index);
+                _currentPageNotifier.value = index;
               },
               itemBuilder: (context, index) {
                 final slide = _slides[index];
-                return HeroSlide(
-                  data: slide,
-                  onTapAction: () {
-                    Navigator.of(
-                      context,
-                    ).push(fadeSlideRoute(slide.routeBuilder()));
-                  },
+                return RepaintBoundary(
+                  child: HeroSlide(
+                    data: slide,
+                    onTapAction: () {
+                      Navigator.of(
+                        context,
+                      ).push(fadeSlideRoute(slide.routeBuilder()));
+                    },
+                  ),
                 );
               },
             ),
@@ -1440,25 +1515,30 @@ class _HeroCardState extends State<_HeroCard> {
               right: 20,
               bottom: 12,
               child: IgnorePointer(
-                child: Row(
-                  children: List.generate(_slides.length, (index) {
-                    final isActive = _currentPage == index;
-                    return Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          right: index < _slides.length - 1 ? 8 : 0,
-                        ),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 220),
-                          curve: Curves.easeOut,
-                          height: 2.0,
-                          color: isActive
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.25),
-                        ),
-                      ),
+                child: ValueListenableBuilder<int>(
+                  valueListenable: _currentPageNotifier,
+                  builder: (context, currentPage, _) {
+                    return Row(
+                      children: List.generate(_slides.length, (index) {
+                        final isActive = currentPage == index;
+                        return Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              right: index < _slides.length - 1 ? 8 : 0,
+                            ),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeOutCubic,
+                              height: 2.0,
+                              color: isActive
+                                  ? Colors.white
+                                  : Colors.white.withValues(alpha: 0.25),
+                            ),
+                          ),
+                        );
+                      }),
                     );
-                  }),
+                  },
                 ),
               ),
             ),
@@ -1674,37 +1754,45 @@ class _EditorialCultureCard extends StatelessWidget {
         item.category.toLowerCase().contains('batik') ||
         item.title.toLowerCase().contains('batik');
 
-    return InteractiveScale(
-      pressedScale: 0.98,
-      semanticLabel: item.title,
-      onTap: () => onTap(item),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 1. Bingkai Foto Potret (AspectRatio 3 / 4)
-          AspectRatio(
-            aspectRatio: 3 / 4,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                border: Border.all(color: const Color(0x2EC5A467), width: 0.6),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4.4),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Base Image
-                    Image.asset(
-                      'assets/images/${item.image}',
-                      fit: BoxFit.cover,
-                      alignment: Alignment.topCenter,
-                      filterQuality: FilterQuality.medium,
-                      frameBuilder: (_, child, frame, sync) => AnimatedOpacity(
-                        opacity: (sync || frame != null) ? 1.0 : 0.0,
-                        duration: const Duration(milliseconds: 250),
-                        child: child,
-                      ),
+    return RepaintBoundary(
+      child: InteractiveScale(
+        pressedScale: 0.98,
+        semanticLabel: item.title,
+        onTap: () => onTap(item),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Bingkai Foto Potret (AspectRatio 3 / 4)
+            AspectRatio(
+              aspectRatio: 3 / 4,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(color: const Color(0x2EC5A467), width: 0.6),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4.4),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Base Image
+                      Image.asset(
+                        'assets/images/${item.image}',
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                        cacheWidth: (MediaQuery.sizeOf(context).width *
+                                0.45 *
+                                MediaQuery.devicePixelRatioOf(context))
+                            .round()
+                            .clamp(180, 720),
+                        gaplessPlayback: true,
+                        filterQuality: FilterQuality.medium,
+                        frameBuilder: (_, child, frame, sync) => AnimatedOpacity(
+                          opacity: (sync || frame != null) ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeOutCubic,
+                          child: child,
+                        ),
                       errorBuilder: (_, _, _) => Container(
                         color: const Color(0xFF181512),
                         child: const Center(
@@ -1724,7 +1812,7 @@ class _EditorialCultureCard extends StatelessWidget {
                       ),
 
                     // Gradasi vignette tipis di 20% bagian atas dan bawah
-                    const DecoratedBox(
+                  const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
@@ -1801,6 +1889,7 @@ class _EditorialCultureCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ],
+      ),
       ),
     );
   }
@@ -2123,6 +2212,10 @@ class _EventRecommendationTile extends StatelessWidget {
                     recommendation.imagePath,
                     fit: BoxFit.cover,
                     alignment: Alignment.topCenter,
+                    cacheWidth: (56 * MediaQuery.devicePixelRatioOf(context))
+                        .round()
+                        .clamp(112, 240),
+                    gaplessPlayback: true,
                     errorBuilder: (_, _, _) => Container(
                       color: const Color(0xFF28211B),
                     ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/theme.dart';
@@ -189,6 +190,7 @@ class _TersimpanTabState extends State<TersimpanTab> {
         }
 
         return ListView.separated(
+          scrollCacheExtent: const ScrollCacheExtent.pixels(400),
           padding: EdgeInsets.fromLTRB(
             20,
             12,
@@ -200,7 +202,7 @@ class _TersimpanTabState extends State<TersimpanTab> {
           separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final item = items[index];
-            return _buildGarmentCard(item);
+            return RepaintBoundary(child: _buildGarmentCard(item));
           },
         );
       },
@@ -208,6 +210,9 @@ class _TersimpanTabState extends State<TersimpanTab> {
   }
 
   Widget _buildGarmentCard(ClothingItem item) {
+    final thumbCacheWidth = (76 * MediaQuery.devicePixelRatioOf(context))
+        .round()
+        .clamp(120, 300);
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF1E1712),
@@ -228,9 +233,13 @@ class _TersimpanTabState extends State<TersimpanTab> {
               child: Image.asset(
                 'assets/garments/${item.id}.png',
                 fit: BoxFit.contain,
+                cacheWidth: thumbCacheWidth,
+                gaplessPlayback: true,
                 errorBuilder: (_, _, _) => Image.asset(
                   item.imageAsset,
                   fit: BoxFit.cover,
+                  cacheWidth: thumbCacheWidth,
+                  gaplessPlayback: true,
                 ),
               ),
             ),

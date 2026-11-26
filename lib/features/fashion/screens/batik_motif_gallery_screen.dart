@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import '../../../core/theme.dart';
 
 /// Screen 05 — Batik & Motif (Galeri Wastra & Tekstil Tradisional Jawa Tengah)
@@ -205,7 +206,12 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
                     activeMotif.imagePath,
                     fit: BoxFit.contain,
                     alignment: Alignment.center,
-                    filterQuality: FilterQuality.high,
+                    cacheWidth: (MediaQuery.sizeOf(context).width *
+                            MediaQuery.devicePixelRatioOf(context))
+                        .round()
+                        .clamp(360, 1200),
+                    gaplessPlayback: true,
+                    filterQuality: FilterQuality.medium,
                   ),
                 ),
               ),
@@ -218,6 +224,7 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
+              scrollCacheExtent: const ScrollCacheExtent.pixels(400),
               padding: const EdgeInsets.symmetric(horizontal: 16),
               physics: const BouncingScrollPhysics(),
               itemCount: _motifs.length,
@@ -268,7 +275,12 @@ class _BatikMotifGalleryScreenState extends State<BatikMotifGalleryScreen> {
                             child: Image.asset(
                               motif.imagePath,
                               fit: BoxFit.contain,
-                              filterQuality: FilterQuality.high,
+                              cacheWidth: (48 *
+                                      MediaQuery.devicePixelRatioOf(context))
+                                  .round()
+                                  .clamp(96, 200),
+                              gaplessPlayback: true,
+                              filterQuality: FilterQuality.medium,
                             ),
                           ),
                         ),

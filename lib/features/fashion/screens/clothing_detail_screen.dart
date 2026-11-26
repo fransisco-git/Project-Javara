@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import '../../../core/purchase_search_helper.dart';
 import '../../../core/theme.dart';
@@ -53,6 +54,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
       body: JBackground(
         variant: HeritageBackgroundVariant.wardrobe,
         child: CustomScrollView(
+          scrollCacheExtent: const ScrollCacheExtent.pixels(600),
           physics: const BouncingScrollPhysics(),
           slivers: [
           // 1. EDITORIAL SLIVER APP BAR
@@ -153,7 +155,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                 child: GarmentPhotoVisual(
                   item: item,
                   alignment: Alignment.topCenter,
-                  filterQuality: FilterQuality.high,
+                  filterQuality: FilterQuality.medium,
                   fallbackFontSize: 40,
                   fallbackPadding: const EdgeInsets.fromLTRB(28, 72, 28, 28),
                   photoOverlay: Stack(

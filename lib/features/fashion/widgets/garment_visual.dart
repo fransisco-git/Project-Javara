@@ -100,28 +100,39 @@ class GarmentPhotoVisual extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final path = effectiveAssetPath;
-    return Image.asset(
-      path,
-      key: ValueKey(path),
-      fit: BoxFit.cover,
-      alignment: alignment,
-      filterQuality: filterQuality,
-      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-        final hasFrame = wasSynchronouslyLoaded || frame != null;
-        if (!hasFrame || photoOverlay == null) return child;
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            child,
-            photoOverlay!,
-          ],
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final int? decodeWidth =
+            constraints.hasBoundedWidth && constraints.maxWidth.isFinite
+                ? (constraints.maxWidth * dpr).round().clamp(120, 1200)
+                : null;
+        return Image.asset(
+          path,
+          key: ValueKey(path),
+          fit: BoxFit.cover,
+          alignment: alignment,
+          cacheWidth: decodeWidth,
+          gaplessPlayback: true,
+          filterQuality: filterQuality,
+          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+            final hasFrame = wasSynchronouslyLoaded || frame != null;
+            if (!hasFrame || photoOverlay == null) return child;
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                child,
+                photoOverlay!,
+              ],
+            );
+          },
+          errorBuilder: (_, _, _) => GarmentTypographyFallback(
+            item: item,
+            fontSize: fallbackFontSize,
+            padding: fallbackPadding,
+          ),
         );
       },
-      errorBuilder: (_, _, _) => GarmentTypographyFallback(
-        item: item,
-        fontSize: fallbackFontSize,
-        padding: fallbackPadding,
-      ),
     );
   }
 }
