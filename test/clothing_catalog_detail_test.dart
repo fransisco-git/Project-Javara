@@ -68,8 +68,23 @@ void main() {
             findsAtLeastNWidgets(1),
           );
 
-          // Blangkon Surakarta Trepes has no photo -> renders flat GarmentTypographyFallback (no icons)
+          // Blangkon Surakarta Trepes now has its HD photo in assets/koleksi/
           expect(find.text('Blangkon Surakarta Trepes'), findsOneWidget);
+          final blangkonCard = find
+              .ancestor(
+                of: find.text('Blangkon Surakarta Trepes'),
+                matching: find.byType(GestureDetector),
+              )
+              .first;
+          expect(
+            find.descendant(
+              of: blangkonCard,
+              matching: find.byType(GarmentTypographyFallback),
+            ),
+            findsNothing,
+          );
+
+          // Items without a photo (e.g. Blangkon Yogyakarta Mondholan) render flat GarmentTypographyFallback (no icons)
           expect(find.byType(GarmentTypographyFallback), findsAtLeastNWidgets(1));
           final fallbackVisual = find.byType(GarmentTypographyFallback).first;
           expect(
@@ -82,10 +97,10 @@ void main() {
               matching: find.byType(ColoredBox),
             ),
           );
-          final blangkon = JavaneseClothingData.getItemById(
-            'blangkon_surakarta_parang',
+          final jogjaBlangkon = JavaneseClothingData.getItemById(
+            'blangkon_yogyakarta_sidomukti',
           )!;
-          expect(fallbackBox.color, blangkon.primaryColor);
+          expect(fallbackBox.color, jogjaBlangkon.primaryColor);
 
           // Switch to List View and verify category badge contrast (#6E5019) & fallback
           await tester.tap(find.byIcon(Icons.view_agenda_outlined));
@@ -118,6 +133,9 @@ void main() {
         final blangkon = JavaneseClothingData.getItemById(
           'blangkon_surakarta_parang',
         )!;
+        final jogjaBlangkon = JavaneseClothingData.getItemById(
+          'blangkon_yogyakarta_sidomukti',
+        )!;
 
         final errors = <FlutterErrorDetails>[];
         final prevOnError = FlutterError.onError;
@@ -126,6 +144,7 @@ void main() {
         };
 
         try {
+          // Blangkon Surakarta Trepes loads its real HD photo from assets/koleksi/
           await tester.pumpWidget(
             MaterialApp(
               builder: (context, child) => MediaQuery(
@@ -138,8 +157,22 @@ void main() {
             ),
           );
           await tester.pumpAndSettle();
+          expect(find.byType(GarmentTypographyFallback), findsNothing);
 
-          // Hero displays typographic fallback with no category icon
+          // Item without photo shows typographic fallback with no category icon
+          await tester.pumpWidget(
+            MaterialApp(
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: const TextScaler.linear(1.3),
+                ),
+                child: child!,
+              ),
+              home: ClothingDetailScreen(item: jogjaBlangkon),
+            ),
+          );
+          await tester.pumpAndSettle();
+
           expect(find.byType(GarmentTypographyFallback), findsOneWidget);
           expect(
             find.descendant(
@@ -150,17 +183,17 @@ void main() {
           );
 
           // Contrast checks on cream background
-          final titleWidget = tester.widget<Text>(find.text(blangkon.name));
+          final titleWidget = tester.widget<Text>(find.text(jogjaBlangkon.name));
           expect(titleWidget.style?.color, const Color(0xFF2C2219));
 
           final scriptTexts = tester
-              .widgetList<Text>(find.text(blangkon.javaneseScript))
+              .widgetList<Text>(find.text(jogjaBlangkon.javaneseScript))
               .where((t) => t.style?.color == const Color(0xFF5C4632))
               .toList();
           expect(scriptTexts, isNotEmpty);
 
           final periodWidget = tester.widget<Text>(
-            find.text('Periode: ${blangkon.period}'),
+            find.text('Periode: ${jogjaBlangkon.period}'),
           );
           expect(periodWidget.style?.color, const Color(0xFF5C4632));
           expect(periodWidget.style?.fontStyle, isNot(FontStyle.italic));
