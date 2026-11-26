@@ -22,14 +22,24 @@ class CultureItem {
   final String tag; // mis. "ADILUHUNG KERATON"
   final String? price; // null => pakai actionLabel
   final String actionLabel;
-  final String image; // nama file di assets/images/
+  final String image; // nama file di assets/images/ atau path assets/...
   final String description;
   final String history;
   final String location;
   final String regency;
   final List<String> highlights;
   final String category;
+
+  /// Path aset penuh agar Beranda, Detail, dan Tersimpan memuat gambar yang sama persis.
+  String get imageAssetPath =>
+      image.startsWith('assets/') ? image : 'assets/images/$image';
 }
+
+/// Seluruh daftar warisan budaya yang tampil di Beranda (populer & pencarian).
+const List<CultureItem> allCultureItems = [
+  ...popularItems,
+  ...pickedItems,
+];
 
 const popularItems = <CultureItem>[
   CultureItem(
@@ -162,7 +172,7 @@ const pickedItems = <CultureItem>[
     tag: 'BUSANA PRIA PRIYAYI',
     price: 'Rp285.000',
     actionLabel: 'Pesan Busana',
-    image: 'kebaya.png',
+    image: 'model_surjan_pranakan_solo.jpg',
     category: 'Busana Tradisi',
     regency: 'Kota Surakarta',
     location: 'Sentra Tenun Pedan Klaten & Solo',

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../../core/purchase_search_helper.dart';
 import '../../core/theme.dart';
 import '../../data/culture_items.dart';
+import '../../services/saved_garments_service.dart';
 import '../../widgets/photo_box.dart';
 
 /// Halaman Detail Warisan Budaya Editorial Mendalam JAVARA.
@@ -29,23 +30,45 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    SavedGarmentsService.instance.initialize();
+    _isBookmarked = SavedGarmentsService.instance.isSaved(widget.item.id);
+    SavedGarmentsService.instance.savedItemIdsNotifier.addListener(
+      _onSavedChanged,
+    );
+  }
+
+  void _onSavedChanged() {
+    if (!mounted) return;
+    final nextSaved = SavedGarmentsService.instance.isSaved(widget.item.id);
+    if (nextSaved != _isBookmarked) {
+      setState(() => _isBookmarked = nextSaved);
+    }
   }
 
   @override
   void dispose() {
+    SavedGarmentsService.instance.savedItemIdsNotifier.removeListener(
+      _onSavedChanged,
+    );
     _tabController.dispose();
     super.dispose();
   }
 
-  void _toggleBookmark() {
+  Future<void> _toggleBookmark() async {
     HapticFeedback.lightImpact();
-    setState(() => _isBookmarked = !_isBookmarked);
-    ScaffoldMessenger.of(context).showSnackBar(
+    final messenger = ScaffoldMessenger.of(context);
+    final isSaved = await SavedGarmentsService.instance.toggleSave(
+      widget.item.id,
+    );
+    if (!mounted) return;
+    setState(() => _isBookmarked = isSaved);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
       SnackBar(
         content: Text(
-          _isBookmarked
-              ? '${widget.item.title} disimpan ke Favorit Warisan.'
-              : '${widget.item.title} dihapus dari Favorit.',
+          isSaved
+              ? '${widget.item.title} disimpan ke Koleksi Tersimpan.'
+              : '${widget.item.title} dihapus dari Koleksi Tersimpan.',
           style: JText.serif(13, color: Colors.white),
         ),
         backgroundColor: const Color(0xFF2E2019),

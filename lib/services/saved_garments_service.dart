@@ -2,9 +2,34 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/culture_items.dart';
 import '../features/fashion/data/javanese_clothing_data.dart';
 import '../features/fashion/models/javanese_clothing_models.dart';
 import 'supabase_service.dart';
+
+/// Entri terpadu untuk busana/warisan yang disimpan baik dari Koleksi maupun Beranda.
+class SavedGarmentEntry {
+  const SavedGarmentEntry.clothing(ClothingItem item)
+      : clothingItem = item,
+        cultureItem = null;
+
+  const SavedGarmentEntry.culture(CultureItem item)
+      : clothingItem = null,
+        cultureItem = item;
+
+  final ClothingItem? clothingItem;
+  final CultureItem? cultureItem;
+
+  String get id => clothingItem?.id ?? cultureItem!.id;
+  String get title => clothingItem?.name ?? cultureItem!.title;
+  String get subtitle => clothingItem != null
+      ? '${clothingItem!.region.title} · ${clothingItem!.category.label}'
+      : cultureItem!.meta;
+  String get description =>
+      clothingItem?.philosophicalMeaning ?? cultureItem!.description;
+  String get imageAssetPath =>
+      clothingItem?.imageAsset ?? cultureItem!.imageAssetPath;
+}
 
 /// Layanan reaktif terpadu untuk item & setelan busana yang disimpan pengguna.
 /// Menghubungkan aksi simpan/bookmark dari Koleksi (katalog & detail)
@@ -117,6 +142,38 @@ class SavedGarmentsService {
     return JavaneseClothingData.clothingItems
         .where((item) => ids.contains(item.id))
         .toList();
+  }
+
+  /// Mengambil daftar objek `CultureItem` (dari Beranda) yang tersimpan.
+  List<CultureItem> getSavedCultureItems() {
+    final ids = savedItemIdsNotifier.value;
+    return allCultureItems.where((item) => ids.contains(item.id)).toList();
+  }
+
+  /// Mengambil seluruh entri tersimpan (Koleksi + Beranda) dalam urutan terbaru lebih dulu.
+  List<SavedGarmentEntry> getSavedEntries() {
+    final ids = savedItemIdsNotifier.value.toList().reversed;
+    final entries = <SavedGarmentEntry>[];
+    final seen = <String>{};
+
+    for (final id in ids) {
+      if (!seen.add(id)) continue;
+
+      final clothing = JavaneseClothingData.getItemById(id);
+      if (clothing != null) {
+        entries.add(SavedGarmentEntry.clothing(clothing));
+        continue;
+      }
+
+      for (final culture in allCultureItems) {
+        if (culture.id == id) {
+          entries.add(SavedGarmentEntry.culture(culture));
+          break;
+        }
+      }
+    }
+
+    return entries;
   }
 
   /// Menyimpan setelan paduan busana baru ke `Setelan Saya`.

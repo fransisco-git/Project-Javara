@@ -5,6 +5,7 @@ import '../../../core/theme.dart';
 import '../../../services/saved_garments_service.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
+import '../widgets/garment_visual.dart';
 
 /// Layar Utama Tab Wardrobe JAVARA — Unified Personal Styling & Saved Wardrobe.
 ///
@@ -737,16 +738,14 @@ class _WardrobeTabState extends State<WardrobeTab> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(4),
-                    child: Image.asset(
-                      'assets/garments/${item.id}.png',
+                    child: SizedBox(
                       width: height - 6,
                       height: height - 6,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => Image.asset(
-                        item.imageAsset,
-                        width: height - 6,
-                        height: height - 6,
-                        fit: BoxFit.contain,
+                      child: GarmentPhotoVisual(
+                        item: item,
+                        alignment: Alignment.topCenter,
+                        fallbackFontSize: 11,
+                        fallbackPadding: const EdgeInsets.all(2),
                       ),
                     ),
                   ),
@@ -1083,18 +1082,15 @@ class _WardrobeTabState extends State<WardrobeTab> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: ColoredBox(
                         color: const Color(0xFF261D17),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.all(4),
-                      child: Image.asset(
-                        'assets/garments/${item.id}.png',
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, _, _) => Image.asset(
-                          item.imageAsset,
-                          fit: BoxFit.contain,
+                        child: GarmentPhotoVisual(
+                          item: item,
+                          alignment: Alignment.topCenter,
+                          fallbackFontSize: 14,
+                          fallbackPadding: const EdgeInsets.all(6),
                         ),
                       ),
                     ),
@@ -1256,20 +1252,19 @@ class _WardrobeTabState extends State<WardrobeTab> {
                   ),
                   child: Row(
                     children: [
-                      // Thumbnail
+                      // Thumbnail (identik dengan foto di Koleksi)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Container(
+                        child: SizedBox(
                           width: 58,
                           height: 58,
-                          color: const Color(0xFF261D17),
-                          padding: const EdgeInsets.all(4),
-                          child: Image.asset(
-                            'assets/garments/${item.id}.png',
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, _, _) => Image.asset(
-                              item.imageAsset,
-                              fit: BoxFit.contain,
+                          child: ColoredBox(
+                            color: const Color(0xFF261D17),
+                            child: GarmentPhotoVisual(
+                              item: item,
+                              alignment: Alignment.topCenter,
+                              fallbackFontSize: 13,
+                              fallbackPadding: const EdgeInsets.all(4),
                             ),
                           ),
                         ),
