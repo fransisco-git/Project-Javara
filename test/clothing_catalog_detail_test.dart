@@ -84,7 +84,7 @@ void main() {
             findsNothing,
           );
 
-          // Items without a photo (e.g. Blangkon Banyumasan Wirasaba) render flat GarmentTypographyFallback (no icons)
+          // Items without a photo (e.g. Kuluk Kanigaran Karaton Solo) render flat GarmentTypographyFallback (no icons)
           expect(find.byType(GarmentTypographyFallback), findsAtLeastNWidgets(1));
           final fallbackVisual = find.byType(GarmentTypographyFallback).first;
           expect(
@@ -97,10 +97,10 @@ void main() {
               matching: find.byType(ColoredBox),
             ),
           );
-          final banyumasBlangkon = JavaneseClothingData.getItemById(
-            'blangkon_banyumasan_wirasaba',
+          final kuluk = JavaneseClothingData.getItemById(
+            'kuluk_kanigaran_solo',
           )!;
-          expect(fallbackBox.color, banyumasBlangkon.primaryColor);
+          expect(fallbackBox.color, kuluk.primaryColor);
 
           // Switch to List View and verify category badge contrast (#6E5019) & fallback
           await tester.tap(find.byIcon(Icons.view_agenda_outlined));
@@ -139,6 +139,9 @@ void main() {
         final banyumasBlangkon = JavaneseClothingData.getItemById(
           'blangkon_banyumasan_wirasaba',
         )!;
+        final kuluk = JavaneseClothingData.getItemById(
+          'kuluk_kanigaran_solo',
+        )!;
 
         final errors = <FlutterErrorDetails>[];
         final prevOnError = FlutterError.onError;
@@ -147,8 +150,8 @@ void main() {
         };
 
         try {
-          // Blangkon Surakarta Trepes & Yogyakarta Mondholan load their real HD photos from assets/koleksi/
-          for (final photoItem in [blangkon, jogjaBlangkon]) {
+          // All 3 Blangkon items load their real HD photos from assets/koleksi/
+          for (final photoItem in [blangkon, jogjaBlangkon, banyumasBlangkon]) {
             await tester.pumpWidget(
               MaterialApp(
                 builder: (context, child) => MediaQuery(
@@ -177,8 +180,8 @@ void main() {
                 child: child!,
               ),
               home: ClothingDetailScreen(
-                key: ValueKey(banyumasBlangkon.id),
-                item: banyumasBlangkon,
+                key: ValueKey(kuluk.id),
+                item: kuluk,
               ),
             ),
           );
@@ -195,18 +198,18 @@ void main() {
 
           // Contrast checks on cream background
           final titleWidget = tester.widget<Text>(
-            find.text(banyumasBlangkon.name),
+            find.text(kuluk.name),
           );
           expect(titleWidget.style?.color, const Color(0xFF2C2219));
 
           final scriptTexts = tester
-              .widgetList<Text>(find.text(banyumasBlangkon.javaneseScript))
+              .widgetList<Text>(find.text(kuluk.javaneseScript))
               .where((t) => t.style?.color == const Color(0xFF5C4632))
               .toList();
           expect(scriptTexts, isNotEmpty);
 
           final periodWidget = tester.widget<Text>(
-            find.text('Periode: ${banyumasBlangkon.period}'),
+            find.text('Periode: ${kuluk.period}'),
           );
           expect(periodWidget.style?.color, const Color(0xFF5C4632));
           expect(periodWidget.style?.fontStyle, isNot(FontStyle.italic));
