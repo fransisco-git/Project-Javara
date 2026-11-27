@@ -7,7 +7,6 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({
       'javara_pref_aksara': true,
-      'javara_pref_gamelan': true,
       'javara_size_top': 'L (LD 98 cm)',
       'javara_size_head': 'No. 7 (57 cm)',
       'javara_size_jarik': 'Standar (220 cm)',
@@ -61,7 +60,7 @@ void main() {
     // 4. Verify Preferences
     expect(find.text('Preferensi & Bantuan'), findsOneWidget);
     expect(find.textContaining('Aksara Jawa'), findsOneWidget);
-    expect(find.textContaining('Musik Gamelan'), findsOneWidget);
+    expect(find.textContaining('Musik Gamelan'), findsNothing);
     expect(find.text('Keluar dari Akun'), findsOneWidget);
 
     // 5. Verify Old Gamification Elements are REMOVED
@@ -78,7 +77,6 @@ void main() {
   testWidgets('ProfileTab displays Guest Account (Tamu JAVARA) mode and conversion banner when in guest mode', (tester) async {
     SharedPreferences.setMockInitialValues({
       'javara_pref_aksara': true,
-      'javara_pref_gamelan': true,
       'javara_is_guest': true,
       'javara_profile_name': 'Tamu JAVARA',
       'javara_profile_email': 'tamu.budaya@javara.id',
@@ -141,7 +139,6 @@ void main() {
   testWidgets('ProfileTab shows Belum diatur for logged-in user without saved sizes', (tester) async {
     SharedPreferences.setMockInitialValues({
       'javara_pref_aksara': true,
-      'javara_pref_gamelan': true,
       'javara_is_guest': false,
       'javara_profile_name': 'Siti Rahayu',
       'javara_profile_email': 'siti@javara.id',

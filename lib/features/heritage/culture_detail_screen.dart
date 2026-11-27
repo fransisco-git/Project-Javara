@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/purchase_search_helper.dart';
 import '../../core/theme.dart';
 import '../../data/culture_items.dart';
+import '../../services/saved_garments_service.dart';
 import '../../widgets/photo_box.dart';
-import 'cultural_order_sheet.dart';
 
 /// Halaman Detail Warisan Budaya Editorial Mendalam JAVARA.
 /// Menampilkan sejarah otentik, filosofi adiluhung, sorotan keistimewaan,
-/// panduan lokasi, pemutar narasi audio, dan tombol aksi terintegrasi.
+/// panduan lokasi, dan tombol aksi terintegrasi.
 class CultureDetailScreen extends StatefulWidget {
   const CultureDetailScreen({super.key, required this.item, this.onOpenMap});
 
@@ -23,64 +25,53 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   bool _isBookmarked = false;
-  bool _isPlayingNarration = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    SavedGarmentsService.instance.initialize();
+    _isBookmarked = SavedGarmentsService.instance.isSaved(widget.item.id);
+    SavedGarmentsService.instance.savedItemIdsNotifier.addListener(
+      _onSavedChanged,
+    );
+  }
+
+  void _onSavedChanged() {
+    if (!mounted) return;
+    final nextSaved = SavedGarmentsService.instance.isSaved(widget.item.id);
+    if (nextSaved != _isBookmarked) {
+      setState(() => _isBookmarked = nextSaved);
+    }
   }
 
   @override
   void dispose() {
+    SavedGarmentsService.instance.savedItemIdsNotifier.removeListener(
+      _onSavedChanged,
+    );
     _tabController.dispose();
     super.dispose();
   }
 
-  void _toggleBookmark() {
+  Future<void> _toggleBookmark() async {
     HapticFeedback.lightImpact();
-    setState(() => _isBookmarked = !_isBookmarked);
-    ScaffoldMessenger.of(context).showSnackBar(
+    final messenger = ScaffoldMessenger.of(context);
+    final isSaved = await SavedGarmentsService.instance.toggleSave(
+      widget.item.id,
+    );
+    if (!mounted) return;
+    setState(() => _isBookmarked = isSaved);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
       SnackBar(
         content: Text(
-          _isBookmarked
-              ? '${widget.item.title} disimpan ke Favorit Warisan.'
-              : '${widget.item.title} dihapus dari Favorit.',
+          isSaved
+              ? '${widget.item.title} disimpan ke Koleksi Tersimpan.'
+              : '${widget.item.title} dihapus dari Koleksi Tersimpan.',
           style: JText.serif(13, color: Colors.white),
         ),
         backgroundColor: const Color(0xFF2E2019),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _toggleAudioNarration() {
-    HapticFeedback.lightImpact();
-    setState(() => _isPlayingNarration = !_isPlayingNarration);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              _isPlayingNarration
-                  ? Icons.volume_up_rounded
-                  : Icons.volume_off_rounded,
-              color: JColors.gold,
-              size: 18,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                _isPlayingNarration
-                    ? 'Memutar audio narasi & gamelan pengiring ${widget.item.title}...'
-                    : 'Audio narasi dihentikan.',
-                style: JText.serif(13, color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: const Color(0xFF1E1528),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
       ),
@@ -107,6 +98,7 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
               ),
             ),
             CustomScrollView(
+              scrollCacheExtent: const ScrollCacheExtent.pixels(600),
               physics: const BouncingScrollPhysics(),
               slivers: [
                 // 1. SLIVER APP BAR DENGAN FOTO MEWAH
@@ -114,34 +106,52 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
                   expandedHeight: (h * 0.44).clamp(320.0, 420.0),
                   pinned: true,
                   backgroundColor: const Color(0xFF191014),
-                  leading: IconButton(
-                    icon: Container(
-                      padding: const EdgeInsets.all(7),
-                      decoration: const BoxDecoration(
-                        color: Color(0x99191014),
-                        shape: BoxShape.circle,
+                  leadingWidth: 64,
+                  leading: Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      icon: Container(
+                        width: 38,
+                        height: 38,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: const Color(0xB3191014),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0x33FFFFFF),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 17,
+                          color: Colors.white,
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        size: 16,
-                        color: Colors.white,
-                      ),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
-                    onPressed: () => Navigator.of(context).pop(),
                   ),
                   actions: [
                     IconButton(
+                      padding: EdgeInsets.zero,
                       icon: Container(
-                        padding: const EdgeInsets.all(7),
-                        decoration: const BoxDecoration(
-                          color: Color(0x99191014),
+                        width: 38,
+                        height: 38,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: const Color(0xB3191014),
                           shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0x33FFFFFF),
+                            width: 0.8,
+                          ),
                         ),
                         child: Icon(
                           _isBookmarked
                               ? Icons.bookmark_rounded
                               : Icons.bookmark_border_rounded,
-                          size: 20,
+                          size: 19,
                           color: _isBookmarked
                               ? const Color(0xFFFFD700)
                               : Colors.white,
@@ -155,7 +165,11 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
                     background: Stack(
                       fit: StackFit.expand,
                       children: [
-                        AssetPhoto(file: item.image, radius: 0),
+                        AssetPhoto(
+                          file: item.image,
+                          radius: 0,
+                          alignment: Alignment.topCenter,
+                        ),
                         // Gradasi pencahayaan dusk sinematik
                         const DecoratedBox(
                           decoration: BoxDecoration(
@@ -250,111 +264,68 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // --- PEMUTAR AUDIO NARASI GESTUR SUARA JAWA ---
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF241829),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: const Color(0x66DFB76C),
-                              width: 0.8,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              GestureDetector(
-                                onTap: _toggleAudioNarration,
-                                child: Container(
-                                  width: 42,
-                                  height: 42,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFDFB76C),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    _isPlayingNarration
-                                        ? Icons.pause_rounded
-                                        : Icons.play_arrow_rounded,
-                                    color: const Color(0xFF241829),
-                                    size: 26,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Narasi Suara Jawa & Gamelan',
-                                      style: JText.serif(
-                                        13,
-                                        weight: FontWeight.w700,
-                                        color: const Color(0xFFFFDF9E),
-                                      ),
-                                    ),
-                                    Text(
-                                      _isPlayingNarration
-                                          ? 'Sedang memutar lantunan kisah...'
-                                          : 'Dengarkan pembacaan naskah budaya',
-                                      style: JText.serif(
-                                        11.5,
-                                        color: const Color(0xFFC7B7A6),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (_isPlayingNarration)
-                                Row(
-                                  children: List.generate(4, (i) {
-                                    return Container(
-                                      margin: const EdgeInsets.only(left: 3),
-                                      width: 3,
-                                      height: 12.0 + (i % 2 == 0 ? 8 : -4),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFFFD700),
-                                        borderRadius: BorderRadius.circular(2),
-                                      ),
-                                    );
-                                  }),
-                                ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
 
                         // --- TAB BAR EDITORIAL ---
                         Container(
+                          padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
                             color: const Color(0xFFEFE6D6),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: TabBar(
                             controller: _tabController,
+                            indicatorSize: TabBarIndicatorSize.tab,
+                            dividerColor: Colors.transparent,
+                            labelPadding:
+                                const EdgeInsets.symmetric(horizontal: 6),
                             indicator: BoxDecoration(
                               color: const Color(0xFF3A261D),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(9),
                             ),
                             labelColor: const Color(0xFFFFDF9E),
                             unselectedLabelColor: const Color(0xFF6E5B49),
                             labelStyle: JText.serif(
-                              12,
+                              12.5,
                               weight: FontWeight.w700,
                             ),
                             unselectedLabelStyle: JText.serif(
-                              12,
+                              12.5,
                               weight: FontWeight.w500,
                             ),
                             tabs: const [
-                              Tab(text: 'Sejarah & Filosofi'),
-                              Tab(text: 'Sorotan Luhur'),
-                              Tab(text: 'Lokasi & Panduan'),
+                              Tab(
+                                height: 38,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    'Sejarah',
+                                    maxLines: 1,
+                                    softWrap: false,
+                                  ),
+                                ),
+                              ),
+                              Tab(
+                                height: 38,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    'Sorotan',
+                                    maxLines: 1,
+                                    softWrap: false,
+                                  ),
+                                ),
+                              ),
+                              Tab(
+                                height: 38,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    'Lokasi',
+                                    maxLines: 1,
+                                    softWrap: false,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -402,95 +373,43 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
                     ),
                   ],
                 ),
-                child: Row(
-                  children: [
-                    if (item.price != null && item.price!.startsWith('Rp'))
-                      Padding(
-                        padding: const EdgeInsets.only(right: 16),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Harga Karya',
-                              style: JText.serif(10.5, color: JColors.muted),
-                            ),
-                            Text(
-                              item.price!,
-                              style: JText.serif(
-                                18,
-                                weight: FontWeight.w800,
-                                color: JColors.ink,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    Expanded(
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          gradient: const LinearGradient(
-                            colors: [
-                              Color(0xFFE4BC6C),
-                              Color(0xFFC79835),
-                              Color(0xFF8C5D17),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x44DFB76C),
-                              blurRadius: 12,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            showModalBottomSheet<void>(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (_) => CulturalOrderSheet(item: item),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.shopping_bag_outlined,
-                                color: Color(0xFF241829),
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                item.price != null &&
-                                        item.price!.startsWith('Rp')
-                                    ? 'Pesan Karya Mpu'
-                                    : 'Akses Panduan Lengkap',
-                                style: JText.serif(
-                                  14.5,
-                                  weight: FontWeight.w700,
-                                  color: const Color(0xFF241829),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      launchPurchaseSearch(item.title);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF3A261D),
+                      foregroundColor: const Color(0xFFFFDF9E),
+                      elevation: 0,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                  ],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Cari Tempat Membeli',
+                          style: JText.serif(
+                            14.5,
+                            weight: FontWeight.w700,
+                            color: const Color(0xFFFFDF9E),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(
+                          Icons.north_east,
+                          color: Color(0xFFFFDF9E),
+                          size: 16,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -663,44 +582,78 @@ class _CultureDetailScreenState extends State<CultureDetailScreen>
                     size: 18,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    'Waktu Berkunjung Terbaik: 07.00 - 17.00 WIB',
-                    style: JText.serif(12.5, color: const Color(0xFF6E5B49)),
+                  Expanded(
+                    child: Text(
+                      'Waktu Berkunjung Terbaik: 07.00 - 17.00 WIB',
+                      style: JText.serif(12.5, color: const Color(0xFF6E5B49)),
+                    ),
                   ),
                 ],
               ),
-              if (widget.onOpenMap != null) ...[
-                const SizedBox(height: 14),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      widget.onOpenMap!();
-                    },
-                    icon: const Icon(
-                      Icons.map_rounded,
-                      size: 18,
-                      color: JColors.button,
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () async {
+                    HapticFeedback.lightImpact();
+                    final query = resolveCulturalMapsQuery(
+                      itemId: item.id,
+                      title: item.title,
+                      location: item.location,
+                      region: item.regency,
+                    );
+                    final launched = await launchGoogleMaps(query);
+                    if (!launched && mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Gagal membuka Google Maps.',
+                            style: JText.serif(13, color: Colors.white),
+                          ),
+                          backgroundColor: const Color(0xFF2E2019),
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: JColors.button, width: 1.2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    label: Text(
-                      'Buka di Peta Budaya Jawa Tengah',
-                      style: JText.serif(
-                        13,
-                        weight: FontWeight.w700,
-                        color: JColors.button,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: JColors.button, width: 1.2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
                     ),
                   ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          'Buka di Google Maps',
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: JText.serif(
+                            13,
+                            weight: FontWeight.w700,
+                            color: JColors.button,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(
+                        Icons.north_east,
+                        size: 16,
+                        color: JColors.button,
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
             ],
           ),
         ),

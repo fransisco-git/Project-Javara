@@ -7,62 +7,6 @@ import '../core/config/app_config.dart';
 import '../features/fashion/models/javanese_clothing_models.dart';
 import '../features/fashion/data/javanese_clothing_data.dart';
 
-/// Model Rekam Data Generasi AI di Database
-class AiGenerationRecord {
-  const AiGenerationRecord({
-    required this.id,
-    required this.userId,
-    required this.modelId,
-    required this.modelName,
-    required this.garmentName,
-    required this.originalImageUrl,
-    required this.generatedImageUrl,
-    required this.status,
-    required this.createdAt,
-    this.parameters = const {},
-  });
-
-  final String id;
-  final String userId;
-  final String modelId;
-  final String modelName;
-  final String garmentName;
-  final String originalImageUrl;
-  final String generatedImageUrl;
-  final String status;
-  final DateTime createdAt;
-  final Map<String, dynamic> parameters;
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'user_id': userId,
-        'model_id': modelId,
-        'model_name': modelName,
-        'garment_name': garmentName,
-        'original_image_url': originalImageUrl,
-        'generated_image_url': generatedImageUrl,
-        'status': status,
-        'created_at': createdAt.toIso8601String(),
-        'parameters': parameters,
-      };
-
-  factory AiGenerationRecord.fromJson(Map<String, dynamic> json) {
-    return AiGenerationRecord(
-      id: json['id'] as String? ?? '',
-      userId: json['user_id'] as String? ?? 'guest_user',
-      modelId: json['model_id'] as String? ?? '',
-      modelName: json['model_name'] as String? ?? 'Model Adat',
-      garmentName: json['garment_name'] as String? ?? 'Busana Tradisi',
-      originalImageUrl: json['original_image_url'] as String? ?? '',
-      generatedImageUrl: json['generated_image_url'] as String? ?? '',
-      status: json['status'] as String? ?? 'completed',
-      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
-          DateTime.now(),
-      parameters: json['parameters'] as Map<String, dynamic>? ?? {},
-    );
-  }
-}
-
 /// Layanan Integrasi Database Supabase & Offline-First Cache JAVARA
 ///
 /// Menyediakan koneksi aman ke REST API PostgREST Supabase dengan dukungan
@@ -73,7 +17,6 @@ class SupabaseService {
 
   static const String _prefKeyFavorites = 'javara_user_favorites';
   static const String _prefKeySavedOutfits = 'javara_saved_outfits';
-  static const String _prefKeyGenerations = 'javara_ai_generations';
 
   SharedPreferences? _prefs;
 
@@ -159,67 +102,7 @@ class SupabaseService {
     return !isFav;
   }
 
-  /// Riwayat generasi AI fashion studio
-  Future<List<AiGenerationRecord>> getAiGenerations({
-    String userId = 'guest_user',
-  }) async {
-    await initialize();
-
-    if (AppConfig.isSupabaseConfigured) {
-      try {
-        final url = Uri.parse(
-          '${AppConfig.supabaseUrl}/rest/v1/ai_generations?user_id=eq.$userId&order=created_at.desc',
-        );
-        final res = await http.get(url, headers: {
-          'apikey': AppConfig.supabaseAnonKey,
-          'Authorization': 'Bearer ${AppConfig.supabaseAnonKey}',
-        }).timeout(const Duration(seconds: 4));
-
-        if (res.statusCode == 200) {
-          final List list = jsonDecode(res.body);
-          return list.map((e) => AiGenerationRecord.fromJson(e)).toList();
-        }
-      } catch (e) {
-        debugPrint('Supabase getAiGenerations fallback: $e');
-      }
-    }
-
-    // Fallback lokal
-    final rawList = _prefs?.getStringList(_prefKeyGenerations) ?? [];
-    return rawList
-        .map((s) => AiGenerationRecord.fromJson(jsonDecode(s)))
-        .toList();
-  }
-
-  /// Simpan catatan generasi AI baru
-  Future<void> saveAiGeneration(AiGenerationRecord record) async {
-    await initialize();
-
-    final current = await getAiGenerations(userId: record.userId);
-    current.insert(0, record);
-
-    final encoded = current.map((e) => jsonEncode(e.toJson())).toList();
-    await _prefs?.setStringList(_prefKeyGenerations, encoded);
-
-    if (AppConfig.isSupabaseConfigured) {
-      try {
-        await http.post(
-          Uri.parse('${AppConfig.supabaseUrl}/rest/v1/ai_generations'),
-          headers: {
-            'apikey': AppConfig.supabaseAnonKey,
-            'Authorization': 'Bearer ${AppConfig.supabaseAnonKey}',
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal',
-          },
-          body: jsonEncode(record.toJson()),
-        );
-      } catch (e) {
-        debugPrint('Supabase saveAiGeneration error: $e');
-      }
-    }
-  }
-
-  /// Setelan busana 3D tersimpan
+  /// Setelan busana tersimpan
   Future<List<SavedOutfit>> getSavedOutfits() async {
     await initialize();
     final raw = _prefs?.getStringList(_prefKeySavedOutfits) ?? [];

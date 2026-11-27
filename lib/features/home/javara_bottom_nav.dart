@@ -46,7 +46,7 @@ class JavaraBottomNav extends StatelessWidget {
 
   static const double barHeight = 64.0;
   static const double bottomMargin = 8.0;
-  static const Color activeColor = Color(0xFFFED897);
+  static const Color activeColor = JColors.accentGold;
   static const Color inactiveColor = Color(0xFFB8B0A6);
   static const Color surfaceColor = Color(0xFF16110D);
 
@@ -170,9 +170,9 @@ class _InteractiveNavItem extends StatelessWidget {
                   child: item.iconBuilder != null
                       ? item.iconBuilder!(context, isSelected)
                       : AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          switchInCurve: Curves.easeOut,
-                          switchOutCurve: Curves.easeOut,
+                          duration: const Duration(milliseconds: 250),
+                          switchInCurve: Curves.easeOutCubic,
+                          switchOutCurve: Curves.easeOutCubic,
                           transitionBuilder: (child, anim) {
                             final scale = Tween<double>(
                               begin: 0.9,
@@ -202,8 +202,8 @@ class _InteractiveNavItem extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.bottomCenter,
                   child: AnimatedDefaultTextStyle(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOut,
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOutCubic,
                     style: JText.sans(
                       11.0,
                       weight: isSelected ? FontWeight.w600 : FontWeight.w500,

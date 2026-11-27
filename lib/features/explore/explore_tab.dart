@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme.dart';
@@ -8,8 +9,6 @@ import '../../widgets/photo_box.dart';
 import '../heritage/aksara_jawa_screen.dart';
 import '../heritage/culture_detail_screen.dart';
 import '../heritage/culture_passport_screen.dart';
-import '../heritage/sound_of_java_screen.dart';
-import '../../services/java_music_service.dart';
 import 'explore_data.dart';
 import 'explore_models.dart';
 import 'interactive_map_widget.dart';
@@ -69,6 +68,7 @@ class _ExploreTabState extends State<ExploreTab> {
                 if (mounted) setState(() {});
               },
               child: ListView(
+              scrollCacheExtent: const ScrollCacheExtent.pixels(600),
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 110),
               children: [
@@ -76,11 +76,6 @@ class _ExploreTabState extends State<ExploreTab> {
                 _buildTopBar(),
 
                 const SizedBox(height: 14),
-
-                // BAR SUARA JAWA (SWARA NUSANTARA AMBIENT)
-                _buildSoundscapeFloatingBar(),
-
-                const SizedBox(height: 12),
 
                 // BAR KHASANAH BUSANA & WASTRA ADAT JAWA TENGAH
                 _buildFashionDiscoveryBar(),
@@ -394,155 +389,6 @@ class _ExploreTabState extends State<ExploreTab> {
     );
   }
 
-  /// Floating Bar Pemutar Musik Jawa & Soundscape (DJ Jawa, Pop Jawa, & Gamelan)
-  Widget _buildSoundscapeFloatingBar() {
-    final music = JavaMusicService.instance;
-
-    return ListenableBuilder(
-      listenable: music,
-      builder: (context, _) {
-        final current = music.currentTrack;
-        final isPlaying = music.isPlaying;
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 18),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF261427), Color(0xFF381F3A)],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: const Color(0xFFDFB76C).withValues(alpha: 0.5),
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x33000000),
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  music.togglePlay();
-                },
-                child: Container(
-                  width: 38,
-                  height: 38,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xFFDFB76C),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0x28000000),
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                    color: const Color(0xFF130B17),
-                    size: 22,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    Navigator.of(context)
-                        .push(musicPlayerRoute(const SoundOfJavaScreen()));
-                  },
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 5,
-                              vertical: 1.5,
-                            ),
-                            margin: const EdgeInsets.only(right: 6),
-                            decoration: BoxDecoration(
-                              color: const Color(0x33DFB76C),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              current.category,
-                              style: const TextStyle(
-                                fontSize: 8.5,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFFFFDF9E),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              current.title,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        '${current.artist} · ${music.positionFormatted} / ${music.durationFormatted}',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: Color(0xFFC7B7A6),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton.icon(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.of(context)
-                      .push(musicPlayerRoute(const SoundOfJavaScreen()));
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFDFB76C),
-                  foregroundColor: const Color(0xFF130B17),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  elevation: 0,
-                ),
-                icon: const Icon(Icons.headphones_rounded, size: 14),
-                label: const Text(
-                  'Putar Lagu',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   /// Bar Akses Cepat Khasanah Busana & Wastra Adat Jawa Tengah
   Widget _buildFashionDiscoveryBar() {
     return Container(
@@ -679,6 +525,7 @@ class _ExploreTabState extends State<ExploreTab> {
           height: 165,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
+            scrollCacheExtent: const ScrollCacheExtent.pixels(400),
             physics: const BouncingScrollPhysics(),
             itemCount: curatedCulturalRoutes.length,
             separatorBuilder: (_, _) => const SizedBox(width: 12),

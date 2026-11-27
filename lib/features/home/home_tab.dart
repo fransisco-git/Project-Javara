@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme.dart';
@@ -10,16 +12,16 @@ import '../../data/culture_items.dart';
 import '../../widgets/motion.dart';
 import '../heritage/culture_detail_screen.dart';
 import '../fashion/screens/clothing_detail_screen.dart';
-import '../fashion/screens/jelajahi_busana_screen.dart';
 import '../fashion/screens/clothing_catalog_screen.dart';
 import '../fashion/screens/batik_motif_gallery_screen.dart';
-import '../fashion/data/javanese_clothing_data.dart';
 import '../fashion/models/javanese_clothing_models.dart';
 import '../../services/saved_garments_service.dart';
 import '../../widgets/skeleton_shimmer.dart';
 import '../../widgets/interactive_feedback.dart';
+import 'event_guide_data.dart';
 import 'javara_bottom_nav.dart';
 import 'widgets/category_theme_icons.dart';
+import 'widgets/hero_slide.dart';
 
 /// Halaman Beranda JAVARA - Menampilkan khasanah budaya Jawa Tengah.
 /// Menghadirkan model Candi Borobudur 3D fotorealistik (cutout transparan)
@@ -43,37 +45,76 @@ class _HomeTabState extends State<HomeTab> {
   String _q = '';
   bool _isLoading = true;
   bool _isSearchOpen = false;
+  bool _didPrecache = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Pra-decode & cache tekstur visual utama ke VRAM agar mulus tanpa stutter
+    if (_didPrecache) return;
+    _didPrecache = true;
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final screenW = MediaQuery.sizeOf(context).width;
+    final bgCacheWidth = (screenW * 1.24 * dpr).round().clamp(360, 1280);
+    final handCacheWidth = ((screenW * 0.98).clamp(360.0, 480.0) * dpr)
+        .round()
+        .clamp(320, 1100);
+    final heroCacheWidth = (screenW * dpr).round().clamp(360, 1440);
+
+    // Pra-decode & cache tekstur visual utama ke VRAM sesuai ukuran layar agar mulus tanpa flicker
     precacheImage(
-      const AssetImage('assets/images/buddha_hand_left.png'),
+      ResizeImage.resizeIfNeeded(
+        handCacheWidth,
+        null,
+        const AssetImage('assets/images/buddha_hand_left.png'),
+      ),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/buddha_hand_right.png'),
+      ResizeImage.resizeIfNeeded(
+        handCacheWidth,
+        null,
+        const AssetImage('assets/images/buddha_hand_right.png'),
+      ),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/candi_3d_cinema.jpg'),
+      ResizeImage.resizeIfNeeded(
+        bgCacheWidth,
+        null,
+        const AssetImage('assets/images/candi_3d_cinema.jpg'),
+      ),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/candi_3d_cutout.png'),
+      ResizeImage.resizeIfNeeded(
+        bgCacheWidth,
+        null,
+        const AssetImage('assets/images/candi_3d_cutout.png'),
+      ),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/model_kebaya_kartini_solo.jpg'),
+      ResizeImage.resizeIfNeeded(
+        heroCacheWidth,
+        null,
+        const AssetImage('assets/images/model_kebaya_kartini_solo.jpg'),
+      ),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/model_jawi_jangkep_solo.jpg'),
+      ResizeImage.resizeIfNeeded(
+        heroCacheWidth,
+        null,
+        const AssetImage('assets/images/hero_beskap_surakarta.jpg'),
+      ),
       context,
     );
     precacheImage(
-      const AssetImage('assets/images/model_solo_basahan_bride.jpg'),
+      ResizeImage.resizeIfNeeded(
+        heroCacheWidth,
+        null,
+        const AssetImage('assets/images/model_solo_basahan_bride.jpg'),
+      ),
       context,
     );
   }
@@ -175,6 +216,15 @@ class _HomeTabState extends State<HomeTab> {
     final popular = _q.isEmpty ? popularItems : _filter(allItems);
     final empty = popular.isEmpty;
     final topPadding = MediaQuery.of(context).padding.top;
+    final mediaBottom = MediaQuery.paddingOf(context).bottom;
+    const navbarReserve =
+        JavaraBottomNav.barHeight + JavaraBottomNav.bottomMargin;
+    final bottomClearance =
+        (mediaBottom >= navbarReserve
+            ? mediaBottom
+            : mediaBottom + navbarReserve) +
+        24.0;
+    const heroToCategorySpace = 28.0;
 
     return MouseRegion(
       onHover: (e) =>
@@ -256,122 +306,150 @@ class _HomeTabState extends State<HomeTab> {
                               },
                               child: ListView(
                                 controller: _scrollController,
+                                scrollCacheExtent:
+                                    const ScrollCacheExtent.pixels(600),
                                 physics: const BouncingScrollPhysics(),
                                 padding: EdgeInsets.fromLTRB(
-                                  20,
-                                  topPadding + 62,
-                                  20,
-                                  JavaraBottomNav.contentBottomPadding(context),
+                                  0,
+                                  topPadding + 58,
+                                  0,
+                                  bottomClearance,
                                 ),
                                 keyboardDismissBehavior:
                                     ScrollViewKeyboardDismissBehavior.onDrag,
                                 children: [
                                   // --- MODE TAMPILAN UTAMA (EDITORIAL BERANDA) ---
                                   if (_q.isEmpty) ...[
-                                    // Panggung visual tertata rapi di atas dengan ruang lega di tengah
-                                    const SizedBox(height: 28),
-                                    // 1. Hero Editorial ("Kebaya Kartini Solo Sutra")
-                                    StaggerIn(
-                                      index: 1,
-                                      child: _HeroCard(
-                                        onStart: () {
-                                          Navigator.of(context).push(
-                                            fadeSlideRoute(
-                                              const JelajahiBusanaScreen(),
-                                            ),
-                                          );
-                                        },
+                                    // 1. Hero Carousel Selebar Layar (indikator 3 segmen di dalam hero)
+                                    const RepaintBoundary(
+                                      child: StaggerIn(
+                                        index: 1,
+                                        child: _HeroCard(),
                                       ),
                                     ),
-                                    const SizedBox(height: 24),
+                                    SizedBox(height: heroToCategorySpace),
 
                                     // 2. 3 Kategori Utama
-                                    StaggerIn(
-                                      index: 2,
-                                      child: _Categories(
-                                        onTap: _onCategoryTapped,
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                      ),
+                                      child: StaggerIn(
+                                        index: 2,
+                                        child: _Categories(
+                                          onTap: _onCategoryTapped,
+                                        ),
                                       ),
                                     ),
-                                    const SizedBox(height: 24),
+                                    const SizedBox(height: 20),
 
                                     // 3. Grid "Warisan Populer" (Dinaikkan agar koleksi busana langsung terlihat)
                                     if (popular.isNotEmpty) ...[
-                                      _SectionHeader(
-                                        title: 'Warisan Populer',
-                                        onSeeAll: () => widget.onOpenTab(1),
-                                      ),
-                                      const SizedBox(height: 14),
-                                      _PopularGrid(
-                                        items: popular,
-                                        onTap: (item) => Navigator.of(context)
-                                            .push(
-                                              fadeSlideRoute(
-                                                CultureDetailScreen(
-                                                  item: item,
-                                                  onOpenMap: () =>
-                                                      widget.onOpenTab(1),
-                                                ),
-                                              ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _SectionHeader(
+                                              title: 'Warisan Populer',
+                                              onSeeAll: () =>
+                                                  widget.onOpenTab(1),
                                             ),
+                                            const SizedBox(height: 14),
+                                            _PopularGrid(
+                                              items: popular,
+                                              onTap: (item) =>
+                                                  Navigator.of(context).push(
+                                                    fadeSlideRoute(
+                                                      CultureDetailScreen(
+                                                        item: item,
+                                                        onOpenMap: () => widget
+                                                            .onOpenTab(1),
+                                                      ),
+                                                    ),
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                       const SizedBox(height: 24),
                                     ],
 
-                                    // 4. Sorotan Kurasi "Busana Pilihan Hari Ini"
-                                    StaggerIn(
-                                      index: 3,
-                                      child: _FeaturedOutfitOfTheDayCard(
-                                        onOpenExplore: () =>
-                                            Navigator.of(context).push(
-                                              fadeSlideRoute(
-                                                const JelajahiBusanaScreen(),
-                                              ),
-                                            ),
+                                    // 4. Kartu "Panduan Acara"
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                      ),
+                                      child: StaggerIn(
+                                        index: 3,
+                                        child: _EventGuideCard(
+                                          onOpenMap: () => widget.onOpenTab(1),
+                                        ),
                                       ),
                                     ),
-                                    const SizedBox(height: 26),
                                   ],
 
                                   // --- MODE HASIL PENCARIAN ---
                                   if (_q.isNotEmpty) ...[
                                     const SizedBox(height: 10),
-                                    if (empty)
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 40,
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            'Tidak ada hasil untuk "${_search.text.trim()}"',
-                                            style: JText.serif(
-                                              14,
-                                              color: const Color(0xFFB3A394),
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                    else ...[
-                                      _SectionHeader(
-                                        title:
-                                            'Hasil Pencarian (${popular.length})',
-                                        onSeeAll: () => widget.onOpenTab(1),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
                                       ),
-                                      const SizedBox(height: 14),
-                                      _PopularGrid(
-                                        items: popular,
-                                        onTap: (item) => Navigator.of(context)
-                                            .push(
-                                              fadeSlideRoute(
-                                                CultureDetailScreen(
-                                                  item: item,
-                                                  onOpenMap: () =>
-                                                      widget.onOpenTab(1),
+                                      child: empty
+                                          ? Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 40,
+                                                  ),
+                                              child: Center(
+                                                child: Text(
+                                                  'Tidak ada hasil untuk "${_search.text.trim()}"',
+                                                  style: JText.serif(
+                                                    14,
+                                                    color: const Color(
+                                                      0xFFB3A394,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
+                                            )
+                                          : Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                _SectionHeader(
+                                                  title:
+                                                      'Hasil Pencarian (${popular.length})',
+                                                  onSeeAll: () =>
+                                                      widget.onOpenTab(1),
+                                                ),
+                                                const SizedBox(height: 14),
+                                                _PopularGrid(
+                                                  items: popular,
+                                                  onTap: (item) =>
+                                                      Navigator.of(
+                                                        context,
+                                                      ).push(
+                                                        fadeSlideRoute(
+                                                          CultureDetailScreen(
+                                                            item: item,
+                                                            onOpenMap: () =>
+                                                                widget
+                                                                    .onOpenTab(
+                                                                      1,
+                                                                    ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                ),
+                                                const SizedBox(height: 16),
+                                              ],
                                             ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                    ],
+                                    ),
                                   ],
                                 ],
                               ),
@@ -441,43 +519,6 @@ class _HomeTabState extends State<HomeTab> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// PANEL GLASSMORPHISM OBSIDIAN JAVARA
-/// Panel kaca gelap tembus pandang dengan kilauan border emas halus.
-class _JavaraGlassPanel extends StatelessWidget {
-  const _JavaraGlassPanel({
-    required this.child,
-    this.padding = const EdgeInsets.all(16),
-    this.radius = 16,
-  });
-
-  final Widget child;
-  final EdgeInsetsGeometry padding;
-  final double radius;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: Container(
-        padding: padding,
-        decoration: BoxDecoration(
-          color: const Color(0xEE140E1B),
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.all(color: const Color(0x38DFB76C), width: 1.0),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x33000000),
-              blurRadius: 6,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: child,
       ),
     );
   }
@@ -609,9 +650,9 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
       ..rotateY(rightHandYaw)
       ..rotateZ(rightHandRoll);
 
-    final handsOpacity = (1.0 - ((_smoothScroll - 600.0) / 450.0)).clamp(
-      0.35,
-      1.0,
+    final handsOpacity = (0.86 - ((_smoothScroll - 600.0) / 450.0) * 0.86).clamp(
+      0.31,
+      0.86,
     );
 
     // DOLLY ZOOM SINEMATIK CANDI:
@@ -644,23 +685,30 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
       ..rotateY(yaw)
       ..rotateZ(roll);
 
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final bgCacheWidth = (w * 1.24 * dpr).round().clamp(360, 1280);
+    final handCacheWidth = (handHeight * dpr).round().clamp(320, 1100);
+    final handModulateColor = Colors.white.withValues(alpha: handsOpacity);
+
     return Stack(
       fit: StackFit.expand,
       children: [
         // --- 1. LANGIT OBSIDIAN DUSK MISTIS (THREEUI KAGE STYLE) ---
-        Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF040206), // Puncak langit malam obsidian
-                Color(0xFF0D0814),
-                Color(0xFF1B0E1E), // Atmospheric dusk
-                Color(0xFF2E1715), // Warm volcanic sunset horizon
-                Color(0xFF07040B), // Deep ground
-              ],
-              stops: [0.0, 0.25, 0.55, 0.82, 1.0],
+        const RepaintBoundary(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF040206), // Puncak langit malam obsidian
+                  Color(0xFF0D0814),
+                  Color(0xFF1B0E1E), // Atmospheric dusk
+                  Color(0xFF2E1715), // Warm volcanic sunset horizon
+                  Color(0xFF07040B), // Deep ground
+                ],
+                stops: [0.0, 0.25, 0.55, 0.82, 1.0],
+              ),
             ),
           ),
         ),
@@ -675,11 +723,13 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
 
         // --- 3. SURYA MANDALA AKASA (GOD RAYS & RADIANT GOLD CORONA) ---
         Positioned.fill(
-          child: CustomPaint(
-            painter: _JavaraSuryaMandalaPainter(
-              scrollOffset: _smoothScroll,
-              elapsedTime: _elapsedTime,
-              pointerX: _smoothPointerX,
+          child: RepaintBoundary(
+            child: CustomPaint(
+              painter: _JavaraSuryaMandalaPainter(
+                scrollOffset: _smoothScroll,
+                elapsedTime: _elapsedTime,
+                pointerX: _smoothPointerX,
+              ),
             ),
           ),
         ),
@@ -700,12 +750,16 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
                   Image.asset(
                     'assets/images/candi_3d_cinema.jpg',
                     fit: BoxFit.cover,
+                    cacheWidth: bgCacheWidth,
+                    gaplessPlayback: true,
                     filterQuality: FilterQuality.medium,
                     excludeFromSemantics: true,
                   ),
                   Image.asset(
                     'assets/images/candi_3d_cutout.png',
                     fit: BoxFit.cover,
+                    cacheWidth: bgCacheWidth,
+                    gaplessPlayback: true,
                     filterQuality: FilterQuality.medium,
                     excludeFromSemantics: true,
                   ),
@@ -718,14 +772,16 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
         // --- 5. AURA ENERGI SUCI ANJALI MUDRA (BLOOM & SACRED RIPPLES SAAT TELAPAK BERTEMU DI TENGAH) ---
         Positioned.fill(
           child: IgnorePointer(
-            child: CustomPaint(
-              painter: _AnjaliMudraEnergyPainter(
-                contactPoint: Offset(
-                  centerX + (_smoothPointerX * 8.0),
-                  handsY + (handHeight * 0.44),
+            child: RepaintBoundary(
+              child: CustomPaint(
+                painter: _AnjaliMudraEnergyPainter(
+                  contactPoint: Offset(
+                    centerX + (_smoothPointerX * 8.0),
+                    handsY + (handHeight * 0.44),
+                  ),
+                  openCurve: openCurve,
+                  elapsedTime: _elapsedTime,
                 ),
-                openCurve: openCurve,
-                elapsedTime: _elapsedTime,
               ),
             ),
           ),
@@ -739,17 +795,18 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           height: handHeight,
           child: RepaintBoundary(
             child: IgnorePointer(
-              child: Opacity(
-                opacity: handsOpacity,
-                child: Transform(
-                  transform: leftHandMatrix,
-                  alignment: Alignment.center,
-                  child: Image.asset(
-                    'assets/images/buddha_hand_left.png',
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.medium,
-                    excludeFromSemantics: true,
-                  ),
+              child: Transform(
+                transform: leftHandMatrix,
+                alignment: Alignment.center,
+                child: Image.asset(
+                  'assets/images/buddha_hand_left.png',
+                  fit: BoxFit.contain,
+                  cacheWidth: handCacheWidth,
+                  gaplessPlayback: true,
+                  color: handModulateColor,
+                  colorBlendMode: BlendMode.modulate,
+                  filterQuality: FilterQuality.medium,
+                  excludeFromSemantics: true,
                 ),
               ),
             ),
@@ -764,17 +821,18 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
           height: handHeight,
           child: RepaintBoundary(
             child: IgnorePointer(
-              child: Opacity(
-                opacity: handsOpacity,
-                child: Transform(
-                  transform: rightHandMatrix,
-                  alignment: Alignment.center,
-                  child: Image.asset(
-                    'assets/images/buddha_hand_right.png',
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.medium,
-                    excludeFromSemantics: true,
-                  ),
+              child: Transform(
+                transform: rightHandMatrix,
+                alignment: Alignment.center,
+                child: Image.asset(
+                  'assets/images/buddha_hand_right.png',
+                  fit: BoxFit.contain,
+                  cacheWidth: handCacheWidth,
+                  gaplessPlayback: true,
+                  color: handModulateColor,
+                  colorBlendMode: BlendMode.modulate,
+                  filterQuality: FilterQuality.medium,
+                  excludeFromSemantics: true,
                 ),
               ),
             ),
@@ -784,31 +842,35 @@ class _Javara3DTempleBackgroundState extends State<_Javara3DTempleBackground>
         // --- 8. KABUT VOLUMETRIK & 32 PARTIKEL KUNANG-KUNANG EMAS ---
         Positioned.fill(
           child: IgnorePointer(
-            child: CustomPaint(
-              painter: _JavaraAtmospherePainter(
-                scrollOffset: _smoothScroll,
-                elapsedTime: _elapsedTime,
-                pointerX: _smoothPointerX,
+            child: RepaintBoundary(
+              child: CustomPaint(
+                painter: _JavaraAtmospherePainter(
+                  scrollOffset: _smoothScroll,
+                  elapsedTime: _elapsedTime,
+                  pointerX: _smoothPointerX,
+                ),
               ),
             ),
           ),
         ),
 
-        // --- 10. VIGNETTE PEREDUP BAWAH (MEMASTIKAN KONTEN TERBACA JELAS) ---
-        Positioned.fill(
+        // --- 10. VIGNETTE PEREDUP (MENJAGA KONTRAST KONTEN & MENENANGKAN LATAR) ---
+        const Positioned.fill(
           child: IgnorePointer(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    const Color(0x22000000),
-                    Colors.transparent,
-                    const Color(0x6607040B),
-                    const Color(0xF507040B),
-                  ],
-                  stops: const [0.0, 0.20, 0.60, 1.0],
+            child: RepaintBoundary(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0x3A000000),
+                      Color(0x2907040B),
+                      Color(0x7507040B),
+                      Color(0xF507040B),
+                    ],
+                    stops: [0.0, 0.20, 0.60, 1.0],
+                  ),
                 ),
               ),
             ),
@@ -829,6 +891,12 @@ class _JavaraArchitecturalWatermark extends StatelessWidget {
   final double scrollOffset;
   final double pointerX;
 
+  static final TextStyle _watermarkTitleStyle = JText.serif(
+    82,
+    weight: FontWeight.w900,
+    color: const Color(0x18FFDF9E),
+  ).copyWith(letterSpacing: 14);
+
   @override
   Widget build(BuildContext context) {
     final parallaxY = -scrollOffset * 0.15;
@@ -843,13 +911,11 @@ class _JavaraArchitecturalWatermark extends StatelessWidget {
           child: Center(
             child: Transform.translate(
               offset: Offset(parallaxX, 0),
-              child: Text(
-                'JAVARA',
-                style: JText.serif(
-                  82,
-                  weight: FontWeight.w900,
-                  color: const Color(0x18FFDF9E),
-                ).copyWith(letterSpacing: 14),
+              child: RepaintBoundary(
+                child: Text(
+                  'JAVARA',
+                  style: _watermarkTitleStyle,
+                ),
               ),
             ),
           ),
@@ -861,13 +927,15 @@ class _JavaraArchitecturalWatermark extends StatelessWidget {
           child: Center(
             child: Transform.translate(
               offset: Offset(-parallaxX * 0.5, 0),
-              child: const Text(
-                'ꦗ ꦮ ꦫ',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Color(0x26DFB76C),
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 16,
+              child: const RepaintBoundary(
+                child: Text(
+                  'ꦗ ꦮ ꦫ',
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Color(0x26DFB76C),
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 16,
+                  ),
                 ),
               ),
             ),
@@ -968,7 +1036,7 @@ class _JavaraSuryaMandalaPainter extends CustomPainter {
   bool shouldRepaint(covariant _JavaraSuryaMandalaPainter oldDelegate) => true;
 }
 
-/// Melukis Aliran Kabut Fajar & 28 Partikel Kunang-Kunang Emas Javara
+/// Melukis Aliran Kabut Fajar Lembut di Beranda (tanpa partikel titik emas melayang)
 class _JavaraAtmospherePainter extends CustomPainter {
   _JavaraAtmospherePainter({
     required this.scrollOffset,
@@ -979,38 +1047,6 @@ class _JavaraAtmospherePainter extends CustomPainter {
   final double scrollOffset;
   final double elapsedTime;
   final double pointerX;
-
-  // 28 Partikel Emas dengan koordinat spasial 3D (x, y, z-depth, speed, size)
-  static final List<(double, double, double, double, double)> _embers = [
-    (0.12, 0.15, 0.9, 1.2, 3.8),
-    (0.28, 0.32, 0.4, 0.8, 2.2),
-    (0.45, 0.18, 1.4, 1.5, 4.6),
-    (0.68, 0.42, 0.6, 0.9, 2.8),
-    (0.82, 0.22, 1.1, 1.3, 4.0),
-    (0.18, 0.65, 0.5, 0.7, 2.4),
-    (0.38, 0.54, 1.3, 1.4, 4.2),
-    (0.55, 0.72, 0.7, 1.0, 3.2),
-    (0.76, 0.60, 1.2, 1.3, 4.4),
-    (0.88, 0.82, 0.4, 0.6, 2.0),
-    (0.24, 0.86, 0.8, 1.1, 3.4),
-    (0.64, 0.92, 1.0, 1.2, 3.6),
-    (0.08, 0.48, 0.6, 0.8, 2.6),
-    (0.50, 0.38, 1.5, 1.6, 5.0),
-    (0.35, 0.78, 0.5, 0.7, 2.5),
-    (0.92, 0.46, 0.8, 1.0, 3.0),
-    (0.15, 0.94, 1.2, 1.3, 4.1),
-    (0.72, 0.28, 0.7, 0.9, 2.9),
-    (0.40, 0.08, 1.0, 1.1, 3.5),
-    (0.60, 0.12, 0.5, 0.7, 2.3),
-    (0.80, 0.05, 1.3, 1.4, 4.3),
-    (0.22, 0.38, 0.9, 1.2, 3.7),
-    (0.52, 0.88, 0.4, 0.6, 2.1),
-    (0.78, 0.48, 1.1, 1.3, 3.9),
-    (0.32, 0.24, 0.6, 0.8, 2.7),
-    (0.66, 0.68, 1.4, 1.5, 4.7),
-    (0.86, 0.34, 0.5, 0.7, 2.2),
-    (0.06, 0.74, 1.0, 1.1, 3.3),
-  ];
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1046,38 +1082,6 @@ class _JavaraAtmospherePainter extends CustomPainter {
       ),
       mistPaint,
     );
-
-    // --- 28 PARTIKEL EMAS DENGAN KEDALAMAN 3D ---
-    final emberPaint = Paint()..style = PaintingStyle.fill;
-
-    for (final (bx, by, depth, speed, radius) in _embers) {
-      final cycle =
-          ((by * h * 1.5) -
-              (elapsedTime * speed * 28.0) -
-              (scrollOffset * 0.60 * depth)) %
-          (h * 1.3);
-      final py = cycle - (h * 0.15);
-
-      final sway =
-          math.sin((elapsedTime * 1.2 * speed) + (bx * 15.0)) * (15.0 * depth);
-      final px = (bx * w) + sway + (pointerX * 18.0 * depth);
-
-      final flicker = (math.sin(elapsedTime * 3.0 + (bx * 20.0)) * 0.25) + 0.75;
-      final alpha = (0.60 * depth * flicker).clamp(0.18, 0.95);
-
-      // Partikel Inti Emas
-      emberPaint.color = const Color(0xFFFFD700).withValues(alpha: alpha);
-      canvas.drawCircle(
-        Offset(px, py),
-        radius * (0.8 + depth * 0.3),
-        emberPaint,
-      );
-
-      // Pendaran Lembut di Sekeliling Partikel
-      emberPaint.color = const Color(0xFFDF9E48)
-          .withValues(alpha: alpha * 0.35);
-      canvas.drawCircle(Offset(px, py), radius * 2.8 * depth, emberPaint);
-    }
   }
 
   @override
@@ -1381,33 +1385,11 @@ class _TopHeaderIconButton extends StatelessWidget {
   }
 }
 
-/// MODEL ITEM HERO ADIBUSANA JAVARA
-class _HeroAdibusanaItem {
-  const _HeroAdibusanaItem({
-    required this.tag,
-    required this.javaneseScript,
-    required this.title,
-    required this.subtitle,
-    required this.imagePath,
-    required this.buttonLabel,
-    required this.routeBuilder,
-  });
-
-  final String tag;
-  final String javaneseScript;
-  final String title;
-  final String subtitle;
-  final String imagePath;
-  final String buttonLabel;
-  final Widget Function() routeBuilder;
-}
-
-/// HERO SHOWCASE ADIBUSANA AGENG KERATON JAWA TENGAH
-/// Menggantikan hero lama dengan pameran busana adat adiluhung beresolusi tinggi,
-/// tipografi editorial mewah, dan narasi filosofis otentik tanpa elemen semu.
+/// HERO CAROUSEL EDITORIAL BERANDA JAVARA
+/// Menampilkan 3 slide arsip busana adat selebar layar menggunakan satu template
+/// seragam (`HeroSlide`) dengan indikator garis tipis 3 segmen di bawah hero.
 class _HeroCard extends StatefulWidget {
-  const _HeroCard({required this.onStart});
-  final VoidCallback onStart;
+  const _HeroCard();
 
   @override
   State<_HeroCard> createState() => _HeroCardState();
@@ -1415,37 +1397,38 @@ class _HeroCard extends StatefulWidget {
 
 class _HeroCardState extends State<_HeroCard> {
   late final PageController _pageController;
-  int _currentPage = 0;
+  final ValueNotifier<int> _currentPageNotifier = ValueNotifier<int>(0);
+  Timer? _autoSlideTimer;
+  bool _isUserDragging = false;
 
-  static final List<_HeroAdibusanaItem> _items = [
-    _HeroAdibusanaItem(
-      tag: 'ADIBUSANA NINGRAT PUTRI',
-      javaneseScript: 'ꦏꦼꦧꦪꦏꦂꦠꦶꦤꦶ',
-      title: 'Kebaya Kartini Solo Sutra',
-      subtitle: 'Keanggunan putri bangsawan berhias peniti renteng kencana dan jarik Parang Kusumo.',
+  static const Duration _autoSlideInterval = Duration(seconds: 4);
+
+  static final List<HeroSlideData> _slides = [
+    HeroSlideData(
+      eyebrow: 'ARSIP 01 · BUSANA PUTRI',
+      title: 'Kebaya Beludru Solo Putri',
       imagePath: 'assets/images/model_kebaya_kartini_solo.jpg',
-      buttonLabel: 'Koleksi Busana Putri',
+      imageAlignment: const Alignment(0, -0.6),
+      imageScale: 1.0,
       routeBuilder: () =>
           const ClothingCatalogScreen(initialGender: GenderTarget.wanita),
     ),
-    _HeroAdibusanaItem(
-      tag: 'ADIBUSANA AGENG KSATRIA',
-      javaneseScript: 'ꦗꦮꦶꦗꦁꦏꦼꦥ꧀',
-      title: 'Jawi Jangkep Keprabon',
-      subtitle: 'Busana resmi ksatria Keraton Surakarta Hadiningrat berhias beskap sikepan & keris ladrang.',
-      imagePath: 'assets/images/model_jawi_jangkep_solo.jpg',
-      buttonLabel: 'Koleksi Busana Pria',
+    HeroSlideData(
+      eyebrow: 'ARSIP 02 · BUSANA PRIA',
+      title: 'Beskap Surakarta Klasik',
+      imagePath: 'assets/images/hero_beskap_surakarta.jpg',
+      imageAlignment: const Alignment(0, -0.6),
+      imageScale: 1.0,
       routeBuilder: () =>
           const ClothingCatalogScreen(initialGender: GenderTarget.pria),
     ),
-    _HeroAdibusanaItem(
-      tag: 'MAHAKARYA PENGANTIN',
-      javaneseScript: 'ꦱꦺꦴꦭꦺꦴꦧꦱꦲꦤ꧀',
+    HeroSlideData(
+      eyebrow: 'ARSIP 03 · BUSANA PENGANTIN',
       title: 'Solo Basahan Kampuhan',
-      subtitle: 'Tata rias pengantin ageng tertua keraton berbalut dodot kampuh prada emas & melati ronce.',
       imagePath: 'assets/images/model_solo_basahan_bride.jpg',
-      buttonLabel: 'Jelajahi Busana Adat',
-      routeBuilder: () => const JelajahiBusanaScreen(),
+      imageAlignment: const Alignment(0, -0.6),
+      imageScale: 1.0,
+      routeBuilder: () => const ClothingCatalogScreen(),
     ),
   ];
 
@@ -1453,249 +1436,109 @@ class _HeroCardState extends State<_HeroCard> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    _startAutoSlide();
+  }
+
+  void _startAutoSlide() {
+    _autoSlideTimer?.cancel();
+    _autoSlideTimer = Timer.periodic(_autoSlideInterval, (_) {
+      if (!mounted || _isUserDragging || !_pageController.hasClients) return;
+      final nextPage = (_currentPageNotifier.value + 1) % _slides.length;
+      _pageController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 520),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   @override
   void dispose() {
+    _autoSlideTimer?.cancel();
+    _currentPageNotifier.dispose();
     _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 228,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0x66DFB76C), width: 1.1),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x55000000),
-            blurRadius: 16,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
+    final heroHeight = (MediaQuery.sizeOf(context).height * 0.32).clamp(
+      240.0,
+      300.0,
+    );
+
+    return Listener(
+      onPointerDown: (_) {
+        _isUserDragging = true;
+        _autoSlideTimer?.cancel();
+      },
+      onPointerUp: (_) {
+        _isUserDragging = false;
+        _startAutoSlide();
+      },
+      onPointerCancel: (_) {
+        _isUserDragging = false;
+        _startAutoSlide();
+      },
+      child: SizedBox(
+        width: double.infinity,
+        height: heroHeight,
         child: Stack(
           children: [
-            // PageView Slider
+            // Full-width edge-to-edge hero PageView (auto-slide setiap 4 detik, pause saat digeser)
             PageView.builder(
               controller: _pageController,
-              itemCount: _items.length,
+              allowImplicitScrolling: true,
+              physics: const PageScrollPhysics(),
+              itemCount: _slides.length,
               onPageChanged: (index) {
-                setState(() => _currentPage = index);
+                _currentPageNotifier.value = index;
               },
               itemBuilder: (context, index) {
-                final item = _items[index];
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Foto Busana Adat Beresolusi Tinggi
-                    Image.asset(
-                      item.imagePath,
-                      fit: BoxFit.cover,
-                      alignment: Alignment.centerRight,
-                    ),
-
-                    // Gradasi Bayangan Sinematik Obsidian (Memastikan Keterbacaan Teks Sempurna)
-                    const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            Color(0xF50A0710),
-                            Color(0xD90A0710),
-                            Color(0x800A0710),
-                            Color(0x150A0710),
-                          ],
-                          stops: [0.0, 0.45, 0.72, 1.0],
-                        ),
-                      ),
-                    ),
-
-                    // Konten Teks Editorial & Tombol Aksi
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.bottomLeft,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 320),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Badge Pilar Budaya & Aksara Jawa
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 4,
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 3.5,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0x38DFB76C),
-                                      borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(
-                                        color: const Color(0x88DFB76C),
-                                        width: 0.8,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          Icons.auto_awesome,
-                                          size: 11,
-                                          color: Color(0xFFFFDF9E),
-                                        ),
-                                        const SizedBox(width: 5),
-                                        Text(
-                                          item.tag,
-                                          style: JText.sans(
-                                            8.5,
-                                            weight: FontWeight.w800,
-                                            color: const Color(0xFFFFDF9E),
-                                          ).copyWith(letterSpacing: 0.9),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Text(
-                                    item.javaneseScript,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xBFDFB76C),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Judul Koleksi Busana Adat
-                              Text(
-                                item.title,
-                                style: JText.editorial(
-                                  21,
-                                  weight: FontWeight.w700,
-                                  color: const Color(0xFFFFFDF8),
-                                  height: 1.15,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-
-                              const SizedBox(height: 5),
-
-                              // Deskripsi Filosofis Singkat
-                              Text(
-                                item.subtitle,
-                                style: JText.sans(
-                                  11,
-                                  color: const Color(0xFFD6C8B8),
-                                  height: 1.35,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Tombol Eksplorasi Solid Emas Kencana
-                              InteractiveScale(
-                                onTap: () {
-                                  HapticFeedback.lightImpact();
-                                  Navigator.of(
-                                    context,
-                                  ).push(fadeSlideRoute(item.routeBuilder()));
-                                },
-                                pressedScale: 0.94,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 8.5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        Color(0xFFE4C590),
-                                        Color(0xFFC79B3A),
-                                      ],
-                                    ),
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color: Color(0x33000000),
-                                        blurRadius: 6,
-                                        offset: Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Flexible(
-                                        child: FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: Text(
-                                            item.buttonLabel,
-                                            style: JText.sans(
-                                              11.5,
-                                              weight: FontWeight.w700,
-                                              color: const Color(0xFF14100D),
-                                            ),
-                                            maxLines: 1,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      const Icon(
-                                        Icons.arrow_forward_rounded,
-                                        size: 13,
-                                        color: Color(0xFF14100D),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                final slide = _slides[index];
+                return RepaintBoundary(
+                  child: HeroSlide(
+                    data: slide,
+                    onTapAction: () {
+                      Navigator.of(
+                        context,
+                      ).push(fadeSlideRoute(slide.routeBuilder()));
+                    },
+                  ),
                 );
               },
             ),
 
-            // Indikator Titik Carousel di Pojok Kanan Bawah
+            // Indikator garis tipis 3 segmen DI DALAM hero, 12 dp dari dasar di atas gradien
             Positioned(
+              left: 20,
+              right: 20,
               bottom: 12,
-              right: 14,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: List.generate(
-                  _items.length,
-                  (index) => AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    width: _currentPage == index ? 16 : 5,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: _currentPage == index
-                          ? const Color(0xFFE4C590)
-                          : const Color(0x66DFB76C),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
+              child: IgnorePointer(
+                child: ValueListenableBuilder<int>(
+                  valueListenable: _currentPageNotifier,
+                  builder: (context, currentPage, _) {
+                    return Row(
+                      children: List.generate(_slides.length, (index) {
+                        final isActive = currentPage == index;
+                        return Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              right: index < _slides.length - 1 ? 8 : 0,
+                            ),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeOutCubic,
+                              height: 2.0,
+                              color: isActive
+                                  ? Colors.white
+                                  : Colors.white.withValues(alpha: 0.25),
+                            ),
+                          ),
+                        );
+                      }),
+                    );
+                  },
                 ),
               ),
             ),
@@ -1715,19 +1558,16 @@ class _Categories extends StatelessWidget {
     (
       iconType: JavaraCategoryIconType.busana,
       title: 'Busana',
-      subtitle: 'Pria & Wanita',
       actionKey: 'Busana',
     ),
     (
       iconType: JavaraCategoryIconType.aksesoris,
       title: 'Aksesoris',
-      subtitle: 'Ricikan Adat',
       actionKey: 'Aksesoris',
     ),
     (
       iconType: JavaraCategoryIconType.batik,
       title: 'Batik',
-      subtitle: 'Motif Pakem',
       actionKey: 'Batik',
     ),
   ];
@@ -1748,60 +1588,40 @@ class _Categories extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _JavaraGlassPanel(
-                      padding: EdgeInsets.zero,
-                      radius: 18,
-                      child: Container(
-                        width: 52,
-                        height: 52,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(18),
-                          gradient: const RadialGradient(
-                            center: Alignment.topLeft,
-                            radius: 1.2,
-                            colors: [Color(0x35DFB76C), Color(0x05DFB76C)],
-                          ),
+                    Container(
+                      width: 58,
+                      height: 58,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: const Color(0xCC18130F),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: const Color(0x28DFB76C),
+                          width: 0.9,
                         ),
-                        child: ExcludeSemantics(
-                          child: JavaraCategoryThemeIcon(
-                            key: ValueKey('category_icon_${item.actionKey.toLowerCase()}'),
-                            type: item.iconType,
-                            size: 28,
-                          ),
+                      ),
+                      child: ExcludeSemantics(
+                        child: JavaraCategoryThemeIcon(
+                          key: ValueKey('category_icon_${item.actionKey.toLowerCase()}'),
+                          type: item.iconType,
+                          size: 31,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 7),
+                    const SizedBox(height: 8),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              item.title,
-                              style: JText.serif(
-                                11.5,
-                                weight: FontWeight.w700,
-                                color: const Color(0xFFFFF0D0),
-                              ),
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 1.5),
-                            Text(
-                              item.subtitle,
-                              style: JText.sans(
-                                9.5,
-                                weight: FontWeight.w500,
-                                color: const Color(0xFFAFA08F),
-                              ),
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                        child: Text(
+                          item.title,
+                          style: JText.serif(
+                            13.5,
+                            weight: FontWeight.w600,
+                            color: const Color(0xFFFFF0D0),
+                          ),
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ),
@@ -1934,37 +1754,45 @@ class _EditorialCultureCard extends StatelessWidget {
         item.category.toLowerCase().contains('batik') ||
         item.title.toLowerCase().contains('batik');
 
-    return InteractiveScale(
-      pressedScale: 0.98,
-      semanticLabel: item.title,
-      onTap: () => onTap(item),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 1. Bingkai Foto Potret (AspectRatio 3 / 4)
-          AspectRatio(
-            aspectRatio: 3 / 4,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                border: Border.all(color: const Color(0x2EC5A467), width: 0.6),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4.4),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Base Image
-                    Image.asset(
-                      'assets/images/${item.image}',
-                      fit: BoxFit.cover,
-                      alignment: Alignment.topCenter,
-                      filterQuality: FilterQuality.medium,
-                      frameBuilder: (_, child, frame, sync) => AnimatedOpacity(
-                        opacity: (sync || frame != null) ? 1.0 : 0.0,
-                        duration: const Duration(milliseconds: 250),
-                        child: child,
-                      ),
+    return RepaintBoundary(
+      child: InteractiveScale(
+        pressedScale: 0.98,
+        semanticLabel: item.title,
+        onTap: () => onTap(item),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Bingkai Foto Potret (AspectRatio 3 / 4)
+            AspectRatio(
+              aspectRatio: 3 / 4,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(color: const Color(0x2EC5A467), width: 0.6),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4.4),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Base Image
+                      Image.asset(
+                        'assets/images/${item.image}',
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                        cacheWidth: (MediaQuery.sizeOf(context).width *
+                                0.45 *
+                                MediaQuery.devicePixelRatioOf(context))
+                            .round()
+                            .clamp(180, 720),
+                        gaplessPlayback: true,
+                        filterQuality: FilterQuality.medium,
+                        frameBuilder: (_, child, frame, sync) => AnimatedOpacity(
+                          opacity: (sync || frame != null) ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeOutCubic,
+                          child: child,
+                        ),
                       errorBuilder: (_, _, _) => Container(
                         color: const Color(0xFF181512),
                         child: const Center(
@@ -1984,7 +1812,7 @@ class _EditorialCultureCard extends StatelessWidget {
                       ),
 
                     // Gradasi vignette tipis di 20% bagian atas dan bawah
-                    const DecoratedBox(
+                  const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
@@ -2062,213 +1890,286 @@ class _EditorialCultureCard extends StatelessWidget {
           ),
         ],
       ),
+      ),
     );
   }
 }
 
-/// Card Busana Pilihan Hari Ini (Featured Outfit of the Day)
-/// Disajikan dengan layout editorial tenang, bebas tombol mencolok yang berebut fokus.
-class _FeaturedOutfitOfTheDayCard extends StatelessWidget {
-  const _FeaturedOutfitOfTheDayCard({this.onOpenExplore});
+/// Kartu "Panduan Acara" bergaya editorial selaras Hero Banner.
+/// Tanpa badge bintang, tanpa aksara Jawa, tanpa ikon.
+class _EventGuideCard extends StatelessWidget {
+  const _EventGuideCard({required this.onOpenMap});
 
-  final VoidCallback? onOpenExplore;
+  final VoidCallback onOpenMap;
+
+  void _openEventSheet(BuildContext context, EventGuideItem guide) {
+    HapticFeedback.lightImpact();
+    final recommendations = resolveEventRecommendations(guide);
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return _EventGuideBottomSheet(
+          guide: guide,
+          recommendations: recommendations,
+          onSelectRecommendation: (rec) {
+            Navigator.of(sheetContext).pop();
+            if (rec.cultureItem != null) {
+              Navigator.of(context).push(
+                fadeSlideRoute(
+                  CultureDetailScreen(
+                    item: rec.cultureItem!,
+                    onOpenMap: onOpenMap,
+                  ),
+                ),
+              );
+            } else if (rec.clothingItem != null) {
+              Navigator.of(context).push(
+                fadeSlideRoute(
+                  ClothingDetailScreen(item: rec.clothingItem!),
+                ),
+              );
+            }
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final outfit = JavaneseClothingData.curatedOutfits.first;
+    final row1 = eventGuideItems.take(2).toList();
+    final row2 = eventGuideItems.skip(2).take(2).toList();
 
-    void navigateToDetail() {
-      HapticFeedback.lightImpact();
-      final item = JavaneseClothingData.clothingItems.firstWhere(
-        (it) => it.id == outfit.upperBodyId,
-        orElse: () => JavaneseClothingData.clothingItems.first,
-      );
-      Navigator.of(context)
-          .push(fadeSlideRoute(ClothingDetailScreen(item: item)));
-    }
-
-    return InteractiveCard(
-      onTap: navigateToDetail,
-      borderRadius: 20,
-      padding: EdgeInsets.zero,
-      backgroundColor: const Color(0xFF181614),
-      border: Border.all(color: const Color(0x14FFFFFF), width: 1.0),
-      semanticLabel: 'Busana Pilihan Hari Ini - ${outfit.title}',
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFF181614),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0x14FFFFFF), width: 1.0),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Badge & Aksara Jawa
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0x1AE4C590),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: const Color(0x33E4C590),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.star_rounded,
-                        size: 12,
-                        color: Color(0xFFE4C590),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'BUSANA PILIHAN HARI INI',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFFE4C590),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  outfit.javaneseScript,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFFDFC08E),
+          Text(
+            'PANDUAN ACARA',
+            style: JText.sans(
+              10,
+              weight: FontWeight.w600,
+              color: const Color(0xFFC5A467),
+            ).copyWith(letterSpacing: 1.8),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Pilih Busana Sesuai Acara',
+            style: JText.serif(
+              20,
+              weight: FontWeight.w700,
+              color: const Color(0xFFFAF6F0),
+            ).copyWith(height: 1.2),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Padanan busana dan pakem untuk momenmu.',
+            style: JText.sans(
+              12,
+              weight: FontWeight.w400,
+              color: const Color(0xFFB09F8F),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              for (int i = 0; i < row1.length; i++) ...[
+                if (i > 0) const SizedBox(width: 10),
+                Expanded(
+                  child: _EventOutlineButton(
+                    label: row1[i].title,
+                    onTap: () => _openEventSheet(context, row1[i]),
                   ),
                 ),
               ],
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              for (int i = 0; i < row2.length; i++) ...[
+                if (i > 0) const SizedBox(width: 10),
+                Expanded(
+                  child: _EventOutlineButton(
+                    label: row2[i].title,
+                    onTap: () => _openEventSheet(context, row2[i]),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EventOutlineButton extends StatelessWidget {
+  const _EventOutlineButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFFFAF6F0),
+        backgroundColor: const Color(0x08FFFFFF),
+        side: const BorderSide(color: Color(0x2EFFFFFF), width: 0.9),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 13),
+        minimumSize: const Size(0, 44),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      onPressed: onTap,
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: JText.sans(
+          12.5,
+          weight: FontWeight.w600,
+          color: const Color(0xFFFAF6F0),
+        ),
+      ),
+    );
+  }
+}
+
+class _EventGuideBottomSheet extends StatelessWidget {
+  const _EventGuideBottomSheet({
+    required this.guide,
+    required this.recommendations,
+    required this.onSelectRecommendation,
+  });
+
+  final EventGuideItem guide;
+  final List<ResolvedEventRecommendation> recommendations;
+  final ValueChanged<ResolvedEventRecommendation> onSelectRecommendation;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxHeight = MediaQuery.of(context).size.height * 0.78;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
+    return Container(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      decoration: const BoxDecoration(
+        color: Color(0xFF161311),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border(
+          top: BorderSide(color: Color(0x33E4C590), width: 1.0),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: 12, bottom: 8),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: const Color(0x44E4C590),
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
-
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  outfit.title,
-                  style: JText.serif(
-                    18,
-                    weight: FontWeight.w800,
-                    color: const Color(0xFFFAF6F0),
+          Flexible(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'PANDUAN ACARA',
+                    style: JText.sans(
+                      10,
+                      weight: FontWeight.w600,
+                      color: const Color(0xFFC5A467),
+                    ).copyWith(letterSpacing: 1.6),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${outfit.collectionCategory} • ${outfit.era}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFFB09F8F),
+                  const SizedBox(height: 4),
+                  Text(
+                    guide.title,
+                    style: JText.serif(
+                      22,
+                      weight: FontWeight.w700,
+                      color: const Color(0xFFFAF6F0),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  outfit.summary,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFFDCD2C5),
-                    height: 1.45,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 14),
+                  const SizedBox(height: 16),
 
-                // Komponen Ricikan Tags
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: const [
-                    _RicikanTag('Blangkon Trepes'),
-                    _RicikanTag('Beskap Landhung'),
-                    _RicikanTag('Batik Parang Barong'),
-                    _RicikanTag('Keris Ladrang Solo'),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Tombol Sekunder / Ghost Button: Lihat Detail Busana →
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFFAF6F0),
-                          backgroundColor: const Color(0x0FFFFFFF),
-                          side: const BorderSide(
-                            color: Color(0x22FFFFFF),
-                            width: 1,
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 11),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: navigateToDetail,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Lihat Detail Busana',
-                              style: JText.sans(
-                                12,
-                                weight: FontWeight.w600,
-                                color: const Color(0xFFFAF6F0),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            const Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 14,
-                              color: Color(0xFFE4C590),
-                            ),
-                          ],
-                        ),
+                  // Kotak Pakem & Etika
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1F1A16),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: const Color(0x33E4C590),
+                        width: 0.9,
                       ),
                     ),
-                    if (onOpenExplore != null) ...[
-                      const SizedBox(width: 10),
-                      OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFB09F8F),
-                          side: const BorderSide(
-                            color: Color(0x14FFFFFF),
-                            width: 1,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 11,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: onOpenExplore,
-                        child: Text(
-                          'Koleksi Lain',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Pakem & Etika',
                           style: JText.sans(
-                            12,
-                            weight: FontWeight.w600,
-                            color: const Color(0xFFB09F8F),
+                            11.5,
+                            weight: FontWeight.w700,
+                            color: const Color(0xFFE4C590),
                           ),
                         ),
+                        const SizedBox(height: 6),
+                        Text(
+                          guide.pakemText,
+                          style: JText.sans(
+                            12.5,
+                            weight: FontWeight.w400,
+                            color: const Color(0xFFE2D8CB),
+                          ).copyWith(height: 1.5),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  if (recommendations.isNotEmpty) ...[
+                    const SizedBox(height: 18),
+                    Text(
+                      'Rekomendasi Busana',
+                      style: JText.sans(
+                        11.5,
+                        weight: FontWeight.w700,
+                        color: const Color(0xFFB8A999),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    for (int i = 0; i < recommendations.length; i++) ...[
+                      if (i > 0) const SizedBox(height: 10),
+                      _EventRecommendationTile(
+                        recommendation: recommendations[i],
+                        onTap: () => onSelectRecommendation(recommendations[i]),
                       ),
                     ],
                   ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -2277,25 +2178,90 @@ class _FeaturedOutfitOfTheDayCard extends StatelessWidget {
   }
 }
 
-class _RicikanTag extends StatelessWidget {
-  const _RicikanTag(this.label);
-  final String label;
+class _EventRecommendationTile extends StatelessWidget {
+  const _EventRecommendationTile({
+    required this.recommendation,
+    required this.onTap,
+  });
+
+  final ResolvedEventRecommendation recommendation;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: const Color(0xFF221812),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0x33E4C590), width: 0.6),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 10,
-          color: Color(0xFFE4C590),
-          fontWeight: FontWeight.w600,
+    return Material(
+      color: const Color(0xFF1E1915),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0x1EFFFFFF), width: 0.8),
+          ),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: SizedBox(
+                  width: 56,
+                  height: 56,
+                  child: Image.asset(
+                    recommendation.imagePath,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                    cacheWidth: (56 * MediaQuery.devicePixelRatioOf(context))
+                        .round()
+                        .clamp(112, 240),
+                    gaplessPlayback: true,
+                    errorBuilder: (_, _, _) => Container(
+                      color: const Color(0xFF28211B),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      recommendation.title,
+                      style: JText.serif(
+                        14,
+                        weight: FontWeight.w700,
+                        color: const Color(0xFFFAF6F0),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      (recommendation.peran != null &&
+                              recommendation.peran!.isNotEmpty)
+                          ? recommendation.peran!
+                          : recommendation.subtitle,
+                      style: JText.sans(
+                        11,
+                        weight: FontWeight.w400,
+                        color: const Color(0xFFAFA08F),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.chevron_right_rounded,
+                size: 18,
+                color: Color(0xFFC5A467),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -34,6 +34,26 @@ void main() {
       expect(find.text(' · '), findsNothing); // Separated by dot character '·'
       expect(find.text('·'), findsOneWidget);
 
+      // Verify full-bleed pendopo Javanese attire hero background is rendered without zoom
+      final heroFinder = find.byWidgetPredicate(
+        (w) =>
+            w is Image &&
+            w.image is AssetImage &&
+            (w.image as AssetImage).assetName ==
+                'assets/images/welcome_pendopo_busana.jpg',
+      );
+      expect(heroFinder, findsOneWidget);
+      expect(tester.widget<Image>(heroFinder).fit, BoxFit.cover);
+
+      // Verify small JAVARA monogram logo is NOT rendered on WelcomeScreen
+      final logoFinder = find.byWidgetPredicate(
+        (w) =>
+            w is Image &&
+            w.image is AssetImage &&
+            (w.image as AssetImage).assetName == 'assets/images/logo_javara.png',
+      );
+      expect(logoFinder, findsNothing);
+
       // Aksara Jawa element above headline is commented out (hidden)
       expect(find.textContaining('ꦗ ꦮ ꦫ'), findsNothing);
     });

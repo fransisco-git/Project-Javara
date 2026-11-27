@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
-import 'javanese_wardrobe_screen.dart';
 
 /// Layar Koleksi Busana Tersimpan Pengguna ("Koleksi Pusaka Saya / My Heritage Collection")
 class MyHeritageCollectionScreen extends StatefulWidget {
@@ -336,19 +335,8 @@ class _MyHeritageCollectionScreenState extends State<MyHeritageCollectionScreen>
                       ),
                       const SizedBox(height: 4),
                       const Text(
-                        'Buka Studio Busana 3D dan simpan setelan kreasi Anda.',
+                        'Jelajahi katalog busana dan simpan koleksi pilihan Anda.',
                         style: TextStyle(color: Color(0xFFA89989), fontSize: 11),
-                      ),
-                      const SizedBox(height: 18),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE4C590),
-                          foregroundColor: const Color(0xFF14100D),
-                        ),
-                        onPressed: () => Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (_) => const JavaneseWardrobeScreen()),
-                        ),
-                        child: const Text('Buka Studio 3D Sekarang'),
                       ),
                     ],
                   ),
@@ -417,25 +405,6 @@ class _MyHeritageCollectionScreenState extends State<MyHeritageCollectionScreen>
                           Text('Kepala: ${head?.name ?? "-"}', style: const TextStyle(fontSize: 11, color: Color(0xFFD4C8BC))),
                           Text('Atasan: ${upper?.name ?? "-"}', style: const TextStyle(fontSize: 11, color: Color(0xFFD4C8BC))),
                           Text('Bawahan: ${lower?.name ?? "-"}', style: const TextStyle(fontSize: 11, color: Color(0xFFD4C8BC))),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: const Color(0xFFE4C590),
-                                side: const BorderSide(color: Color(0xFFE4C590)),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(
-                                    builder: (_) => JavaneseWardrobeScreen(savedOutfitToLoad: item),
-                                  ),
-                                );
-                              },
-                              child: const Text('Kenakan Kembali di Studio 3D'),
-                            ),
-                          ),
                         ],
                       ),
                     );

@@ -206,7 +206,7 @@ class SinauBusanaScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'Jelajahi katalog beli & sewa lengkap dengan padu padan 3D dan virtual try-on.',
+                  'Jelajahi katalog lengkap busana adat Jawa Tengah beserta filosofi dan rujukan tempat membeli.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11.5,

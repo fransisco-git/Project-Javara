@@ -5,7 +5,6 @@ import '../../../core/transitions.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
 import 'clothing_detail_screen.dart';
-import 'javanese_wardrobe_screen.dart';
 import '../../../widgets/interactive_feedback.dart';
 
 /// Layar Eksplorasi Setelan Busana Lengkap Tradisional Jawa ("Jelajahi Busana")
@@ -135,9 +134,16 @@ class _JelajahiBusanaScreenState extends State<JelajahiBusanaScreen> {
                         widget.onSelectOutfit!(outfit);
                         Navigator.of(context).pop();
                       } else {
-                        Navigator.of(context).pushReplacement(
+                        final upperItem = JavaneseClothingData.clothingItems
+                            .firstWhere(
+                              (it) => it.id == outfit.upperBodyId,
+                              orElse: () =>
+                                  JavaneseClothingData.clothingItems.first,
+                            );
+                        Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => JavaneseWardrobeScreen(initialOutfit: outfit),
+                            builder: (_) =>
+                                ClothingDetailScreen(item: upperItem),
                           ),
                         );
                       }

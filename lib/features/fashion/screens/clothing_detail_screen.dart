@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import '../../../core/purchase_search_helper.dart';
 import '../../../core/theme.dart';
 import '../../../core/transitions.dart';
 import '../../../services/saved_garments_service.dart';
 import '../data/javanese_clothing_data.dart';
 import '../models/javanese_clothing_models.dart';
-import 'javara_studio_screen.dart';
-import 'javanese_wardrobe_screen.dart';
+import '../widgets/garment_visual.dart';
 
 /// Screen 03 — Detail Pakaian (Halaman Ensiklopedia Busana Adat Jawa Tengah)
 class ClothingDetailScreen extends StatefulWidget {
@@ -53,6 +54,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
       body: JBackground(
         variant: HeritageBackgroundVariant.wardrobe,
         child: CustomScrollView(
+          scrollCacheExtent: const ScrollCacheExtent.pixels(600),
           physics: const BouncingScrollPhysics(),
           slivers: [
           // 1. EDITORIAL SLIVER APP BAR
@@ -61,165 +63,145 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
             pinned: true,
             backgroundColor: const Color(0xFF181310),
             elevation: 0,
+            leadingWidth: 64,
             leading: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CircleAvatar(
-                backgroundColor: const Color(0x99181310),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    color: Color(0xFFE4C590),
-                    size: 18,
+              padding: const EdgeInsets.only(left: 12),
+              child: Center(
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xB3181310),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0x33E4C590),
+                      width: 0.8,
+                    ),
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: Color(0xFFE4C590),
+                      size: 18,
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
                 ),
               ),
             ),
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: 12),
-                child: CircleAvatar(
-                  backgroundColor: const Color(0x99181310),
-                  child: IconButton(
-                    tooltip: _isBookmarked ? 'Hapus dari Wardrobe' : 'Simpan ke Wardrobe',
-                    icon: Icon(
-                      _isBookmarked
-                          ? Icons.bookmark_added_rounded
-                          : Icons.bookmark_border_rounded,
-                      color: const Color(0xFFE4C590),
-                      size: 20,
+                child: Center(
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xB3181310),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0x33E4C590),
+                        width: 0.8,
+                      ),
                     ),
-                    onPressed: () async {
-                      final messenger = ScaffoldMessenger.of(context);
-                      final isSaved = await SavedGarmentsService.instance.toggleSave(item.id);
-                      if (!mounted) return;
-                      messenger.hideCurrentSnackBar();
-                      messenger.showSnackBar(
-                        SnackBar(
-                          duration: const Duration(milliseconds: 1400),
-                          backgroundColor: const Color(0xFF241A14),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(
-                              color: Color(0xFFE4C590),
-                              width: 1,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      tooltip: _isBookmarked ? 'Hapus dari Wardrobe' : 'Simpan ke Wardrobe',
+                      icon: Icon(
+                        _isBookmarked
+                            ? Icons.bookmark_added_rounded
+                            : Icons.bookmark_border_rounded,
+                        color: const Color(0xFFE4C590),
+                        size: 20,
+                      ),
+                      onPressed: () async {
+                        final messenger = ScaffoldMessenger.of(context);
+                        final isSaved = await SavedGarmentsService.instance.toggleSave(item.id);
+                        if (!mounted) return;
+                        messenger.hideCurrentSnackBar();
+                        messenger.showSnackBar(
+                          SnackBar(
+                            duration: const Duration(milliseconds: 1400),
+                            backgroundColor: const Color(0xFF241A14),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: const BorderSide(
+                                color: Color(0xFFE4C590),
+                                width: 1,
+                              ),
+                            ),
+                            content: Text(
+                              isSaved
+                                  ? '${item.name} disimpan ke Wardrobe'
+                                  : '${item.name} dihapus dari Wardrobe',
+                              style: const TextStyle(
+                                color: Color(0xFFFAF6F0),
+                                fontSize: 13,
+                              ),
                             ),
                           ),
-                          content: Text(
-                            isSaved
-                                ? '${item.name} disimpan ke Wardrobe'
-                                : '${item.name} dihapus dari Wardrobe',
-                            style: const TextStyle(
-                              color: Color(0xFFFAF6F0),
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Latar Belakang Gradasi Hangat Studio
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: RadialGradient(
-                        center: const Alignment(0, -0.2),
-                        radius: 0.9,
-                        colors: [
-                          item.primaryColor.withValues(alpha: 0.65),
-                          const Color(0xFF14100D),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Pola Geometris Tenun Halus Melayang
-                  Positioned.fill(
-                    child: Opacity(
-                      opacity: 0.08,
-                      child: CustomPaint(
-                        painter: _BatikPatternBackdropPainter(
-                          color: item.accentColor,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Showcase Siluet Busana Tengah (Foto Autentik / Ikon)
-                  Center(
-                    child: Hero(
-                      tag: 'garment_${item.id}',
-                      child: Container(
-                        width: 180,
-                        height: 180,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFF1C1612),
-                          border: Border.all(
-                            color: item.accentColor.withValues(alpha: 0.6),
-                            width: 2,
-                          ),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x33000000),
-                              blurRadius: 8,
-                              offset: Offset(0, 3),
+              background: Hero(
+                tag: 'garment_${item.id}',
+                child: GarmentPhotoVisual(
+                  item: item,
+                  alignment: Alignment.topCenter,
+                  filterQuality: FilterQuality.medium,
+                  fallbackFontSize: 40,
+                  fallbackPadding: const EdgeInsets.fromLTRB(28, 72, 28, 28),
+                  photoOverlay: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Scrim Atas Tipis agar Tombol Kembali & Bookmark Tetap Kontras
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: 110,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Color(0x9914100D),
+                                Colors.transparent,
+                              ],
                             ),
-                          ],
-                        ),
-                        child: ClipOval(
-                          child: item.assetImagePath != null &&
-                                  item.assetImagePath!.isNotEmpty
-                              ? Image.asset(
-                                  item.assetImagePath!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) => Center(
-                                    child: Icon(
-                                      item.category.icon,
-                                      size: 80,
-                                      color: item.accentColor,
-                                    ),
-                                  ),
-                                )
-                              : Center(
-                                  child: Icon(
-                                    item.category.icon,
-                                    size: 80,
-                                    color: item.accentColor,
-                                  ),
-                                ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-
-                  // Bayangan Bawah
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: 90,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Color(0xFF14100D),
-                          ],
+                      // Scrim Bawah Tipis pada Foto
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: 90,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Color(0x8814100D),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -276,11 +258,13 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                               color: Color(0xFFC7B7A6),
                             ),
                             const SizedBox(width: 4),
-                            Text(
-                              item.region.title,
-                              style: const TextStyle(
-                                color: Color(0xFFC7B7A6),
-                                fontSize: 11,
+                            Flexible(
+                              child: Text(
+                                item.region.title,
+                                style: const TextStyle(
+                                  color: Color(0xFFC7B7A6),
+                                  fontSize: 11,
+                                ),
                               ),
                             ),
                           ],
@@ -297,7 +281,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                     style: const TextStyle(
                       fontFamily: 'serif',
                       fontSize: 16,
-                      color: Color(0xFFDFC08E),
+                      color: Color(0xFF5C4632),
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -310,7 +294,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                     style: JText.serif(
                       24,
                       weight: FontWeight.w800,
-                      color: const Color(0xFFFAF6F0),
+                      color: const Color(0xFF2C2219),
                     ),
                   ),
 
@@ -321,19 +305,11 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                     'Periode: ${item.period}',
                     style: const TextStyle(
                       fontSize: 12.5,
-                      color: Color(0xFFB09F8F),
-                      fontStyle: FontStyle.italic,
+                      color: Color(0xFF5C4632),
                     ),
                   ),
 
                   const SizedBox(height: 20),
-
-                  // DUAL BUTTON: VIRTUAL TRY-ON (AI STUDIO) & STUDIO 3D
-                  _buildVirtualTryOnButton(context, item),
-                  const SizedBox(height: 10),
-                  _buildStudio3DButton(context, item),
-
-                  const SizedBox(height: 24),
 
                   // KOTAK KONTEKS SOSIAL & TATA BUSANA
                   _buildSectionCard(
@@ -405,12 +381,14 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                               color: Color(0xFFDFC08E),
                             ),
                             SizedBox(width: 8),
-                            Text(
-                              'Sumber & Rujukan Sejarah',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFFFAF6F0),
+                            Expanded(
+                              child: Text(
+                                'Sumber & Rujukan Sejarah',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFFFAF6F0),
+                                ),
                               ),
                             ),
                           ],
@@ -433,7 +411,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                   // BUSANA TERKAIT & KESELARASAN SEJARAH
                   _buildCompatibleGarmentsSection(context, item),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 28),
                 ],
               ),
             ),
@@ -441,144 +419,70 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
         ],
       ),
     ),
+    bottomNavigationBar: Container(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        MediaQuery.of(context).padding.bottom + 12,
+      ),
+      decoration: const BoxDecoration(
+        color: Color(0xFF14100D),
+        border: Border(
+          top: BorderSide(color: Color(0x33E4C590), width: 1.0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x44000000),
+            blurRadius: 10,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        height: 50,
+        child: ElevatedButton(
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            launchPurchaseSearch(item.name);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF3A261D),
+            foregroundColor: const Color(0xFFFFDF9E),
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Cari Tempat Membeli',
+                  style: JText.serif(
+                    14.5,
+                    weight: FontWeight.w700,
+                    color: const Color(0xFFFFDF9E),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                const Icon(
+                  Icons.north_east,
+                  color: Color(0xFFFFDF9E),
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 }
-
-  Widget _buildVirtualTryOnButton(BuildContext context, ClothingItem item) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF2E2219),
-            Color(0xFF19130F),
-          ],
-        ),
-        border: Border.all(
-          color: const Color(0x99DFB76C),
-          width: 1.2,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x35000000),
-            blurRadius: 8,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            HapticFeedback.mediumImpact();
-            Navigator.of(context).push(
-              fadeSlideRoute(
-                JavaraStudioScreen(initialGarment: item),
-              ),
-            );
-          },
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.auto_awesome_rounded,
-                    color: Color(0xFFFFDF9E),
-                    size: 20,
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    'Coba Virtual Try-On (AI Studio)',
-                    style: TextStyle(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFFFFDF9E),
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Color(0xFFFFDF9E),
-                    size: 13,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStudio3DButton(BuildContext context, ClothingItem item) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: const Color(0xFFC79B3A),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x28000000),
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            Navigator.of(context).push(
-              fadeSlideRoute(
-                const JavaneseWardrobeScreen(),
-              ),
-            );
-          },
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.view_in_ar_rounded,
-                    color: Color(0xFF14100D),
-                    size: 22,
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    'Coba di Studio Busana 3D',
-                    style: TextStyle(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF14100D),
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  SizedBox(width: 6),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Color(0xFF14100D),
-                    size: 13,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildSectionCard({
     required String title,
@@ -680,7 +584,7 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w800,
-            color: Color(0xFFFAF6F0),
+            color: Color(0xFF2C2219),
           ),
         ),
         const SizedBox(height: 4),
@@ -688,12 +592,12 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
           'Padanan busana yang selaras menurut tatakrama tradisi',
           style: TextStyle(
             fontSize: 11.5,
-            color: Color(0xFFA69383),
+            color: Color(0xFF5C4632),
           ),
         ),
         const SizedBox(height: 14),
         SizedBox(
-          height: 140,
+          height: 164,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -758,6 +662,8 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                           fontSize: 10,
                           color: Color(0xFF8E7D6F),
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -795,12 +701,14 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
                 color: Color(0xFFDFC08E),
               ),
               const SizedBox(width: 8),
-              Text(
-                'Palet Warna Tradisi & Makna Alam',
-                style: JText.serif(
-                  13,
-                  weight: FontWeight.w700,
-                  color: const Color(0xFFFAF6F0),
+              Expanded(
+                child: Text(
+                  'Palet Warna Tradisi & Makna Alam',
+                  style: JText.serif(
+                    13,
+                    weight: FontWeight.w700,
+                    color: const Color(0xFFFAF6F0),
+                  ),
                 ),
               ),
             ],
@@ -848,28 +756,4 @@ class _ClothingDetailScreenState extends State<ClothingDetailScreen> {
       ),
     );
   }
-}
-
-class _BatikPatternBackdropPainter extends CustomPainter {
-  const _BatikPatternBackdropPainter({required this.color});
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-
-    const step = 32.0;
-    for (double x = 0; x < size.width; x += step) {
-      for (double y = 0; y < size.height; y += step) {
-        canvas.drawCircle(Offset(x, y), 8, paint);
-        canvas.drawCircle(Offset(x, y), 14, paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

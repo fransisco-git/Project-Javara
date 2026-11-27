@@ -40,16 +40,23 @@ class JavaraHeritageBackground extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        _BaseGradientLayer(variant: variant),
         Positioned.fill(
-          child: CustomPaint(
-            painter: _JavaneseKawungWatermarkPainter(variant: variant),
-          ),
-        ),
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: _getVignetteGradient(variant),
+          child: RepaintBoundary(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                _BaseGradientLayer(variant: variant),
+                CustomPaint(
+                  isComplex: true,
+                  willChange: false,
+                  painter: _JavaneseKawungWatermarkPainter(variant: variant),
+                ),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: _getVignetteGradient(variant),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -280,12 +287,9 @@ class _JavaneseKawungWatermarkPainter extends CustomPainter {
         canvas.drawCircle(Offset(x, y), 2.2, dotPaint);
 
         // 4 kelopak elips melingkar melambangkan "Sedulur Papat Lima Pancer"
-        // Kelopak horisontal (kanan-kiri)
-        canvas.save();
-        canvas.translate(x, y);
         canvas.drawOval(
           Rect.fromCenter(
-            center: const Offset(radius * 0.55, 0),
+            center: Offset(x + radius * 0.55, y),
             width: radius * 1.1,
             height: radius * 0.58,
           ),
@@ -293,17 +297,15 @@ class _JavaneseKawungWatermarkPainter extends CustomPainter {
         );
         canvas.drawOval(
           Rect.fromCenter(
-            center: const Offset(-radius * 0.55, 0),
+            center: Offset(x - radius * 0.55, y),
             width: radius * 1.1,
             height: radius * 0.58,
           ),
           paint,
         );
-
-        // Kelopak vertikal (atas-bawah)
         canvas.drawOval(
           Rect.fromCenter(
-            center: const Offset(0, radius * 0.55),
+            center: Offset(x, y + radius * 0.55),
             width: radius * 0.58,
             height: radius * 1.1,
           ),
@@ -311,13 +313,12 @@ class _JavaneseKawungWatermarkPainter extends CustomPainter {
         );
         canvas.drawOval(
           Rect.fromCenter(
-            center: const Offset(0, -radius * 0.55),
+            center: Offset(x, y - radius * 0.55),
             width: radius * 0.58,
             height: radius * 1.1,
           ),
           paint,
         );
-        canvas.restore();
       }
     }
   }

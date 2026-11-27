@@ -22,14 +22,24 @@ class CultureItem {
   final String tag; // mis. "ADILUHUNG KERATON"
   final String? price; // null => pakai actionLabel
   final String actionLabel;
-  final String image; // nama file di assets/images/
+  final String image; // nama file di assets/images/ atau path assets/...
   final String description;
   final String history;
   final String location;
   final String regency;
   final List<String> highlights;
   final String category;
+
+  /// Path aset penuh agar Beranda, Detail, dan Tersimpan memuat gambar yang sama persis.
+  String get imageAssetPath =>
+      image.startsWith('assets/') ? image : 'assets/images/$image';
 }
+
+/// Seluruh daftar warisan budaya yang tampil di Beranda (populer & pencarian).
+const List<CultureItem> allCultureItems = [
+  ...popularItems,
+  ...pickedItems,
+];
 
 const popularItems = <CultureItem>[
   CultureItem(
@@ -38,7 +48,7 @@ const popularItems = <CultureItem>[
     meta: 'Busana Resmi Pria · Surakarta, Jateng',
     price: 'Rp485.000',
     actionLabel: 'Sewa / Beli',
-    image: 'kebaya.png',
+    image: 'model_surjan_pranakan_solo.jpg',
     tag: 'AGUNG KASUNANAN',
     category: 'Busana Tradisi',
     regency: 'Kota Surakarta',
@@ -58,7 +68,7 @@ const popularItems = <CultureItem>[
     meta: 'Busana Pengantin Adat · Surakarta, Jateng',
     price: 'Rp1.250.000',
     actionLabel: 'Sewa Busana',
-    image: 'kebaya.png',
+    image: 'solo_basahan_couple.jpg',
     tag: 'BUSANA ADAT ADILUHUNG',
     category: 'Busana Tradisi',
     regency: 'Kota Surakarta',
@@ -94,7 +104,7 @@ const popularItems = <CultureItem>[
   ),
   CultureItem(
     id: 'kebaya_kartini_rembang',
-    title: 'Kebaya Kartini Jawa Tengah',
+    title: 'Kebaya Kartini',
     meta: 'Busana Tradisional Wanita · Rembang & Jepara',
     price: 'Rp325.000',
     actionLabel: 'Sewa / Beli',
@@ -162,7 +172,7 @@ const pickedItems = <CultureItem>[
     tag: 'BUSANA PRIA PRIYAYI',
     price: 'Rp285.000',
     actionLabel: 'Pesan Busana',
-    image: 'kebaya.png',
+    image: 'model_surjan_pranakan_solo.jpg',
     category: 'Busana Tradisi',
     regency: 'Kota Surakarta',
     location: 'Sentra Tenun Pedan Klaten & Solo',

@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 /// Digunakan untuk perpindahan dari Badai Sinematik Pembuka menuju Gerbang Candi Bentar Dieng.
 Route<T> cinematicFadeRoute<T>(
   Widget page, {
-  Duration duration = const Duration(milliseconds: 650),
+  Duration duration = const Duration(milliseconds: 320),
 }) {
   return PageRouteBuilder<T>(
     transitionDuration: duration,
@@ -14,7 +14,8 @@ Route<T> cinematicFadeRoute<T>(
     transitionsBuilder: (_, animation, _, child) {
       final curved = CurvedAnimation(
         parent: animation,
-        curve: Curves.easeInOutCubic,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
       );
       return FadeTransition(
         opacity: curved,
@@ -28,22 +29,12 @@ Route<T> cinematicFadeRoute<T>(
 /// Opaque 100%, bebas dari efek ghosting / tumpang tindih transparansi layar.
 Route<T> fadeSlideRoute<T>(
   Widget page, {
-  Duration duration = const Duration(milliseconds: 320),
+  Duration duration = const Duration(milliseconds: 300),
 }) {
-  return CupertinoPageRoute<T>(
-    builder: (_) => page,
-  );
-}
-
-/// Transisi modal khusus Pemutar Musik (Swara Jawa):
-/// Meluncur halus dari bawah ke atas (seperti Spotify & Apple Music) dengan latar
-/// solid 100% tanpa efek tembus pandang atau rendering ganda.
-Route<T> musicPlayerRoute<T>(Widget page) {
   return PageRouteBuilder<T>(
-    transitionDuration: const Duration(milliseconds: 340),
+    transitionDuration: duration,
     reverseTransitionDuration: const Duration(milliseconds: 280),
     opaque: true,
-    fullscreenDialog: true,
     pageBuilder: (_, _, _) => page,
     transitionsBuilder: (_, animation, _, child) {
       final curved = CurvedAnimation(
@@ -53,7 +44,7 @@ Route<T> musicPlayerRoute<T>(Widget page) {
       );
       return SlideTransition(
         position: Tween<Offset>(
-          begin: const Offset(0.0, 1.0),
+          begin: const Offset(1.0, 0.0),
           end: Offset.zero,
         ).animate(curved),
         child: child,

@@ -1,10 +1,9 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
 import '../models/javanese_clothing_models.dart';
 
 /// Lembar Penjelasan Detail Budaya & Konstruksi Busana Adat
-class JavaneseGarmentDetailSheet extends StatefulWidget {
+class JavaneseGarmentDetailSheet extends StatelessWidget {
   const JavaneseGarmentDetailSheet({
     super.key,
     required this.item,
@@ -22,40 +21,7 @@ class JavaneseGarmentDetailSheet extends StatefulWidget {
   }
 
   @override
-  State<JavaneseGarmentDetailSheet> createState() => _JavaneseGarmentDetailSheetState();
-}
-
-class _JavaneseGarmentDetailSheetState extends State<JavaneseGarmentDetailSheet> {
-  AudioPlayer? _audioPlayer;
-  bool _isPlayingNarration = false;
-
-  @override
-  void dispose() {
-    _audioPlayer?.dispose();
-    super.dispose();
-  }
-
-  Future<void> _toggleAudioNarration() async {
-    if (_isPlayingNarration) {
-      await _audioPlayer?.stop();
-      setState(() => _isPlayingNarration = false);
-    } else {
-      _audioPlayer ??= AudioPlayer();
-      try {
-        await _audioPlayer?.play(AssetSource('audio/suwe_ora_jamu.mp3'));
-        setState(() => _isPlayingNarration = true);
-        _audioPlayer?.onPlayerComplete.listen((_) {
-          if (mounted) setState(() => _isPlayingNarration = false);
-        });
-      } catch (_) {
-        setState(() => _isPlayingNarration = true);
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final item = widget.item;
 
     return Container(
       constraints: BoxConstraints(
@@ -193,55 +159,6 @@ class _JavaneseGarmentDetailSheetState extends State<JavaneseGarmentDetailSheet>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Tombol Putar Narasi Suara
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF241A14),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0x33E4C590), width: 1.0),
-                    ),
-                    child: Row(
-                      children: [
-                        IconButton.filled(
-                          style: IconButton.styleFrom(
-                            backgroundColor: const Color(0xFFE4C590),
-                            foregroundColor: const Color(0xFF14100D),
-                          ),
-                          icon: Icon(
-                            _isPlayingNarration ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                            size: 20,
-                          ),
-                          onPressed: _toggleAudioNarration,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _isPlayingNarration ? 'Memutar Narasi Audio & Gamelan...' : 'Dengarkan Narasi Filosofi',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFFFAF6F0),
-                                ),
-                              ),
-                              const Text(
-                                'Kidung gamelan ladrang pengiring busana adat',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Color(0xFFA89989),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
                   // 1. Makna & Filosofi Luhur
                   _buildSectionCard(
                     title: 'Makna & Filosofi Kebudayaan',

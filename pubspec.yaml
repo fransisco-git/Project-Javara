@@ -40,10 +40,7 @@ dependencies:
   url_launcher: ^6.3.3
   flutter_map: ^8.3.2
   latlong2: ^0.10.1
-  audioplayers: ^6.8.1
-  flutter_volume_controller: ^2.0.2
   http: ^1.2.1
-  webview_flutter: ^4.10.0
   camera: ^0.12.2
   image_picker: ^1.2.4
   video_player: ^2.9.2
@@ -72,8 +69,8 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/web_3d/
-    - assets/audio/
+    - assets/images/batik/
+    - assets/koleksi/
     - assets/videos/
     - assets/garments/
 

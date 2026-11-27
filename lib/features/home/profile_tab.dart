@@ -10,7 +10,7 @@ import 'javara_bottom_nav.dart';
 
 /// Tab Profil JAVARA - Pengalaman Profil Terpadu Busana Adat Jawa Tengah.
 /// Fokus 100% pada busana adat: identitas pengguna, aktivitas sewa & pesanan,
-/// ukuran tubuh (My Size), preferensi aksara/audio, dan panduan wastra.
+/// ukuran tubuh (My Size), preferensi aksara, dan panduan wastra.
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key, this.onOpenTab});
 
@@ -23,7 +23,6 @@ class ProfileTab extends StatefulWidget {
 class _ProfileTabState extends State<ProfileTab> {
   // Preferensi
   bool _showJavaneseScript = true;
-  bool _ambientGamelan = true;
 
   static const String _unsetSizeLabel = 'Belum diatur';
 
@@ -54,7 +53,6 @@ class _ProfileTabState extends State<ProfileTab> {
       setState(() {
         _isGuest = isGuest;
         _showJavaneseScript = prefs.getBool('javara_pref_aksara') ?? true;
-        _ambientGamelan = prefs.getBool('javara_pref_gamelan') ?? true;
 
         if (_isGuest) {
           _sizeTop = _unsetSizeLabel;
@@ -1260,26 +1258,6 @@ class _ProfileTabState extends State<ProfileTab> {
                       setState(() => _showJavaneseScript = v);
                       _savePreference('javara_pref_aksara', v);
                       _showSnack(v ? 'Aksara Jawa diaktifkan.' : 'Aksara Jawa dinonaktifkan.');
-                    },
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFEADBCA)),
-                  // Toggle Gamelan Lembut
-                  SwitchListTile(
-                    value: _ambientGamelan,
-                    activeThumbColor: const Color(0xFFB08D57),
-                    activeTrackColor: const Color(0x44B08D57),
-                    title: Text(
-                      'Musik Gamelan Pengiring Lembut',
-                      style: JText.serif(13.5, weight: FontWeight.w600, color: const Color(0xFF382315)),
-                    ),
-                    subtitle: Text(
-                      'Instrumen gamelan pelog & slendro relaksasi saat menjelajahi busana',
-                      style: JText.serif(11.5, color: const Color(0xFF7D6C5D)),
-                    ),
-                    onChanged: (v) {
-                      setState(() => _ambientGamelan = v);
-                      _savePreference('javara_pref_gamelan', v);
-                      _showSnack(v ? 'Gamelan pengiring diaktifkan.' : 'Gamelan pengiring dinonaktifkan.');
                     },
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFEADBCA)),

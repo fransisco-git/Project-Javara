@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -16,6 +17,7 @@ class JColors {
     0xFF30251F,
   ); // Kayu jati gelap / busana keraton
   static const antiqueGold = Color(0xFFB08D57); // Aksen prada kencana adiluhung
+  static const accentGold = Color(0xFFFED897); // Aksen krem emas utama (navbar & CTA)
   static const charcoal = Color(0xFF242321); // Teks kontras tinggi & bingkai
   static const softSand = Color(0xFFE8DED0); // Kartu sekunder & pembatas halus
 
@@ -139,6 +141,12 @@ ThemeData buildJavaraTheme() {
       selectionHandleColor: JColors.antiqueGold,
     ),
     splashFactory: InkRipple.splashFactory,
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      },
+    ),
   );
 }
 

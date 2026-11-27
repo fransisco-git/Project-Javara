@@ -19,6 +19,9 @@ class JavaraLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (useImageEmblem) {
+      final decodeWidth = (size * MediaQuery.devicePixelRatioOf(context))
+          .round()
+          .clamp(96, 512);
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -26,8 +29,10 @@ class JavaraLogo extends StatelessWidget {
             'assets/images/logo_javara.png',
             width: size,
             height: size,
+            cacheWidth: decodeWidth,
+            gaplessPlayback: true,
             fit: BoxFit.contain,
-            filterQuality: FilterQuality.high,
+            filterQuality: FilterQuality.medium,
             errorBuilder: (_, _, _) => Column(
               mainAxisSize: MainAxisSize.min,
               children: [

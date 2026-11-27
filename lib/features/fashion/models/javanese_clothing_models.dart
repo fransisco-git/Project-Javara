@@ -96,19 +96,13 @@ class ClothingItem {
   final Color accentColor;
   final String? assetImagePath;
 
+  String get photoAsset => 'assets/koleksi/$id.jpg';
+
   String get imageAsset {
-    if (assetImagePath != null && assetImagePath!.isNotEmpty) return assetImagePath!;
-    if (category == ClothingCategory.upperBody) {
-      if (gender == GenderTarget.wanita || name.toLowerCase().contains('kebaya')) {
-        return 'assets/images/kebaya.png';
-      }
-      return 'assets/images/model_surjan_pranakan_solo.jpg';
-    } else if (category == ClothingCategory.lowerBody) {
-      return 'assets/images/batik.png';
-    } else if (category == ClothingCategory.headwear) {
-      return 'assets/images/wayang.png';
+    if (assetImagePath != null && assetImagePath!.isNotEmpty) {
+      return assetImagePath!;
     }
-    return 'assets/images/candi_3d_hero.jpg';
+    return photoAsset;
   }
 
   bool isCompatibleWith(ClothingItem other) {
